@@ -49,3 +49,89 @@ export const getMyClients = async (req, res) => {
 
   }
 };
+
+export const updateClient = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const { name, email, company } =
+      req.body;
+
+    const existingClient =
+      await prisma.client.findFirst({
+        where: {
+          id,
+          userId: req.user.userId,
+        },
+      });
+
+    if (!existingClient) {
+      return res.status(404).json({
+        message: "Client not found",
+      });
+    }
+
+    const updatedClient =
+      await prisma.client.update({
+        where: { id },
+
+        data: {
+          name,
+          email,
+          company,
+        },
+      });
+
+    res.json(updatedClient);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+};
+
+export const deleteClient = async (req, res) => {
+
+  try {
+
+    const { id } = req.params;
+
+    const existingClient =
+      await prisma.client.findFirst({
+        where: {
+          id,
+          userId: req.user.userId,
+        },
+      });
+
+    if (!existingClient) {
+      return res.status(404).json({
+        message: "Client not found",
+      });
+    }
+
+    await prisma.client.delete({
+      where: { id },
+    });
+
+    res.json({
+      message:
+        "Client deleted successfully",
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+};
