@@ -31,6 +31,28 @@ model Client {
 
   user User @relation(fields: [userId], references: [id])
 
+  projects Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id String @id @default(cuid())
+
+  title       String
+  description String?
+
+  budget Float?
+
+  status String @default("PENDING")
+
+  deadline DateTime?
+
+  clientId String
+
+  client Client @relation(fields: [clientId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
