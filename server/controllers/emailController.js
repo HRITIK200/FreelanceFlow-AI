@@ -4,6 +4,9 @@ import {
   sendInvoiceEmail,
 } from "../services/emailService.js";
 
+import { logActivity } from "../services/activityService.js";
+
+
 export const emailInvoice =
   async (req, res) => {
 
@@ -71,6 +74,14 @@ export const emailInvoice =
             ${invoice.project.title}
           </p>
         `,
+      });
+
+      await logActivity({
+        userId: req.user.userId,
+        action: "SEND",
+        entityType: "INVOICE",
+        entityId: invoice.id,
+        details: `Sent invoice ${invoice.invoiceNumber} to ${invoice.project.client.email}`,
       });
 
       res.json({

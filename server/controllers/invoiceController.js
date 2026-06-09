@@ -146,6 +146,14 @@ export const updateInvoiceStatus =
           },
         });
 
+      await logActivity({
+        userId: req.user.userId,
+        action: "UPDATE",
+        entityType: "INVOICE",
+        entityId: updatedInvoice.id,
+        details: `Invoice ${updatedInvoice.invoiceNumber} marked ${updatedInvoice.status}`,
+      });
+
       res.json(
         updatedInvoice
       );
@@ -193,6 +201,14 @@ export const deleteInvoice =
       await prisma.invoice.delete({
         where: { id },
       });
+
+      await logActivity({
+        userId: req.user.userId,
+        action: "DELETE",
+        entityType: "INVOICE",
+        entityId: invoice.id,
+        details: `Deleted invoice ${invoiceNumber}`,
+      }); 
 
       res.json({
         message:

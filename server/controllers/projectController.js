@@ -139,6 +139,14 @@ export const updateProject = async (
 
         data: req.body,
       });
+    
+     await logActivity({
+      userId: req.user.userId,
+      action: "UPDATE",
+      entityType: "PROJECT",
+      entityId: updatedProject.id,
+      details: `Updated project ${updatedProject.title}`,
+     });
 
     res.json(updatedProject);
 
@@ -183,7 +191,16 @@ export const deleteProject = async (
     await prisma.project.delete({
       where: { id },
     });
+    
+    await logActivity({
+      userId: req.user.userId,
+      action: "DELETE",
+      entityType: "PROJECT",
+      entityId: project.id,
+      details: `Deleted project ${project.title}`,
+    });
 
+    
     res.json({
       message:
         "Project deleted successfully",

@@ -91,6 +91,14 @@ export const updateClient = async (req, res) => {
           company,
         },
       });
+    
+    await logActivity({
+      userId: req.user.userId,
+      action: "UPDATE",
+      entityType: "CLIENT",
+      entityId: updatedClient.id,
+      details: `Updated client ${updatedClient.name}`,
+    });
 
     res.json(updatedClient);
 
@@ -127,6 +135,14 @@ export const deleteClient = async (req, res) => {
 
     await prisma.client.delete({
       where: { id },
+    });
+
+    await logActivity({
+      userId: req.user.userId,
+      action: "DELETE",
+      entityType: "CLIENT",
+      entityId: client.id,
+      details: `Deleted client ${clientName}`,
     });
 
     res.json({
