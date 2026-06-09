@@ -7,6 +7,8 @@ import authMiddleware from "./middleware/authMiddleware.js";
 import roleMiddleware from "./middleware/roleMiddleware.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+
 app.get(
   "/api/admin",
   authMiddleware,
