@@ -9,6 +9,8 @@ import clientRoutes from "./routes/clientRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
+import pdfRoutes from "./routes/pdfRoutes.js";
+import emailRoutes from "./routes/emailRoutes.js";
 
 
 dotenv.config();
@@ -29,6 +31,9 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/pdf", pdfRoutes);
+app.use("/api/email", emailRoutes);
+
 
 app.get(
   "/api/admin",
