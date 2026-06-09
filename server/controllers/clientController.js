@@ -1,4 +1,5 @@
 import prisma from "../utils/prisma.js";
+import { logActivity } from "../services/activityService.js";
 
 export const createClient = async (req, res) => {
   try {
@@ -11,6 +12,14 @@ export const createClient = async (req, res) => {
         company,
         userId: req.user.userId,
       },
+    });
+
+    await logActivity({
+      userId: req.user.userId,
+      action: "CREATE",
+      entityType: "CLIENT",
+      entityId: client.id,
+      details: `Created client ${client.name}`,
     });
 
     res.status(201).json(client);

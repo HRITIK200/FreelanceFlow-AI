@@ -1,4 +1,5 @@
 import prisma from "../utils/prisma.js";
+import { logActivity } from "../services/activityService.js";
 
 export const createInvoice = async (
   req,
@@ -41,6 +42,14 @@ export const createInvoice = async (
           projectId,
         },
       });
+    
+    await logActivity({
+      userId: req.user.userId,
+      action: "CREATE",
+      entityType: "INVOICE",
+      entityId: invoice.id,
+      details: `Created invoice ${invoice.invoiceNumber}`,
+    });
 
     res.status(201).json(
       invoice

@@ -1,4 +1,5 @@
 import prisma from "../utils/prisma.js";
+import { logActivity } from "../services/activityService.js";
 
 export const createProject = async (
   req,
@@ -44,6 +45,15 @@ export const createProject = async (
           clientId,
         },
       });
+    
+    await logActivity({
+      userId: req.user.userId,
+      action: "CREATE",
+      entityType: "PROJECT",
+      entityId: project.id,
+      details: `Created project ${project.title}`,
+    });
+
 
     res.status(201).json(project);
 
