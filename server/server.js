@@ -8,6 +8,7 @@ import roleMiddleware from "./middleware/roleMiddleware.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
 
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 app.get(
   "/api/admin",
