@@ -11,6 +11,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import pdfRoutes from "./routes/pdfRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
 
 
 dotenv.config();
@@ -33,7 +34,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/email", emailRoutes);
-
+app.use("/api/activity", activityRoutes);
 
 app.get(
   "/api/admin",
