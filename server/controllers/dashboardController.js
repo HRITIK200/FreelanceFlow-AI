@@ -51,13 +51,81 @@ export const getDashboardStats =
           },
         });
 
+        const totalInvoices =
+          await prisma.invoice.count({
+            where: {
+              project: {
+                client: {
+                  userId:
+                    req.user.userId,
+                },
+              },
+            },
+          });
+
+        const paidRevenue =
+          await prisma.invoice.aggregate({
+            _sum: {
+              amount: true,
+            },
+            where: {
+              status: "PAID",
+              project: {
+                client: {
+                  userId:
+                    req.user.userId,
+                },
+              },
+            },
+          });
+        
+        const pendingRevenue =
+          await prisma.invoice.aggregate({
+            _sum: {
+              amount: true,
+            },
+            where: {
+              status: "PENDING",
+              project: {
+                client: {
+                  userId:
+                    req.user.userId,
+                },
+              },
+            },
+          });
+
+        const overdueInvoices =
+          await prisma.invoice.count({
+            where: {
+              status: "PENDING",
+              dueDate: {
+                lt: new Date(),
+              },
+              project: {
+                client: {
+                  userId:
+                    req.user.userId,
+                },
+              },
+            },
+          });
+
       res.json({
         totalClients,
         totalProjects,
         completedProjects,
+        totalInvoices,
 
-        totalRevenue:
-          revenue._sum.budget || 0,
+        paidRevenue:
+          paidRevenue._sum.amount || 0,
+        
+        pendingRevenue:
+          pendingRevenue._sum.amount || 0,
+          
+        overdueInvoices,
+
+
       });
 
     } catch (error) {
