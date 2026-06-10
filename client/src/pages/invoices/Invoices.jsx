@@ -12,6 +12,9 @@ import {
 import { 
     downloadInvoicePDF,
  } from "../../api/pdfApi";
+import {
+    sendInvoiceEmail,
+} from "../../api/emailApi";
 
 export default function Invoices() {
 
@@ -180,6 +183,30 @@ export default function Invoices() {
                         Download PDF
                     </button>
 
+                    <button
+                      onClick={async () => {
+
+                        try {
+                          await sendInvoiceEmail(
+                            invoice.id
+                            );
+                        alert(
+                          "Invoice email sent"
+                        );
+
+                        fetchInvoices();
+
+                        } catch (error) {
+                          console.log(error);
+                          alert(
+                            "Failed to send email"
+                          );
+                        }
+                        }}
+                        className="bg-purple-500 text-white px-3 py-1 rounded"
+                        >
+                        Email
+                    </button>
 
                     <button
                       onClick={async () => {
