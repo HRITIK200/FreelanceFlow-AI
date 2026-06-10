@@ -29,7 +29,7 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
-    deleteClient
+  deleteClient
 );
 
 export default router;

@@ -141,8 +141,8 @@ export const deleteClient = async (req, res) => {
       userId: req.user.userId,
       action: "DELETE",
       entityType: "CLIENT",
-      entityId: client.id,
-      details: `Deleted client ${clientName}`,
+      entityId: existingClient.id,
+      details: `Deleted client ${existingClient.name}`,
     });
 
     res.json({
