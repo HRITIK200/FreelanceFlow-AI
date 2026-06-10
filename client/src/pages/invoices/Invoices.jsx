@@ -9,6 +9,10 @@ import {
   deleteInvoice,
 } from "../../api/invoiceApi";
 
+import { 
+    downloadInvoicePDF,
+ } from "../../api/pdfApi";
+
 export default function Invoices() {
 
   const [invoices, setInvoices] =
@@ -142,6 +146,40 @@ export default function Invoices() {
                     >
                       Toggle Status
                     </button>
+                    
+                    <button
+                      onClick={async () => {
+
+                        try {
+                          const pdfBlob =
+                            await downloadInvoicePDF(
+                              invoice.id
+                            );
+                        const url =
+                          window.URL.createObjectURL(
+                            pdfBlob
+                          );
+                        const link =
+                          document.createElement("a");
+                        link.href = url;
+                        link.download = 
+                          `Invoice-${invoice.invoiceNumber}.pdf`;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        window.URL.revokeObjectURL(url);
+                        } catch (error) {
+                          console.log(error);
+                          alert(
+                            "Failed to download PDF"
+                          );
+                        }
+                        }}
+                        className="bg-green-500 text-white px-3 py-1 rounded"
+                        >
+                        Download PDF
+                    </button>
+
 
                     <button
                       onClick={async () => {
