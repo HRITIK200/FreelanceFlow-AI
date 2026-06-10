@@ -170,9 +170,8 @@ export const updateInvoiceStatus =
     }
 };
 
-export const deleteInvoice =
-  async (req, res) => {
-
+export const deleteInvoice = async (req, res) => {
+  
     try {
 
       const { id } = req.params;
@@ -207,7 +206,7 @@ export const deleteInvoice =
         action: "DELETE",
         entityType: "INVOICE",
         entityId: invoice.id,
-        details: `Deleted invoice ${invoiceNumber}`,
+        details: `Deleted invoice ${invoice.invoiceNumber}`,
       }); 
 
       res.json({
