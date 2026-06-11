@@ -16,6 +16,9 @@ import {
     sendInvoiceEmail,
 } from "../../api/emailApi";
 
+import { toast } from "react-hot-toast";
+import ConfirmModal from "../../components/ui/ConfirmModal";
+
 export default function Invoices() {
 
   const [invoices, setInvoices] =
@@ -30,9 +33,28 @@ export default function Invoices() {
       setInvoices(data);
     };
 
+  const [search, setSearch] =
+    useState("");
+
+  const [isDeleteOpen, setIsDeleteOpen] =
+    useState(false);
+  const [deleteInvoiceId, setDeleteInvoiceId] =
+    useState(null);
+
   useEffect(() => {
     fetchInvoices();
   }, []);
+
+    const filteredInvoices =
+    invoices.filter(
+      (invoice) =>
+        invoice.invoiceNumber
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+        invoice.project?.title
+            .toLowerCase()
+            .includes(search.toLowerCase())
+    );
 
   return (
     <DashboardLayout>
@@ -43,33 +65,44 @@ export default function Invoices() {
 
       <div className="bg-white rounded shadow">
 
-        <table className="w-full">
+        <div className="mb-4">
+          <input 
+            type="text"
+            placeholder="Search invoices..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full border rounded-lg p-2"
+          />
+        </div>
+        
+        <div className="overflow-x-auto">
+           <table className="w-full min-w-[900px]">
 
           <thead>
 
             <tr className="border-b">
 
-              <th className="p-3">
+              <th className="p-3 text-left">
                 Invoice No
               </th>
 
-              <th className="p-3">
+              <th className="p-3 text-left">
                 Project
               </th>
 
-              <th className="p-3">
+              <th className="p-3 text-left">
                 Amount
               </th>
 
-              <th className="p-3">
+              <th className="p-3 text-left">
                 Status
               </th>
 
-              <th className="p-3">
+              <th className="p-3 text-left">
                 Due Date
               </th>
 
-              <th className="p-3">
+              <th className="p-3 text-left">
                 Actions
               </th>
 
@@ -78,8 +111,18 @@ export default function Invoices() {
           </thead>
 
           <tbody>
+            
+            {filteredInvoices.length === 0 ? (
 
-            {invoices.map(
+              <tr>
+                <td colSpan="6"
+                    className="text-center p-6 text-gray-500">
+                  No invoices found
+                </td>
+              </tr>
+            ) : (
+
+            filteredInvoices.map(
               (invoice) => (
 
               <tr
@@ -104,8 +147,8 @@ export default function Invoices() {
                   <span
                     className={
                       invoice.status === "PAID"
-                      ? "text-green-600 font-bold"
-                      : "text-orange-500 font-bold"
+                      ? "bg-green-100 text-green-700 px-3 py-1 rounded-full"
+                      : "bg-orange-100 text-orange-700 px-3 py-1 rounded-full"
                     }
                   >
                     {invoice.status}
@@ -123,7 +166,7 @@ export default function Invoices() {
 
                 <td className="p-3">
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
 
                     <button
                       onClick={async () => {
@@ -173,7 +216,7 @@ export default function Invoices() {
                         window.URL.revokeObjectURL(url);
                         } catch (error) {
                           console.log(error);
-                          alert(
+                          toast.error(
                             "Failed to download PDF"
                           );
                         }
@@ -190,17 +233,17 @@ export default function Invoices() {
                           await sendInvoiceEmail(
                             invoice.id
                             );
-                        alert(
-                          "Invoice email sent"
-                        );
+                            toast.success(
+                                "Email sent successfully"
+                            );
 
                         fetchInvoices();
 
                         } catch (error) {
                           console.log(error);
-                          alert(
-                            "Failed to send email"
-                          );
+                            toast.error(
+                                "Failed to send email"
+                            );
                         }
                         }}
                         className="bg-purple-500 text-white px-3 py-1 rounded"
@@ -208,27 +251,13 @@ export default function Invoices() {
                         Email
                     </button>
 
-                    <button
-                      onClick={async () => {
-
-                        const confirmDelete =
-                          window.confirm(
-                            "Delete Invoice?"
-                          );
-
-                        if (!confirmDelete)
-                          return;
-
-                        await deleteInvoice(
-                          invoice.id
-                        );
-
-                        fetchInvoices();
-
-                      }}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
+                    <button onClick={() => {
+                        setDeleteInvoiceId(invoice.id);
+                        setIsDeleteOpen(true);
+                    }}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
                     >
-                      Delete
+                        Delete
                     </button>
 
                   </div>
@@ -237,14 +266,36 @@ export default function Invoices() {
 
               </tr>
 
-            ))}
+            ))
+            )}
 
           </tbody>
 
-        </table>
+           </table>
+        </div>
 
       </div>
-
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        title="Delete Invoice"
+        message="Are you sure you want to delete this invoice?"
+        onConfirm={async () => {
+            try {
+                await deleteInvoice(deleteInvoiceId);
+                toast.success(
+                    "Invoice deleted successfully"
+                );
+                fetchInvoices();
+                setIsDeleteOpen(false);
+            } catch (error) {
+                console.log(error);
+                toast.error(
+                    "Failed to delete invoice"
+                );
+            }
+        }}
+      />
     </DashboardLayout>
   );
 }

@@ -7,14 +7,26 @@ import {
   getDashboardStats,
 } from "../../api/dashboardApi";
 
+import DashboardChart from "../../components/dashboard/DashboardChart";
+
 import {
   getActivities,
 } from "../../api/activityApi";
 
+import StatCard from "../../components/ui/StatCard";
+
 export default function Dashboard() {
 
   const [stats, setStats] =
-    useState(null);
+    useState({
+      totalClients: 0,
+      totalProjects: 0,
+      completedprojects: 0,
+      totalInvoices: 0,
+      paidrevenue: 0,
+      pendingRevenue: 0,
+      overdueInvoices: 0,
+    });
 
   const [activities,
     setActivities] =
@@ -60,59 +72,88 @@ export default function Dashboard() {
       </h1>
 
       {stats && (
+        <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
 
-        <div className="grid grid-cols-4 gap-4 mb-8">
+          <StatCard
+            title="Clients"
+            value={stats.totalClients}
+            icon="👥"
+          />
 
-          <div className="bg-white shadow rounded p-4">
-            <h2>Total Clients</h2>
-            <p className="text-2xl font-bold">
-              {stats.totalClients}
-            </p>
-          </div>
+          <StatCard
+            title="Projects"
+            value={stats.totalProjects}
+            icon="📁"
+          />
 
-          <div className="bg-white shadow rounded p-4">
-            <h2>Total Projects</h2>
-            <p className="text-2xl font-bold">
-              {stats.totalProjects}
-            </p>
-          </div>
-
-          <div className="bg-white shadow rounded p-4">
-            <h2>Paid Revenue</h2>
-            <p className="text-2xl font-bold">
-              ₹{stats.paidRevenue}
-            </p>
-          </div>
-
-          <div className="bg-white shadow rounded p-4">
-            <h2>Pending Revenue</h2>
-            <p className="text-2xl font-bold">
-              ₹{stats.pendingRevenue}
-            </p>
-          </div>
-
+          <StatCard
+            title="Paid Revenue"
+            value={`₹${stats.paidRevenue}`}
+            icon="💰"
+          />
+          <StatCard
+            title="Pending Revenue"
+            value={`₹${stats.pendingRevenue}`}
+            icon="⏳"
+          />
+          <StatCard
+            title="Completed"
+            value={stats.completedprojects}
+            icon="✅"
+          />
+          <StatCard
+            title="Overdue"
+            value={stats.overdueInvoices}
+            icon="⚠️"
+          />
         </div>
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+          <h2 className="text-xl font-bold mb-4">
+            Business Overview
+          </h2>
+          <DashboardChart
+             stats={stats}
+             />
+        </div>
+        </>
       )}
+        
+      
+      
 
-      <div className="bg-white shadow rounded p-4">
+      <div className="border-b py-3 hover:bg-gray-50 px-2 rounded">
 
         <h2 className="text-xl font-bold mb-4">
           Recent Activity
         </h2>
+        
+        {activities.length === 0 ? (
+          <p className="text-gray-500">
+            No activity found
+          </p>
+        ) : (
 
-        {activities.map(
+        activities.map(
           (activity) => (
 
           <div
             key={activity.id}
-            className="border-b py-2"
+            className="border-1-4 border-blue-500 pl-4 py-3 mb-4 bg-slate-50 rounded-r-lg"
           >
-
+          <div className="font-medium">
             {activity.details}
+          </div>
+          <div className="text-sm text-gray-500 mt-1">
+            {new Date(
+               activity.createdAt
+            ).toLocaleString()}
 
           </div>
-
-        ))}
+          </div>
+          )
+        )
+        )}
 
       </div>
 

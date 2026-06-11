@@ -11,6 +11,8 @@ from "./pages/auth/Login";
 import Register
 from "./pages/auth/Register";
 
+import { Navigate } from "react-router-dom";
+
 import Clients from "./pages/clients/Clients";
 import Projects from "./pages/projects/Projects";
 import Invoices from "./pages/invoices/Invoices";
@@ -28,6 +30,16 @@ function App() {
       <Route
         path="/register"
         element={<Register />}
+      />
+
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to="/login"
+            replace
+          />
+        }
       />
 
       <Route

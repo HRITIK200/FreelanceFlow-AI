@@ -13,6 +13,11 @@ import {
   deleteClient,
 } from "../../api/clientApi";
 
+import { toast } from "react-hot-toast";
+import Modal from "../../components/ui/Modal";
+import ConfirmModal from "../../components/ui/ConfirmModal";
+
+
 export default function Clients() {
 
   const [clients,
@@ -26,6 +31,21 @@ export default function Clients() {
       email: "",
       company: "",
     });
+
+  const [isEditOpen, setIsEditOpen] =
+    useState(false);
+
+  const [selectedClient, setSelectedClient] =
+    useState(null);
+
+  const [search, setSearch] =
+    useState("");
+  
+  const [deleteClientId, setDeleteClientId] =
+    useState(null); 
+  const [isDeleteOpen, setIsDeleteOpen] =
+    useState(false);
+  
 
   const fetchClients =
     async () => {
@@ -47,6 +67,10 @@ export default function Clients() {
 
       await createClient(form);
 
+      toast.success(
+        "Client created successfully"
+      );
+
       setForm({
         name: "",
         email: "",
@@ -55,6 +79,19 @@ export default function Clients() {
 
       fetchClients();
     };
+
+  const filteredClients = clients.filter(
+    (client) =>
+      client.name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      client.email
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+        client.company
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+    );
 
   return (
     <DashboardLayout>
@@ -68,7 +105,7 @@ export default function Clients() {
         className="bg-white p-4 rounded shadow mb-6"
       >
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           <input
             placeholder="Name"
@@ -119,6 +156,16 @@ export default function Clients() {
 
       <div className="bg-white rounded shadow">
 
+        <div className="mb-4">
+            <input 
+               type="text"
+               placeholder="Search clients..."
+               value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full border rounded-lg p-2"
+            />
+        </div>
+
         <table className="w-full">
 
           <thead>
@@ -147,7 +194,7 @@ export default function Clients() {
 
           <tbody>
 
-            {clients.map(
+            {filteredClients.map(
               (client) => (
 
               <tr
@@ -170,48 +217,26 @@ export default function Clients() {
                 <td className="p-3">
                     <div className="flex gap-2">
 
-                      <button
-                        onClick={async () => {
-
-                          const newName =
-                            prompt(
-                              "Enter new name",
-                              client.name
-                            );
-                          if (!newName) return;
-
-                          await updateClient(
-                            client.id,
-                            {
-                                name: newName,
-                                email: client.email,
-                                company: client.company,
-                            }
-                          );
-                            fetchClients();
+                    <button
+                        onClick={() => {
+                            setSelectedClient(client);
+                            setIsEditOpen(true);
                         }}
                         className="bg-yellow-500 text-white px-2 py-1 rounded"
-                      >
+                    >
                         Edit
-                      </button>
+                    </button>
 
                     <button
-                        onClick={async () => {
-
-                         const confirmDelete =
-                            window.confirm(
-                              "Delete this client?"
-                            );
-                          if (!confirmDelete) return;
-                            await deleteClient(
-                                client.id
-                            );
-                            fetchClients();
+                        onClick={() => {
+                            
+                         setDeleteClientId(client.id);
+                         setIsDeleteOpen(true);
                         }}
                         className="bg-red-500 text-white px-2 py-1 rounded"
-                      >
+                    >
                         Delete
-                      </button>
+                    </button>
                     </div>
                     </td>  
 
@@ -224,7 +249,106 @@ export default function Clients() {
         </table>
 
       </div>
+     
+        <Modal
+           isOpen={isEditOpen}
+           onClose={() => setIsEditOpen(false)}
+           title="Edit Client"
+        >
 
+        {selectedClient && (
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              
+              try {
+                await updateClient(
+                  selectedClient.id,
+                  {
+                    name: selectedClient.name,
+                    email: selectedClient.email,
+                    company: selectedClient.company,
+                  }
+                );
+                fetchClients();
+
+                setIsEditOpen(false);
+
+              } catch (error) {
+                console.log(error);
+                toast.error(
+                  "Failed to update client"
+                );
+              }
+            }}
+            >
+            <input type="text"
+              value={selectedClient.name}
+              onChange={(e) =>
+                setSelectedClient({
+                  ...selectedClient,
+                  name: e.target.value,
+                })
+              }
+              className="w-full border p-2 rounded mb-4"
+            />
+            <input type="email"
+                value={selectedClient.email}
+                onChange={(e) =>
+                  setSelectedClient({
+                    ...selectedClient,
+                    email: e.target.value,
+                  })
+                }
+                className="w-full border p-2 rounded mb-4"
+            />
+            <input type="text"
+                value={selectedClient.company}
+                onChange={(e) =>
+                  setSelectedClient({
+                    ...selectedClient,
+                    company: e.target.value,
+                  })
+                }
+                className="w-full border p-2 rounded mb-4"
+            />
+            <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                    Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded"
+                >
+                    Cancel
+                </button>
+            </div>
+            </form>
+        )}
+
+        </Modal>
+        <ConfirmModal
+          isOpen={isDeleteOpen}
+          onClose={() => setIsDeleteOpen(false)}
+          title="Delete Client"
+          message="Are you sure you want to delete this client?"
+          onConfirm={async () => {
+            try {
+              await deleteClient(deleteClientId);
+              toast.success("Client deleted successfully");
+              fetchClients();
+              setIsDeleteOpen(false);
+            } catch (error) {
+              console.log(error);
+              toast.error("Failed to delete client");
+            }
+          }}
+        />
     </DashboardLayout>
   );
 }
