@@ -58,6 +58,49 @@ export default function Dashboard() {
         <h1 className="text-4xl font-bold text-gray-900">
           Welcome Back 👋
         </h1>
+        <div className="
+          mt-4
+          grid
+          grid-cols-1
+          md:grid-cols-3
+          gap-4">
+
+        <div className="
+          bg-gradient-to-r
+         from-blue-600
+         to-indigo-600
+         text-white
+           p-5
+           rounded-2xl ">
+         <p>Total Revenue</p>
+         <h2 className="text-3xl font-bold">
+           ₹{stats.paidRevenue}
+         </h2>
+        </div>
+
+        <div className="
+         bg-white
+           p-5
+           rounded-2xl
+           shadow ">
+         <p>Active Clients</p>
+         <h2 className="text-3xl font-bold">
+          {stats.totalClients}
+         </h2>
+        </div>
+
+        <div className="
+        bg-white
+          p-5
+          rounded-2xl
+          shadow ">
+        <p>Projects</p>
+        <h2 className="text-3xl font-bold">
+          {stats.totalProjects}
+        </h2>
+      </div>
+
+</div>
 
         <p className="text-gray-500 mt-2">
           Here's an overview of your freelance business.
@@ -153,9 +196,9 @@ export default function Dashboard() {
             Business Overview
           </h2>
 
-          <DashboardChart
-            stats={stats}
-          />
+          <div className="h-[350px">
+            <DashboardChart stats={stats} />
+          </div>
         </div>
 
         {/* Quick Actions */}
@@ -172,51 +215,69 @@ export default function Dashboard() {
             Quick Actions
           </h2>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
             <button
               className="
-              w-full
-              bg-blue-600
-              hover:bg-blue-700
+              p-5
+              rounded-2xl
+              bg-gradient-to-r
+              from-blue-500
+              to-blue-600
               text-white
-              py-3
-              rounded-xl
-              font-medium
+              hover:scale-105
               transition
             "
             >
-              + Add Client
+            <div className="text-3xl mb-2">
+              👤
+            </div>
+            <h3 className="font-semibold">
+              Add Client
+            </h3>
+
             </button>
 
             <button
               className="
-              w-full
-              bg-indigo-600
-              hover:bg-indigo-700
+              p-5
+              rounded-2xl
+              bg-gradient-to-r
+              from-indigo-500
+              to-indigo-600
               text-white
-              py-3
-              rounded-xl
-              font-medium
+              hover:scale-105
               transition
             "
             >
-              + Add Project
+              <div className="text-3xl mb-2">
+                📁
+              </div>
+
+              <h3 className="font-semibold">
+                Add Project
+              </h3>
             </button>
 
             <button
               className="
-              w-full
-              bg-purple-600
-              hover:bg-purple-700
-              text-white
-              py-3
-              rounded-xl
-              font-medium
+              p-5
+              rounded-2xl
+              bg-gradient-to-r
+            from-purple-500
+            to-purple-600
+            text-white
+              hover:scale-105
               transition
             "
             >
-              + Create Invoice
+              <div className="text-3xl mb-2">
+                🧾
+              </div>
+
+              <h3 className="font-semibold">
+                Create Invoice
+              </h3>
             </button>
           </div>
         </div>
