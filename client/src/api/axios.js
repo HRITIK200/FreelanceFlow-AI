@@ -1,10 +1,8 @@
-import axios
-from "axios";
+import axios from "axios";
 
-const api =
-  axios.create({
-    baseURL:
-      "http://localhost:5000/api",
-  });
+const api = axios.create({
+  baseURL:
+    "https://freelanceflow-ai-1o3w.onrender.com/api",
+});
 
 export default api;
