@@ -150,59 +150,72 @@ export default function Clients() {
     >
 
       <input
+        type="text"
         placeholder="Client Name"
-        value={form.name}
+        value={selectedClient.name}
         onChange={(e) =>
-          setForm({
-            ...form,
+          setSelectedClient({
+            ...selectedClient,
             name: e.target.value,
           })
         }
-        className="border rounded-xl p-3"
+        className="w-full border rounded-xl p-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
       />
 
       <input
+        type="email"
         placeholder="Email Address"
-        value={form.email}
+        value={selectedClient.email}
         onChange={(e) =>
-          setForm({
-            ...form,
+          setSelectedClient({
+            ...selectedClient,
             email: e.target.value,
           })
         }
-        className="border rounded-xl p-3"
+        className="w-full border rounded-xl p-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
       />
 
       <input
+        type="text"
         placeholder="Company Name"
-        value={form.company}
+        value={selectedClient.company}
         onChange={(e) =>
-          setForm({
-            ...form,
+          setSelectedClient({
+            ...selectedClient,
             company: e.target.value,
           })
         }
-        className="border rounded-xl p-3"
+        className="w-full border rounded-xl p-3 mb-5 focus:ring-2 focus:ring-blue-500 outline-none"
       />
+  
+  <div className="flex gap-3">
 
       <button
         type="submit"
         className="
+            flex-1
           bg-blue-600
           hover:bg-blue-700
           text-white
-          rounded-xl
-          flex
-          items-center
-          justify-center
-          gap-2
-          font-medium
+            py-3
+            rounded-xl
+            font-medium
+            transition
         "
       >
-        <Plus size={18} />
-        Add Client
+        Save Changes
       </button>
 
+      <button
+        type="button"
+        onClick={() =>
+          setIsEditOpen(false)
+        }
+        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium transition">
+          Cancel
+        </button>
+        </div>
+        
     </form>
   </div>
 

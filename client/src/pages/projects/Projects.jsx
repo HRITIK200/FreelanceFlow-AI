@@ -13,6 +13,17 @@ import Modal from "../../components/ui/Modal";
 import { toast } from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 
+import {
+  FolderKanban,
+  CheckCircle2,
+  Clock3,
+  IndianRupee,
+  Search,
+  Pencil,
+  Trash2,
+  Building2,
+} from "lucide-react";
+
 export default function Projects() {
 
   const [projects, setProjects] =
@@ -63,282 +74,441 @@ export default function Projects() {
           .includes(search.toLowerCase())
     );
   
+  const completedProjects =
+  projects.filter(
+    (p) => p.status === "COMPLETED"
+  ).length;
 
-     return (
-       <DashboardLayout>
+  const progressProjects =
+  projects.filter(
+    (p) => p.status === "IN_PROGRESS"
+  ).length;
 
-      <h1 className="text-3xl font-bold mb-6">
-        Projects
-      </h1>
+  const totalRevenue =
+  projects.reduce(
+    (sum, p) => sum + (p.budget || 0),
+    0
+  );
+  
+  return(
+    <DashboardLayout>
 
-      <div className="bg-white rounded shadow">
+  {/* Header */}
 
-        <div className="mb-4">
-            <input 
-               type="text"
-               placeholder="Search projects..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full border rounded-lg p-3"
-            />
-        </div>
-        
-        <div className="overflow-x-auto">
-           <table className="w-full min-w-[700px]">
+  <div className="mb-8">
 
-          <thead>
+    <h1 className="text-4xl font-bold text-gray-900">
+      Projects
+    </h1>
 
-            <tr className="border-b">
+    <p className="text-gray-500 mt-2">
+      Manage and track all freelance projects
+    </p>
 
-              <th className="p-3 text-left">
-                Title
-              </th>
+  </div>
 
-              <th className="p-3 text-left">
-                Client
-              </th>
+  {/* Stats */}
 
-              <th className="p-3 text-left">
-                Budget
-              </th>
+  <div className="
+    grid
+    grid-cols-2
+    lg:grid-cols-4
+    gap-4
+    mb-8
+  ">
 
-              <th className="p-3 text-left">
-                Status
-              </th>
+    <div className="bg-white rounded-2xl shadow-md p-5">
+      <FolderKanban
+        className="text-blue-600 mb-3"
+      />
+      <p className="text-gray-500 text-sm">
+        Total Projects
+      </p>
+      <h3 className="text-2xl font-bold">
+        {projects.length}
+      </h3>
+    </div>
 
-              <th className="p-3 text-left">
-                Actions
-              </th>
+    <div className="bg-white rounded-2xl shadow-md p-5">
+      <CheckCircle2
+        className="text-green-600 mb-3"
+      />
+      <p className="text-gray-500 text-sm">
+        Completed
+      </p>
+      <h3 className="text-2xl font-bold">
+        {completedProjects}
+      </h3>
+    </div>
+
+    <div className="bg-white rounded-2xl shadow-md p-5">
+      <Clock3
+        className="text-yellow-600 mb-3"
+      />
+      <p className="text-gray-500 text-sm">
+        In Progress
+      </p>
+      <h3 className="text-2xl font-bold">
+        {progressProjects}
+      </h3>
+    </div>
+
+    <div className="bg-white rounded-2xl shadow-md p-5">
+      <IndianRupee
+        className="text-purple-600 mb-3"
+      />
+      <p className="text-gray-500 text-sm">
+        Revenue
+      </p>
+      <h3 className="text-2xl font-bold">
+        ₹{totalRevenue}
+      </h3>
+    </div>
+
+  </div>
+
+  {/* Search */}
+
+  <div className="
+    bg-white
+    rounded-2xl
+    shadow-md
+    p-4
+    mb-6
+  ">
+
+    <div className="relative">
+
+      <Search
+        size={18}
+        className="
+          absolute
+          left-4
+          top-1/2
+          -translate-y-1/2
+          text-gray-400
+        "
+      />
+
+      <input
+        type="text"
+        placeholder="Search projects..."
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+        className="
+          w-full
+          border
+          rounded-xl
+          py-3
+          pl-11
+          pr-4
+        "
+      />
+
+    </div>
+
+  </div>
+
+  {/* Desktop Table */}
+
+  <div
+    className="
+      hidden
+      md:block
+      bg-white
+      rounded-2xl
+      shadow-md
+      overflow-hidden
+    "
+  >
+
+    <table className="w-full">
+
+      <thead className="bg-slate-50">
+
+        <tr>
+
+          <th className="p-4 text-left">
+            Project
+          </th>
+
+          <th className="p-4 text-left">
+            Client
+          </th>
+
+          <th className="p-4 text-left">
+            Budget
+          </th>
+
+          <th className="p-4 text-left">
+            Status
+          </th>
+
+          <th className="p-4 text-center">
+            Actions
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {filteredProjects.length === 0 ? (
+
+          <tr>
+
+            <td
+              colSpan="5"
+              className="
+                text-center
+                py-10
+                text-gray-500
+              "
+            >
+              No projects found
+            </td>
+
+          </tr>
+
+        ) : (
+
+          filteredProjects.map(
+            (project) => (
+
+            <tr
+              key={project.id}
+              className="
+                border-t
+                hover:bg-gray-50
+              "
+            >
+
+              <td className="p-4 font-medium">
+                {project.title}
+              </td>
+
+              <td className="p-4">
+                {project.client?.name}
+              </td>
+
+              <td className="p-4 font-semibold">
+                ₹{project.budget}
+              </td>
+
+              <td className="p-4">
+
+                <span
+                  className={`
+                  px-3
+                  py-1
+                  rounded-full
+                  text-xs
+                  font-semibold
+
+                  ${
+                    project.status === "COMPLETED"
+                      ? "bg-green-100 text-green-700"
+
+                    : project.status === "IN_PROGRESS"
+                      ? "bg-blue-100 text-blue-700"
+
+                    : "bg-yellow-100 text-yellow-700"
+                  }
+                  `}
+                >
+                  {project.status.replace(
+                    "_",
+                    " "
+                  )}
+                </span>
+
+              </td>
+
+              <td className="p-4">
+
+                <div className="
+                  flex
+                  justify-center
+                  gap-2
+                ">
+
+                  <button
+                    onClick={() => {
+                      setSelectedProject(project);
+                      setIsEditOpen(true);
+                    }}
+                    className="
+                      bg-yellow-500
+                      text-white
+                      p-2
+                      rounded-lg
+                    "
+                  >
+                    <Pencil size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setDeleteProjectId(
+                        project.id
+                      );
+                      setIsDeleteOpen(true);
+                    }}
+                    className="
+                      bg-red-500
+                      text-white
+                      p-2
+                      rounded-lg
+                    "
+                  >
+                    <Trash2 size={16} />
+                  </button>
+
+                </div>
+
+              </td>
 
             </tr>
 
-          </thead>
+          ))
+        )}
 
-          <tbody>
-            
-            {filteredProjects.length === 0 ? (
+      </tbody>
 
-              <tr>
-                <td
-                  colSpan="5" className="text-center p-6 text-gray-500">
-                  No projects found
-                </td>
-              </tr>
-            ) : (
+    </table>
 
-            filteredProjects.map(
-              (project) => (
+  </div>
 
-              <tr
-                key={project.id}
-                className="border-b"
-              >
+  {/* Mobile Cards */}
 
-                <td className="p-3">
-                  {project.title}
-                </td>
+  <div className="
+    md:hidden
+    space-y-4
+  ">
 
-                <td className="p-3">
-                  {project.client?.name}
-                </td>
+    {filteredProjects.map(
+      (project) => (
 
-                <td className="p-3">
-                  ₹{project.budget}
-                </td>
+      <div
+        key={project.id}
+        className="
+          bg-white
+          rounded-2xl
+          shadow-md
+          p-5
+        "
+      >
 
-                <td className="p-3">
-                  <span className={
-                    project.status === "COMPLETED"
-                        ? "bg-green-100 text-green-700 px-3 py-1 rounded-full"
-                        : "bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full"
-                    }>
-                  {project.status}
-                    </span>
-                </td>
+        <h3 className="
+          font-bold
+          text-lg
+        ">
+          {project.title}
+        </h3>
 
-                <td className="p-3">
+        <div className="
+          mt-3
+          space-y-2
+        ">
 
-                  <div className="flex flex-wrap gap-2">
+          <p className="
+            flex
+            items-center
+            gap-2
+            text-gray-600
+          ">
+            <Building2 size={16} />
+            {project.client?.name}
+          </p>
 
-                    <button
-                      onClick={() => {
-                        setSelectedProject(project);
-                        setIsEditOpen(true);
-                      }}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded"
-                    >
-                      Edit
-                    </button>
+          <p className="
+            font-semibold
+            text-lg
+          ">
+            ₹{project.budget}
+          </p>
 
-                    <button
-                        onClick={() => {
+        </div>
 
-                        setDeleteProjectId(project.id);
-                        setIsDeleteOpen(true);
-                      }}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                    >
-                      Delete
-                    </button>
+        <div className="mt-4">
 
-                  </div>
+          <span
+            className={`
+            px-3
+            py-1
+            rounded-full
+            text-sm
+            font-medium
 
-                </td>
+            ${
+              project.status === "COMPLETED"
+                ? "bg-green-100 text-green-700"
 
-              </tr>
+              : project.status === "IN_PROGRESS"
+                ? "bg-blue-100 text-blue-700"
 
-            ))
+              : "bg-yellow-100 text-yellow-700"
+            }
+            `}
+          >
+            {project.status.replace(
+              "_",
+              " "
             )}
+          </span>
 
-          </tbody>
+        </div>
 
-           </table>
+        <div className="
+          flex
+          gap-2
+          mt-4
+        ">
+
+          <button
+            onClick={() => {
+              setSelectedProject(project);
+              setIsEditOpen(true);
+            }}
+            className="
+              flex-1
+              bg-yellow-500
+              text-white
+              py-2
+              rounded-lg
+            "
+          >
+            Edit
+          </button>
+
+          <button
+            onClick={() => {
+              setDeleteProjectId(
+                project.id
+              );
+              setIsDeleteOpen(true);
+            }}
+            className="
+              flex-1
+              bg-red-500
+              text-white
+              py-2
+              rounded-lg
+            "
+          >
+            Delete
+          </button>
+
         </div>
 
       </div>
-    <Modal
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        title="Edit Project"
-      >
 
-        {selectedProject && (
+    ))}
 
-          <form
-            onSubmit={async (e) => {
-
-              e.preventDefault();
-              
-              try {
-                await updateProject(
-                  selectedProject.id,
-                  {
-                    title: selectedProject.title,
-                    description: selectedProject.description,
-                    budget: Number(selectedProject.budget),
-                    status: selectedProject.status,
-                    deadline: selectedProject.deadline,
-                    clientId: selectedProject.clientId,
-                  }
-                );
-                toast.success(
-                  "Project updated successfully"
-                );
-                fetchProjects();
-                setIsEditOpen(false);
-                } catch (error) {
-                    console.log(error);
-                    toast.error(
-                      "Failed to update project"
-                    );
-                }
-            }}
-          >
-          <label className="block mb-1">
-            Title
-          </label>
-            <input
-                type="text"
-                value={selectedProject.title}
-                onChange={(e) =>
-                  setSelectedProject({
-                    ...selectedProject,
-                    title: e.target.value,
-                  })
-                }
-                className="w-full border p-2 mb-3 rounded"
-            />
-            <label className="block mb-1">
-                Description
-            </label>
-            <textarea
-                value={selectedProject.description || ""}
-                onChange={(e) =>
-                  setSelectedProject({
-                    ...selectedProject,
-                    description: e.target.value,
-                  })
-                }
-                className="w-full border p-2 mb-3 rounded"
-            />
-            <label className="block mb-1">
-                Budget
-            </label>
-            <input
-                type="number"
-                value={selectedProject.budget}
-                onChange={(e) =>
-                  setSelectedProject({                                                                                                   
-                    ...selectedProject,
-                    budget: e.target.value,
-                  })
-                }
-                className="w-full border p-2 mb-3 rounded"
-            />
-            <label className="block mb-1">
-                Status
-            </label>
-            <select  
-                value={selectedProject.status}
-                onChange={(e) =>
-                  setSelectedProject({
-                    ...selectedProject,
-                    status: e.target.value,
-                  })
-                }
-                className="w-full border p-2 mb-3 rounded"
-            >   
-                <option value="PENDING">
-                    Pending
-                </option>
-                <option value="IN_PROGRESS">
-                    In Progress
-                </option>
-                <option value="COMPLETED">
-                    Completed
-                </option>
-            </select>
-
-            <div className="flex flex-wrap gap-2">
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                    Save Changes
-                </button>
-                <button 
-                    type="button"
-                    onClick={() => setIsEditOpen(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded"
-                >
-                    Cancel
-                </button>
-            </div>
-            </form>
-        )}
-
-        </Modal>
-        <ConfirmModal
-          isOpen={isDeleteOpen}
-          onClose={() => setIsDeleteOpen(false)}
-           title="Delete Project"
-           message="Are you sure you want to delete this project? This action cannot be undone."
-          onConfirm={async () => {
-            try {
-                await deleteProject(deleteProjectId);
-                toast.success(
-                  "Project deleted successfully"
-                );
-                fetchProjects();
-                setIsDeleteOpen(false);
-              } catch (error) {
-                console.log(error);
-                toast.error(
-                  "Failed to delete project"
-                );
-              }
-            }}
-        />
-        </DashboardLayout>
-     );
-    }
+  </div>
+  </DashboardLayout>
+  )
+}

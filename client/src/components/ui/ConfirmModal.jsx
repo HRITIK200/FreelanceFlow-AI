@@ -1,4 +1,5 @@
 import Modal from "./Modal";
+import { AlertTriangle } from "lucide-react";
 
 export default function ConfirmModal({
   isOpen,
@@ -7,46 +8,80 @@ export default function ConfirmModal({
   title,
   message,
 }) {
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={title}
     >
+      <div className="text-center">
 
-      <p className="mb-4">
-        {message}
-      </p>
+        {/* Warning Icon */}
 
-      <div className="flex gap-2">
-
-        <button
-          onClick={onConfirm}
+        <div
           className="
-            bg-red-600
-            text-white
-            px-4 py-2
-            rounded
+            h-16
+            w-16
+            mx-auto
+            rounded-full
+            bg-red-100
+            flex
+            items-center
+            justify-center
+            mb-5
           "
         >
-          Delete
-        </button>
+          <AlertTriangle
+            size={32}
+            className="text-red-600"
+          />
+        </div>
 
-        <button
-          onClick={onClose}
-          className="
-            bg-gray-500
-            text-white
-            px-4 py-2
-            rounded
-          "
-        >
-          Cancel
-        </button>
+        {/* Message */}
+
+        <p className="text-gray-600 mb-8 leading-relaxed">
+          {message}
+        </p>
+
+        {/* Actions */}
+
+        <div className="flex gap-3">
+
+          <button
+            onClick={onClose}
+            className="
+              flex-1
+              py-3
+              rounded-xl
+              bg-gray-100
+              hover:bg-gray-200
+              text-gray-700
+              font-medium
+              transition
+            "
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="
+              flex-1
+              py-3
+              rounded-xl
+              bg-red-600
+              hover:bg-red-700
+              text-white
+              font-medium
+              transition
+            "
+          >
+            Delete
+          </button>
+
+        </div>
 
       </div>
-
     </Modal>
   );
 }
