@@ -10,7 +10,7 @@ import {
   getClients,
   createClient,
   updateClient,
-  deleteClient,
+  deleteClient
 } from "../../api/clientApi";
 
 import { toast } from "react-hot-toast";
@@ -20,7 +20,6 @@ import ConfirmModal from "../../components/ui/ConfirmModal";
 import {
   Users,
   Search,
-  Plus,
   Pencil,
   Trash2,
   Building2,
@@ -104,6 +103,7 @@ export default function Clients() {
     );
 
   return (
+    
     <DashboardLayout>
 
   {/* Header */}
@@ -152,12 +152,12 @@ export default function Clients() {
       <input
         type="text"
         placeholder="Client Name"
-        value={selectedClient.name}
+        value={form.name}
         onChange={(e) =>
-          setSelectedClient({
-            ...selectedClient,
+          setForm({
+            ...form,
             name: e.target.value,
-          })
+            })
         }
         className="w-full border rounded-xl p-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
       />
@@ -165,12 +165,12 @@ export default function Clients() {
       <input
         type="email"
         placeholder="Email Address"
-        value={selectedClient.email}
+        value={form.email}
         onChange={(e) =>
-          setSelectedClient({
-            ...selectedClient,
-            email: e.target.value,
-          })
+          setForm({
+           ...form,
+           email: e.target.value,
+           })
         }
         className="w-full border rounded-xl p-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
       />
@@ -178,43 +178,30 @@ export default function Clients() {
       <input
         type="text"
         placeholder="Company Name"
-        value={selectedClient.company}
+        value={form.name}
         onChange={(e) =>
-          setSelectedClient({
-            ...selectedClient,
+          setForm({
+            ...form,
             company: e.target.value,
-          })
+           })
         }
         className="w-full border rounded-xl p-3 mb-5 focus:ring-2 focus:ring-blue-500 outline-none"
       />
   
-  <div className="flex gap-3">
-
-      <button
-        type="submit"
-        className="
-            flex-1
-          bg-blue-600
-          hover:bg-blue-700
-          text-white
-            py-3
-            rounded-xl
-            font-medium
-            transition
-        "
-      >
-        Save Changes
-      </button>
-
-      <button
-        type="button"
-        onClick={() =>
-          setIsEditOpen(false)
-        }
-        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium transition">
-          Cancel
+    <button
+       type="submit"
+       className="
+       bg-blue-600
+       hover:bg-blue-700
+       text-white
+         rounded-xl
+         px-6
+         py-3
+         font-medium
+         "
+        >
+        Add Client
         </button>
-        </div>
         
     </form>
   </div>
@@ -431,7 +418,145 @@ export default function Clients() {
     ))}
 
   </div>
+<Modal
+  isOpen={isEditOpen}
+  onClose={() => setIsEditOpen(false)}
+  title="Edit Client"
+>
+  {selectedClient && (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
 
+        try {
+          await updateClient(
+            selectedClient.id,
+            {
+              name: selectedClient.name,
+              email: selectedClient.email,
+              company: selectedClient.company,
+            }
+          );
+
+          toast.success(
+            "Client updated successfully"
+          );
+
+          fetchClients();
+          setIsEditOpen(false);
+
+        } catch (error) {
+          console.log(error);
+          toast.error(
+            "Failed to update client"
+          );
+        }
+      }}
+    >
+
+      <input
+        type="text"
+        value={selectedClient.name}
+        onChange={(e) =>
+          setSelectedClient({
+            ...selectedClient,
+            name: e.target.value,
+          })
+        }
+        className="w-full border rounded-xl p-3 mb-4"
+      />
+
+      <input
+        type="email"
+        value={selectedClient.email}
+        onChange={(e) =>
+          setSelectedClient({
+            ...selectedClient,
+            email: e.target.value,
+          })
+        }
+        className="w-full border rounded-xl p-3 mb-4"
+      />
+
+      <input
+        type="text"
+        value={selectedClient.company}
+        onChange={(e) =>
+          setSelectedClient({
+            ...selectedClient,
+            company: e.target.value,
+          })
+        }
+        className="w-full border rounded-xl p-3 mb-5"
+      />
+
+      <div className="flex gap-3">
+
+        <button
+          type="submit"
+          className="
+            flex-1
+            bg-blue-600
+            text-white
+            py-3
+            rounded-xl
+          "
+        >
+          Save Changes
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            setIsEditOpen(false)
+          }
+          className="
+            flex-1
+            bg-gray-100
+            py-3
+            rounded-xl
+          "
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </form>
+  )}
+</Modal>
+<ConfirmModal
+  isOpen={isDeleteOpen}
+  onClose={() =>
+    setIsDeleteOpen(false)
+  }
+  title="Delete Client"
+  message="Are you sure you want to delete this client?"
+  onConfirm={async () => {
+    try {
+
+      await deleteClient(
+        deleteClientId
+      );
+
+      toast.success(
+        "Client deleted successfully"
+      );
+
+      fetchClients();
+
+      setIsDeleteOpen(false);
+
+    } catch (error) {
+
+      console.log(error);
+
+      toast.error(
+        "Failed to delete client"
+      );
+    }
+  }}
+/>
 </DashboardLayout>
   );
 }
