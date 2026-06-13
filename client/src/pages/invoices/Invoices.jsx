@@ -1,7 +1,6 @@
-himport { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import DashboardLayout
-from "../../components/layout/DashboardLayout";
+import DashboardLayout from "../../components/layout/DashboardLayout";
 
 import {
   getInvoices,
@@ -55,10 +54,6 @@ export default function Invoices() {
       (i) => i.status === "PENDING"
     ).length;
 
-  const totalRevenue =
-    invoices.reduce(
-      (sum,i) => sum + (i.amount || 0),0
-    );
 
   const paidRevenue =
     invoices
@@ -83,52 +78,15 @@ export default function Invoices() {
         invoice.invoiceNumber
             .toLowerCase()
             .includes(search.toLowerCase()) ||
-        invoice.project?.title
+        (invoice.project?.title || "")
             .toLowerCase()
             .includes(search.toLowerCase())
     );
+  }
 
 return (
 <DashboardLayout>
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-
-  <div className="bg-white rounded-2xl shadow-md p-5">
-    <p className="text-gray-500 text-sm">
-      Total Invoices
-    </p>
-    <h3 className="text-2xl font-bold">
-      {invoices.length}
-    </h3>
-  </div>
-
-  <div className="bg-white rounded-2xl shadow-md p-5">
-    <p className="text-gray-500 text-sm">
-      Paid
-    </p>
-    <h3 className="text-2xl font-bold text-green-600">
-      {paidInvoices}
-    </h3>
-  </div>
-
-  <div className="bg-white rounded-2xl shadow-md p-5">
-    <p className="text-gray-500 text-sm">
-      Pending
-    </p>
-    <h3 className="text-2xl font-bold text-yellow-600">
-      {pendingInvoices}
-    </h3>
-  </div>
-
-  <div className="bg-white rounded-2xl shadow-md p-5">
-    <p className="text-gray-500 text-sm">
-      Revenue
-    </p>
-    <h3 className="text-2xl font-bold text-purple-600">
-      ₹{paidRevenue.toLocaleString()}
-    </h3>
-  </div>
-
-</div>
+  
       <div className="mb-8">
 
         <h1 className="text-4xl font-bold text-gray-900">
@@ -140,7 +98,7 @@ return (
         </p>
       </div>
 
-      //Statistics Cards
+      {/*Statistics Cards*/}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
          <div className="bg-white rounded-2xl shadow-md p-5">
 
@@ -165,7 +123,7 @@ return (
           </h3>
          </div>
 
-         <div className="bg-white rounde-2xl shadow-md p-5">
+         <div className="bg-white rounded-2xl shadow-md p-5">
 
           <Clock3 className="text-yellow-600 mb-3"/>
           <p className="text-gray-500 text-sm">
@@ -321,16 +279,18 @@ return (
                           "PAID"
                             ? "PENDING"
                             : "PAID";
-
-                        await updateInvoice(
-                          invoice.id,
-                          {
-                            status:
-                              newStatus,
-                          }
-                        );
-
+     
+                      try {
+                        await updateInvoice(invoice.id,{
+                          status: newStatus,
+                        });
                         fetchInvoices();
+                        toast.success("Status updated");
+                      } catch(error){
+                        toast.error("Failed to update status");
+                      }  
+
+                    
 
                       }}
                       title="Toggle Status"
@@ -490,7 +450,7 @@ return (
                   Amount
                 </p>
                 <h4 className="text-2xl font-bold">
-                   ₹{invoice.amount.toLocaleString()}
+                   ₹{(invoice.amount || 0).toLocaleString()}
                 </h4>
               </div>
 
@@ -504,7 +464,7 @@ return (
                <p className="font-medium">
                 {
                   new Date(
-                    invoice.duedate
+                    invoice.dueDate
                   ).toLocaleDateString()
                 }
                </p>
@@ -521,13 +481,15 @@ return (
                      ? "PENDING"
                      : "PAID";
                   
-                  await updateInvoice(
-                    invoice.id,
-                    {
-                      status: newStatus,
-                    }
-              );
-              fetchInvoices();
+                  try {
+                        await updateInvoice(invoice.id,{
+                          status: newStatus,
+                        });
+                        fetchInvoices();
+                        toast.success("Status updated");
+                      } catch(error){
+                        toast.error("Failed to update status");
+                      }  
                 }}
               className="bg-blue-500 text-white py-2 rounded-lg">
                 Status
@@ -629,3 +591,4 @@ return (
     </DashboardLayout>
   );
 }
+)

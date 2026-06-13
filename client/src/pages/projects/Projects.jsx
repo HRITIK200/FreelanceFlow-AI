@@ -727,5 +727,5 @@ export default function Projects() {
   }}
 />
   </DashboardLayout>
-  )
+  );
 }
