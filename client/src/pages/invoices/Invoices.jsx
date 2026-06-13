@@ -58,7 +58,7 @@ export default function Invoices() {
   const paidRevenue =
     invoices
       .filter((i) => i.status === "PAID")
-      .reduce((sum, i) => sum + i.amount,0);
+      .reduce((sum, i) => sum + (i.amount || 0), 0);
     
   const [search, setSearch] =
     useState("");
@@ -72,7 +72,7 @@ export default function Invoices() {
     fetchInvoices();
   }, []);
 
-    const filteredInvoices =
+  const filteredInvoices =
     invoices.filter(
       (invoice) =>
         invoice.invoiceNumber
@@ -82,7 +82,6 @@ export default function Invoices() {
             .toLowerCase()
             .includes(search.toLowerCase())
     );
-  }
 
 return (
 <DashboardLayout>
@@ -146,9 +145,9 @@ return (
          </div>
       </div>
 
-      <div className="bg-white rounded shadow">
+      <div className="bg-white rounded-2xl  shadow-md overflow-hidden">
 
-        <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+        <div className="p-4 border-b">
             <div className="relative">
 
               <Search size={18}
@@ -164,7 +163,7 @@ return (
             </div>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
            <table className="w-full min-w-[900px]">
 
           <thead>
@@ -216,7 +215,7 @@ return (
 
               <tr
                 key={invoice.id}
-                className="border-b"
+                className="border-b hover:bg-slate-50 transition"
               >
 
                 <td className="p-3">
@@ -224,11 +223,11 @@ return (
                 </td>
 
                 <td className="p-3">
-                  {invoice.project?.title}
+                  {invoice.project?.title || "No Project"}
                 </td>
 
-                <td className="p-3">
-                  ₹{invoice.amount}
+                <td className="p-3 font-medium">
+                  ₹{(invoice.amount || 0).toLocaleString()}
                 </td>
 
                 <td className="p-3">
@@ -294,7 +293,7 @@ return (
 
                       }}
                       title="Toggle Status"
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition"
+                      className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-lg transition"
                     >
                       <CheckCircle2 size={16} />
                     </button>
@@ -401,7 +400,9 @@ return (
 
            </table>
         
-        <div className="md:hidden space-y-4">
+        
+      </div>
+      <div className="md:hidden space-y-4">
 
           {filteredInvoices.length === 0 ? (
 
@@ -426,7 +427,7 @@ return (
                      {invoice.invoiceNumber}
                   </h3>
                   <p className="text-gray-500 text-sm">
-                     {invoice.project?.title}
+                     {invoice.project?.title || "No Project"}
                   </p>
                 </div>
 
@@ -438,7 +439,11 @@ return (
                      }
                     `}
                     >
-                      {invoice.status}
+                      {
+                       invoice.status === "PAID"
+                         ? "🟢 PAID"
+                         : "🟡 PENDING"
+                      }
                 </span>
               </div>  
 
@@ -491,7 +496,7 @@ return (
                         toast.error("Failed to update status");
                       }  
                 }}
-              className="bg-blue-500 text-white py-2 rounded-lg">
+              className="bg-blue-500 text-white p-2.5 rounded-lg transition">
                 Status
               </button>
               <button onClick={async () => {
@@ -566,6 +571,7 @@ return (
               ))
           )}
       </div>
+      </div>
 
       <ConfirmModal
         isOpen={isDeleteOpen}
@@ -591,4 +597,3 @@ return (
     </DashboardLayout>
   );
 }
-)
