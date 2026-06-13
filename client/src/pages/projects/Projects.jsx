@@ -161,7 +161,7 @@ export default function Projects() {
         Revenue
       </p>
       <h3 className="text-2xl font-bold">
-        ₹{totalRevenue}
+        ₹{totalRevenue.toLocaleString()}
       </h3>
     </div>
 
@@ -509,6 +509,223 @@ export default function Projects() {
     ))}
 
   </div>
+  <Modal
+  isOpen={isEditOpen}
+  onClose={() => setIsEditOpen(false)}
+  title="Edit Project"
+>
+  {selectedProject && (
+
+    <form
+      onSubmit={async (e) => {
+
+        e.preventDefault();
+
+        try {
+
+          await updateProject(
+            selectedProject.id,
+            {
+              title:
+                selectedProject.title,
+
+              description:
+                selectedProject.description,
+
+              budget:
+                Number(
+                  selectedProject.budget
+                ),
+
+              status:
+                selectedProject.status,
+
+              deadline:
+                selectedProject.deadline,
+
+              clientId:
+                selectedProject.clientId,
+            }
+          );
+
+          toast.success(
+            "Project updated successfully"
+          );
+
+          fetchProjects();
+
+          setIsEditOpen(false);
+
+        } catch (error) {
+
+          console.log(error);
+
+          toast.error(
+            "Failed to update project"
+          );
+
+        }
+
+      }}
+    >
+
+      <input
+        type="text"
+        value={selectedProject.title}
+        onChange={(e) =>
+          setSelectedProject({
+            ...selectedProject,
+            title: e.target.value,
+          })
+        }
+        className="
+          w-full
+          border
+          rounded-xl
+          p-3
+          mb-4
+        "
+      />
+
+      <textarea
+        value={
+          selectedProject.description || ""
+        }
+        onChange={(e) =>
+          setSelectedProject({
+            ...selectedProject,
+            description:
+              e.target.value,
+          })
+        }
+        className="
+          w-full
+          border
+          rounded-xl
+          p-3
+          mb-4
+        "
+      />
+
+      <input
+        type="number"
+        value={selectedProject.budget}
+        onChange={(e) =>
+          setSelectedProject({
+            ...selectedProject,
+            budget: e.target.value,
+          })
+        }
+        className="
+          w-full
+          border
+          rounded-xl
+          p-3
+          mb-4
+        "
+      />
+
+      <select
+        value={selectedProject.status}
+        onChange={(e) =>
+          setSelectedProject({
+            ...selectedProject,
+            status: e.target.value,
+          })
+        }
+        className="
+          w-full
+          border
+          rounded-xl
+          p-3
+          mb-5
+        "
+      >
+        <option value="PENDING">
+          Pending
+        </option>
+
+        <option value="IN_PROGRESS">
+          In Progress
+        </option>
+
+        <option value="COMPLETED">
+          Completed
+        </option>
+
+      </select>
+
+      <div className="flex gap-3">
+
+        <button
+          type="submit"
+          className="
+            flex-1
+            bg-blue-600
+            text-white
+            py-3
+            rounded-xl
+          "
+        >
+          Save Changes
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            setIsEditOpen(false)
+          }
+          className="
+            flex-1
+            bg-gray-100
+            py-3
+            rounded-xl
+          "
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </form>
+
+  )}
+</Modal>
+<ConfirmModal
+  isOpen={isDeleteOpen}
+  onClose={() =>
+    setIsDeleteOpen(false)
+  }
+  title="Delete Project"
+  message="Are you sure you want to delete this project?"
+  onConfirm={async () => {
+
+    try {
+
+      await deleteProject(
+        deleteProjectId
+      );
+
+      toast.success(
+        "Project deleted successfully"
+      );
+
+      fetchProjects();
+
+      setIsDeleteOpen(false);
+
+    } catch (error) {
+
+      console.log(error);
+
+      toast.error(
+        "Failed to delete project"
+      );
+
+    }
+
+  }}
+/>
   </DashboardLayout>
   )
 }
