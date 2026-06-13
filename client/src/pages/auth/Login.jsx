@@ -50,7 +50,9 @@ export default function Login() {
           await loginUser(
             formData
           );
-
+        
+        console.log("LOGIN RESPONSE:", data);
+          
         login(
           data.token
         );
