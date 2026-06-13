@@ -7,10 +7,22 @@ import {
   getActivities,
 } from "../../api/activityApi";
 
+import {
+  Search,
+  Activity as ActivityIcon,
+  PlusCircle,
+  Pencil,
+  Trash2,
+  Mail,
+  CheckCircle2,
+} from "lucide-react";
+
 export default function Activity() {
 
   const [activities, setActivities] =
     useState([]);
+
+  const [search, setSearch] = useState("");
 
   const fetchActivities =
     async () => {
@@ -36,63 +48,178 @@ export default function Activity() {
 
   }, []);
 
+ const filteredActivities = activities.filter((activity) =>
+  activity.details
+    .toLowerCase()
+    .includes(search.toLowerCase())
+);
+
+const getActivityIcon = (text) => {
+  const value = text.toLowerCase();
+
+  if (value.includes("created"))
+    return <PlusCircle size={18} className="text-green-600" />;
+
+  if (value.includes("updated"))
+    return <Pencil size={18} className="text-blue-600" />;
+
+  if (value.includes("deleted"))
+    return <Trash2 size={18} className="text-red-600" />;
+
+  if (value.includes("email"))
+    return <Mail size={18} className="text-purple-600" />;
+
+  if (value.includes("paid"))
+    return <CheckCircle2 size={18} className="text-green-600" />;
+
+  return <ActivityIcon size={18} className="text-indigo-600" />;
+};
+
   return (
+  <DashboardLayout>
 
-    <DashboardLayout>
+    {/* Header */}
 
-      <h1 className="text-3xl font-bold mb-6">
-        Activity Logs
-      </h1>
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
 
-      <div className="bg-white rounded-xl shadow">
+      <div>
+        <h1 className="text-4xl font-bold text-gray-900">
+          Activity Logs
+        </h1>
 
-        {activities.length === 0 ? (
+        <p className="text-gray-500 mt-2">
+          Track everything happening in your business.
+        </p>
+      </div>
 
-          <div className="p-6 text-gray-500">
+      <div className="mt-4 md:mt-0 bg-white rounded-xl shadow px-5 py-3">
 
-            No activity found
+        <div className="flex items-center gap-3">
+          <ActivityIcon size={22} />
 
+          <div>
+            <p className="text-sm text-gray-500">
+              Total Activities
+            </p>
+
+            <h3 className="font-bold text-xl">
+              {activities.length}
+            </h3>
           </div>
-
-        ) : (
-
-          activities.map(
-            (activity) => (
-
-              <div
-                key={activity.id}
-                className="
-                  border-b
-                  p-4
-                  hover:bg-gray-50
-                "
-              >
-
-                <div className="font-medium">
-
-                  {activity.details}
-
-                </div>
-
-                <div className="text-sm text-gray-500 mt-1">
-
-                  {new Date(
-                    activity.createdAt
-                  ).toLocaleString()}
-
-                </div>
-
-              </div>
-
-            )
-          )
-
-        )}
+        </div>
 
       </div>
 
-    </DashboardLayout>
+    </div>
 
-  );
+    {/* Search */}
+
+    <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+
+      <div className="relative">
+
+        <Search
+          size={18}
+          className="
+            absolute
+            left-3
+            top-1/2
+            -translate-y-1/2
+            text-gray-400
+          "
+        />
+
+        <input
+          type="text"
+          placeholder="Search activities..."
+          value={search}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+          className="
+            w-full
+            border
+            rounded-xl
+            py-3
+            pl-10
+            pr-4
+            outline-none
+            focus:ring-2
+            focus:ring-blue-500
+          "
+        />
+
+      </div>
+
+    </div>
+
+    {/* Activities */}
+
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+
+      {filteredActivities.length === 0 ? (
+
+        <div className="p-10 text-center text-gray-500">
+          No activity found
+        </div>
+
+      ) : (
+
+        filteredActivities.map((activity) => (
+
+          <div
+            key={activity.id}
+            className="
+              flex
+              items-start
+              gap-4
+              p-5
+              border-b
+              hover:bg-slate-50
+              transition
+            "
+          >
+
+            <div
+              className="
+                h-10
+                w-10
+                rounded-full
+                bg-blue-50
+                flex
+                items-center
+                justify-center
+                shrink-0
+              "
+            >
+              {getActivityIcon(
+                activity.details
+              )}
+            </div>
+
+            <div className="flex-1">
+
+              <h3 className="font-medium text-gray-800">
+                {activity.details}
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-1">
+                {new Date(
+                  activity.createdAt
+                ).toLocaleString()}
+              </p>
+
+            </div>
+
+          </div>
+
+        ))
+
+      )}
+
+    </div>
+
+  </DashboardLayout>
+);
 
 }
