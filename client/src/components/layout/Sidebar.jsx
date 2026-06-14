@@ -1,5 +1,7 @@
 import { NavLink } from "react-router-dom";
 
+import { useAuth } from "../../context/AuthContext";
+
 import {
   LayoutDashboard,
   Users,
@@ -13,6 +15,8 @@ export default function Sidebar({
   sidebarOpen,
   setSidebarOpen,
 }) {
+  
+  const { user } = useAuth();
 
   const menuItems = [
     {
@@ -240,12 +244,12 @@ export default function Sidebar({
                 font-bold
               "
             >
-              H
+              {user?.name?.charAt(0)?.toUpperCase() || "U"}
             </div>
 
             <div>
               <p className="font-medium">
-                Hritik
+                {user?.name || "User"}
               </p>
 
               <p
@@ -254,7 +258,9 @@ export default function Sidebar({
                   text-slate-400
                 "
               >
-                Freelancer
+                {user?.role === "USER"
+                  ? "Freelancer"
+                  : user?.role || "Freelancer"}
               </p>
             </div>
           </div>

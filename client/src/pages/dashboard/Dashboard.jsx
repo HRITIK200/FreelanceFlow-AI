@@ -8,6 +8,9 @@ import { getActivities } from "../../api/activityApi";
 import DashboardChart from "../../components/dashboard/DashboardChart";
 import StatCard from "../../components/ui/StatCard";
 
+import AIInsights
+from "../../components/dashboard/AIInsights";
+
 import {
   Users,
   FolderKanban,
@@ -55,7 +58,7 @@ export default function Dashboard() {
       {/* Header */}
 
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
           Welcome Back 👋
         </h1>
         <div className="
@@ -80,6 +83,7 @@ export default function Dashboard() {
 
         <div className="
          bg-white
+          dark:bg-slate-800
            p-5
            rounded-2xl
            shadow ">
@@ -92,6 +96,7 @@ export default function Dashboard() {
         <div className="
         bg-white
           p-5
+        dark:bg-slate-800
           rounded-2xl
           shadow ">
         <p>Projects</p>
@@ -102,7 +107,7 @@ export default function Dashboard() {
 
 </div>
 
-        <p className="text-gray-500 mt-2">
+        <p className="text-gray-500 dark:text-gray-400 mt-2">
           Here's an overview of your freelance business.
         </p>
       </div>
@@ -114,6 +119,7 @@ export default function Dashboard() {
         flex
         gap-4
         overflow-x-auto
+        dark:bg-slate-800
         pb-2
         lg:grid
         lg:grid-cols-3
@@ -192,7 +198,7 @@ export default function Dashboard() {
           p-6
         "
         >
-          <h2 className="text-xl font-bold mb-4">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">
             Business Overview
           </h2>
 
@@ -206,12 +212,13 @@ export default function Dashboard() {
         <div
           className="
           bg-white
+          dark:bg-slate-800
           rounded-2xl
           shadow-md
           p-6
         "
         >
-          <h2 className="text-xl font-bold mb-5">
+          <h2 className="text-xl font-bold mb-5 dark:text-white">
             Quick Actions
           </h2>
 
@@ -282,12 +289,18 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
+      <div className="mb-8">
+         <AIInsights
+          stats={stats}
+          />
+      </div>
+      
       {/* Recent Activity */}
 
       <div
         className="
         bg-white
+        dark:bg-slate-800
         rounded-2xl
         shadow-md
         p-6
@@ -301,17 +314,17 @@ export default function Dashboard() {
           mb-6
         "
         >
-          <h2 className="text-xl font-bold">
+          <h2 className="text-xl font-bold dark:text-white">
             Recent Activity
           </h2>
 
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Latest Updates
           </span>
         </div>
 
         {activities.length === 0 ? (
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             No activity found
           </p>
         ) : (
@@ -329,6 +342,8 @@ export default function Dashboard() {
                 rounded-xl
                 border
                 border-gray-100
+                dark:border-slate-700
+                dark:bg-slate-900
                 hover:shadow-md
                 transition
               "
@@ -349,11 +364,11 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <p className="font-medium text-gray-800">
+                  <p className="font-medium text-gray-800 dark:text-white">
                     {activity.details}
                   </p>
 
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     {new Date(
                       activity.createdAt
                     ).toLocaleString()}

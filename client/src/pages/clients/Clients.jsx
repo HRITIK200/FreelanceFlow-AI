@@ -16,6 +16,9 @@ import {
 import { toast } from "react-hot-toast";
 import Modal from "../../components/ui/Modal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import {
+  exportToExcel
+} from "../../utils/exportToExcel";
 
 import {
   Users,
@@ -24,6 +27,7 @@ import {
   Trash2,
   Building2,
   Mail,
+  Download,
 } from "lucide-react";
 
 
@@ -119,7 +123,10 @@ export default function Clients() {
       </p>
     </div>
 
-    <div className="mt-4 md:mt-0">
+    <div className="mt-4 md:mt-0 flex gap-3">
+
+      {/* Total Clients Card */}
+
       <div className="bg-white rounded-xl px-4 py-3 shadow">
         <div className="flex items-center gap-3">
           <Users size={20} />
@@ -127,12 +134,25 @@ export default function Clients() {
             <p className="text-sm text-gray-500">
               Total Clients
             </p>
+
             <h3 className="font-bold text-xl">
               {clients.length}
             </h3>
           </div>
+
         </div>
       </div>
+
+      {/* Export Button */}
+
+      <button onClick={() =>
+         exportToExcel(clients,"Clients")
+      }
+      className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl flex items-center gap-2 shadow transition">
+        <Download size={18} />
+        Export
+      </button>
+      
     </div>
   </div>
 
@@ -146,7 +166,7 @@ export default function Clients() {
 
     <form
       onSubmit={handleSubmit}
-      className="grid md:grid-cols-4 gap-4"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
     >
 
       <input
@@ -178,7 +198,7 @@ export default function Clients() {
       <input
         type="text"
         placeholder="Company Name"
-        value={form.name}
+        value={form.company}
         onChange={(e) =>
           setForm({
             ...form,

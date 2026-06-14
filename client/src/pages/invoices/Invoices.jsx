@@ -19,6 +19,7 @@ import { Search } from "lucide-react";
 
 import { toast } from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import { exportToExcel } from "../../utils/exportToExcel";
 
 import {
   CheckCircle2,
@@ -96,6 +97,30 @@ return (
           Manage billing, payments and revenue
         </p>
       </div>
+
+      <div className="flex gap-3 mb-6">
+      
+          <button onClick={() =>
+             exportToExcel(
+              invoices.map(
+                (invoice) => ({
+                  InvoiceNo:invoice.invoiceNumber,
+                  Project:invoice.project?.title,
+                  Amount:invoice.amount,
+                  Status:invoice.status,
+                  DueDate:
+                   new Date(
+                    invoice.dueDate
+                   ).toLocaleDateString(),
+                })
+              ),
+              "Invoices"
+             )}
+             className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl flex items-center gap-2 shadow transition">
+              <Download size={18} />
+               Export
+             </button>
+        </div>
 
       {/*Statistics Cards*/}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

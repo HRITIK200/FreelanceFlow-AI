@@ -12,13 +12,31 @@ export const AuthProvider =
 
     const [token, setToken] =
       useState(
-        localStorage.getItem(
-          "token"
-        )
+        localStorage.getItem("token")
       );
 
+    const [user, setUser] =
+      useState(() => {
+        
+        const storedUser =
+          localStorage.getItem("user");
+
+        if(!storedUser || storedUser === "undefined"){
+          return null;
+        }
+
+        try{
+          return JSON.parse(
+            storedUser
+          );
+        } catch{
+          return null;
+        }
+      });
+
     const login = (
-      jwtToken
+      jwtToken,
+      userData
     ) => {
 
       localStorage.setItem(
@@ -26,9 +44,13 @@ export const AuthProvider =
         jwtToken
       );
 
-      setToken(
-        jwtToken
+      localStorage.setItem(
+        "user",
+        JSON.stringify(userData)
       );
+
+      setToken(jwtToken);
+      setUser(userData);
     };
 
     const logout = () => {
@@ -37,13 +59,19 @@ export const AuthProvider =
         "token"
       );
 
+      localStorage.removeItem(
+        "user"
+      );
+
       setToken(null);
+      setUser(null);
     };
 
     return (
       <AuthContext.Provider
         value={{
           token,
+          user,
           login,
           logout,
         }}

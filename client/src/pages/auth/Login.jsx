@@ -52,9 +52,10 @@ export default function Login() {
           );
         
         console.log("LOGIN RESPONSE:", data);
-          
+
         login(
-          data.token
+          data.token,
+          data.user
         );
 
         toast.success(

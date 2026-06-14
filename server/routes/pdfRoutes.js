@@ -1,5 +1,7 @@
 import express from "express";
 
+console.log("pdfRoutes.js loaded");
+
 import authMiddleware
 from "../middleware/authMiddleware.js";
 

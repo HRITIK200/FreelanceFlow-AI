@@ -1,9 +1,6 @@
 import api
 from "./axios";
 
-const data = await loginUser(formData);
-
-console.log(data);
 
 export const loginUser =
   async (data) => {

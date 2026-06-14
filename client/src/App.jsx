@@ -11,6 +11,9 @@ from "./pages/auth/Login";
 import Register
 from "./pages/auth/Register";
 
+import Profile
+from "./pages/profile/Profile";
+
 import { Navigate } from "react-router-dom";
 
 import Clients from "./pages/clients/Clients";
@@ -31,7 +34,15 @@ function App() {
         path="/register"
         element={<Register />}
       />
-
+      
+      <Route
+        path="/profile"
+        element={
+        <ProtectedRoute>
+        <Profile />
+        </ProtectedRoute>
+        }
+      />
       <Route
         path="/"
         element={

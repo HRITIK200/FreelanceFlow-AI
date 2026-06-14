@@ -12,6 +12,7 @@ import {
 import Modal from "../../components/ui/Modal";
 import { toast } from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import { exportToExcel } from "../../utils/exportToExcel";
 
 import {
   FolderKanban,
@@ -22,7 +23,9 @@ import {
   Pencil,
   Trash2,
   Building2,
+  Download,
 } from "lucide-react";
+import Clients from "../clients/clients";
 
 export default function Projects() {
 
@@ -105,6 +108,25 @@ return(
       Manage and track all freelance projects
     </p>
 
+  </div>
+  <div className="flex gap-3 mb-6">
+
+    <button onClick={() =>
+       exportToExcel(
+        projects.map(
+          (project) => ({
+            Title:project.title,
+            Status:project.status,
+            Budget:project.budget,
+            Client:project.client?.name,
+          })
+        ),
+        "Projects"
+       )}
+       className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl flex items-center gap-2 shadow transition">
+        <Download size={18} />
+         Export
+       </button>
   </div>
 
   {/* Stats */}

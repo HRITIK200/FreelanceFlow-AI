@@ -1,6 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+import { useEffect, useState } from "react";
+import { getActivities } from "../../api/activityApi";
+
+import GlobalSearch
+from "../search/GlobalSearch";
+
 import {
   Bell,
   Search,
@@ -11,16 +17,48 @@ import {
 export default function Navbar({
   setSidebarOpen,
 }) {
-  const { logout } = useAuth();
+  const { logout,user } = useAuth();
 
   const navigate =
     useNavigate();
+
+  const [notificationCount,
+  setNotificationCount] =
+  useState(0);
+
 
   const handleLogout =
     () => {
       logout();
       navigate("/login");
     };
+
+  useEffect(() => {
+
+  const fetchNotifications =
+    async () => {
+
+      try {
+
+        const activities =
+          await getActivities();
+
+        setNotificationCount(
+          Math.min(
+          activities.length,9)
+        );
+        
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    };
+
+    fetchNotifications();
+     
+   }, []);
 
   return (
     <header
@@ -61,34 +99,10 @@ export default function Navbar({
 
         {/* Search */}
 
-        <div
-          className="
-            hidden
-            sm:flex
-            items-center
-            gap-3
-            bg-gray-100
-            rounded-xl
-            px-4
-            py-2
-            w-72
-          "
-        >
-          <Search
-            size={18}
-            className="text-gray-500"
-          />
+      <div className="hidden sm:block">
+        <GlobalSearch />
+      </div>
 
-          <input
-            type="text"
-            placeholder="Search..."
-            className="
-              bg-transparent
-              outline-none
-              w-full
-            "
-          />
-        </div>
       </div>
 
       {/* Right Side */}
@@ -123,7 +137,10 @@ export default function Navbar({
               justify-center
             "
           >
-            3
+            {notificationCount > 9
+              ? "9+"
+              : notificationCount
+            }
           </span>
         </button>
 
@@ -138,7 +155,7 @@ export default function Navbar({
           "
         >
           <p className="font-semibold">
-            User
+            {user?.name}
           </p>
 
           <p
@@ -147,28 +164,19 @@ export default function Navbar({
               text-gray-500
             "
           >
-            Freelancer
+            {user?.role === "USER"
+               ? "Freelancer"
+               : user?.role}
           </p>
         </div>
 
-        <div
-          className="
-            h-11
-            w-11
-            rounded-full
-            bg-gradient-to-r
-            from-blue-600
-            to-indigo-600
-            text-white
-            flex
-            items-center
-            justify-center
-            font-bold
-            shadow-md
-          "
-        >
-          H
-        </div>
+        <button onClick={() =>
+           navigate("/profile")
+         }
+         className="h-11 w-11 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md">
+          {user?.name?.charAt(0)}
+         </button>
+        
 
         {/* Logout */}
 
