@@ -80,6 +80,8 @@ doc.y = 130;
 doc.fillColor("black")
    .fontSize(12);
 
+doc.x = 50;  
+
 doc.text(`Invoice Number: ${invoice.invoiceNumber}`);
 doc.text(`Issue Date: ${invoice.issueDate.toDateString()}`);
 doc.text(`Due Date: ${invoice.dueDate.toDateString()}`);
@@ -176,20 +178,23 @@ doc.fillColor("black")
 
 doc.moveDown(3);
 
-//Footer
+// Footer
+
+const footerY = 700;
 
 doc.strokeColor("#d1d5db")
-   .moveTo(50, 720)
-   .lineTo(550, 720)
+   .moveTo(50, footerY)
+   .lineTo(550, footerY)
    .stroke();
 
 doc.fillColor("gray")
    .fontSize(10)
    .text(
       "Thank you for doing business with FreelanceFlow AI",
-      0,
-      735,
+      50,
+      footerY + 15,
       {
+         width: 500,
          align: "center",
       }
    );
@@ -197,6 +202,7 @@ doc.fillColor("gray")
 doc.text(
    "Generated automatically by FreelanceFlow AI",
    {
+      width: 500,
       align: "center",
    }
 );
