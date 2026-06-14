@@ -41,7 +41,9 @@ export const generateInvoicePDF =
       }
 
       const doc =
-        new PDFDocument();
+        new PDFDocument({
+          margin: 50,
+        });
 
       res.setHeader(
         "Content-Type",
@@ -53,119 +55,162 @@ export const generateInvoicePDF =
         `attachment; filename=${invoice.invoiceNumber}.pdf`
       );
 
-      doc.pipe(res);
+doc.pipe(res);
       
-      //Header
-      doc.fontSize(28)
-         .fillColor("#2563eb")
-         .text("FreelanceFlow AI", {
-         align: "center",
-        });      
-      doc.fontSize(18)
-         .fillColor("black")
-         .text("Professional Invoice", {
-         align: "center",
-        });  
+// Blue Header Background
+doc.rect(0, 0, doc.page.width, 100)
+   .fill("#2563eb");
 
-      doc.moveDown(2);
+doc.fillColor("white")
+   .fontSize(30)
+   .text("FreelanceFlow AI", 0, 30, {
+      align: "center",
+   });
+
+doc.fontSize(14)
+   .text("Professional Invoice", {
+      align: "center",
+   });
+
+doc.moveDown(4);
       
-      // Invoice Information
-      doc.fontSize(12)
-         .text(
-           `Invoice Number: ${invoice.invoiceNumber}`
-         );
-      doc.text(
-          `Issue Date: ${invoice.issueDate.toDateString()}`
-         );
+// Invoice Information
+doc.y = 130;
 
-      doc.text(
-         `Due Date: ${invoice.dueDate.toDateString()}`
-         );
+doc.fillColor("black")
+   .fontSize(12);
 
-      doc.text(
-        `Status: ${invoice.status}`
-      );
-      doc.moveDown();
+doc.text(`Invoice Number: ${invoice.invoiceNumber}`);
+doc.text(`Issue Date: ${invoice.issueDate.toDateString()}`);
+doc.text(`Due Date: ${invoice.dueDate.toDateString()}`);
+doc.text(`Status: ${invoice.status}`);
 
-      //Divider
+doc.moveDown();
 
-      doc.moveTo(50, 180)
-         .lineTo(550, 180)
-         .stroke();
-      doc.moveDown();
+//Divider
 
-      //Client Details
+doc.strokeColor("#d1d5db")
+   .moveTo(50, doc.y)
+   .lineTo(550, doc.y)
+   .stroke();
 
-      doc.fontSize(16)
-         .fillColor("#2563eb")
-         .text("Client Information");
+doc.moveDown();
 
-      doc.fillColor("black")
-         .fontSize(12)
-         .text(`Client Name: ${invoice.project.client.name}`);
-      doc.moveDown();
+//Client Details
+
+doc.fillColor("#2563eb")
+   .fontSize(16)
+   .text("Client Information");
+
+doc.fillColor("black")
+   .fontSize(12)
+   .text(`Client Name: ${invoice.project.client.name}`);
+
+doc.moveDown();
       
-      //Project Details
+//Project Details
 
-      doc.fontSize(16)
-         .fillColor("#2563eb")
-         .text("Project Information");
+doc.fillColor("#2563eb")
+   .fontSize(16)
+   .text("Project Information");
 
-      doc.fillColor("black")
-         .fontSize(12)
-         .text(`Project: ${invoice.project.title}`
+doc.fillColor("black")
+   .fontSize(12)
+   .text(`Project: ${invoice.project.title}`);
 
-         );
-      doc.moveDown();
+doc.moveDown(2);
 
-      //Amount box
+//Amount box
 
-      doc.roundedRect(50, 320, 500, 100, 10)
-         .fillAndStroke("#eff6ff","#2563eb");
-      doc.fillColor("#1e40af")
-         .fontSize(24)
-         .text(`₹${invoice.amount.toLocaleString()}`,
-          70, 355
-         );
-      doc.moveDown(4);
+const boxY = doc.y;
 
-      //Notes
+doc.roundedRect(
+   50,
+   boxY,
+   500,
+   90,
+   10
+).fillAndStroke(
+   "#eff6ff",
+   "#2563eb"
+);
 
-      doc.fillColor("#2563eb")
-         .fontSize(16)
-         .text("Notes");
-
-      doc.moveDown(0.5);
-
-      doc.fontSize(12)
-         .fillColor("black")
-         .text(invoice.notes || "No additional notes.");
-
-      //Footer
-
-      doc.fontSize(10)
-         .fillColor("gray")
-         .text("Thank you for doing business with FreelanceFlow AI.",
-          {
-            align: "center",
-          }
-         );
-      doc.text(
-        "Generated automatically by FreelanceFlow AI",
+doc.fillColor("#2563eb")
+   .fontSize(14)
+   .text(
+      "TOTAL AMOUNT",
+      0,
+      boxY + 18,
       {
-        align: "center",
+         align: "center",
       }
-      );
-      doc.end();
+   );
 
-    } catch (error) {
+doc.fillColor("#1e40af")
+   .fontSize(28)
+   .text(
+      `₹${invoice.amount.toLocaleString()}`,
+      0,
+      boxY + 42,
+      {
+         align: "center",
+      }
+   );
 
-      console.log(error);
+doc.y = boxY + 120;
 
-      res.status(500).json({
+//Notes
+
+doc.fillColor("#2563eb")
+   .fontSize(16)
+   .text("Notes");
+
+doc.moveDown(0.5);
+
+doc.fillColor("black")
+   .fontSize(12)
+   .text(
+      invoice.notes ||
+      "No additional notes."
+   );
+
+doc.moveDown(3);
+
+//Footer
+
+doc.strokeColor("#d1d5db")
+   .moveTo(50, 720)
+   .lineTo(550, 720)
+   .stroke();
+
+doc.fillColor("gray")
+   .fontSize(10)
+   .text(
+      "Thank you for doing business with FreelanceFlow AI",
+      0,
+      735,
+      {
+         align: "center",
+      }
+   );
+
+doc.text(
+   "Generated automatically by FreelanceFlow AI",
+   {
+      align: "center",
+   }
+);
+
+doc.end();
+
+} catch (error) {
+
+  console.log(error);
+
+    res.status(500).json({
         message:
           "Server Error",
-      });
+    });
 
     }
 };
