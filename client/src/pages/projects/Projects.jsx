@@ -25,7 +25,7 @@ import {
   Building2,
   Download,
 } from "lucide-react";
-import Clients from "../clients/clients";
+import Clients from "../clients/Clients";
 
 export default function Projects() {
 
