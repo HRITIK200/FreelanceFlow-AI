@@ -264,6 +264,44 @@ export default function Clients() {
 
   </div>
 
+{/* Empty State */}
+
+{filteredClients.length === 0 ? (
+
+  <div
+    className="
+      bg-white
+      rounded-2xl
+      shadow-md
+      p-12
+      text-center
+    "
+  >
+    
+
+    <h3 className="text-xl font-bold mt-4">
+      <div className="py-16 text-center">
+        <Users
+          size={48}
+          className="mx-auto text-gray-300"
+        />
+        <h3 className="text-xl font-bold">
+          No Clients Yet
+        </h3>
+        <p className="text-gray-500 mt-2">
+          Add your first client to start managaing projects.
+        </p>
+      </div>
+    </h3>
+
+    <p className="text-gray-500 mt-2">
+      Add your first client to get started.
+    </p>
+  </div>
+
+) : (
+
+<>
   {/* Desktop Table */}
 
   <div className="hidden md:block bg-white rounded-2xl shadow-md overflow-hidden">
@@ -303,8 +341,20 @@ export default function Clients() {
             className="border-t hover:bg-gray-50"
           >
 
-            <td className="p-4 font-medium">
-              {client.name}
+            <td className="p-4">
+              <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
+                {client.name?.charAt(0)?.toUpperCase()}
+              </div>
+              <div>
+                <p className="font-semibold">
+                  {client.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Client
+                </p>
+              </div>
+              </div>
             </td>
 
             <td className="p-4">
@@ -312,7 +362,10 @@ export default function Clients() {
             </td>
 
             <td className="p-4">
-              {client.company}
+              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm font-medium">
+                {client.company || "N/A"}
+              </span>
+              
             </td>
 
             <td className="p-4">
@@ -325,10 +378,12 @@ export default function Clients() {
                     setIsEditOpen(true);
                   }}
                   className="
-                    bg-yellow-500
-                    text-white
+                    bg-yellow-100
+                    text-yellow-600
                     p-2
-                    rounded-lg
+                    rounded-xl
+                    hover:bg-yellow-200
+                    transition
                   "
                 >
                   <Pencil size={16} />
@@ -362,6 +417,8 @@ export default function Clients() {
     </table>
 
   </div>
+  </>
+)}
 
   {/* Mobile Cards */}
 
@@ -379,9 +436,22 @@ export default function Clients() {
         "
       >
 
-        <h3 className="font-bold text-lg">
-          {client.name}
-        </h3>
+        <div className="flex items-center gap-3">
+
+          <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
+             {client.name?.charAt(0)?.toUpperCase()}
+          </div>
+
+          <div>
+            <h3 className="font-bold text-lg">
+              {client.name}
+            </h3>
+
+            <p className="text-sm text-gray-500">
+              Client
+            </p>
+          </div>
+        </div>
 
         <div className="mt-3 space-y-2 text-gray-600">
 

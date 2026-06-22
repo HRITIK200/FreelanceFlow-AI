@@ -11,6 +11,7 @@ export const createProject = async (
       title,
       description,
       budget,
+      progress,
       status,
       deadline,
       clientId,
@@ -37,6 +38,7 @@ export const createProject = async (
           title,
           description,
           budget,
+          progress: Number(progress) || 0,
           status,
           deadline:
             deadline
@@ -58,7 +60,8 @@ export const createProject = async (
     res.status(201).json(project);
 
   } catch (error) {
-
+    
+    console.error("UPDATE PROJECT ERROR:");
     console.log(error);
 
     res.status(500).json({
@@ -111,6 +114,11 @@ export const updateProject = async (
   req,
   res
 ) => {
+  console.log("=================================");
+  console.log("UPDATE PROJECT ROUTE HIT");
+  console.log("USER:", req.user);
+  console.log("BODY:", req.body);
+  console.log("=================================");
   try {
 
     const { id } = req.params;
@@ -133,6 +141,9 @@ export const updateProject = async (
       });
     }
 
+    //delete 
+    console.log("REQ BODY:", req.body);
+
     const updatedProject =
       await prisma.project.update({
         where: { id },
@@ -151,12 +162,15 @@ export const updateProject = async (
     res.json(updatedProject);
 
   } catch (error) {
-
-    console.log(error);
-
+    
+    console.log("=================================");
+  console.log("UPDATE PROJECT ERROR");
+  console.error(error);
+  console.log("MESSAGE:", error.message);
+  console.log("=================================");
     res.status(500).json({
       message:
-        "Server Error",
+        error.message,
     });
 
   }

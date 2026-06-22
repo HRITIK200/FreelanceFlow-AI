@@ -14,6 +14,9 @@ from "./pages/auth/Register";
 import Profile
 from "./pages/profile/Profile";
 
+import Settings from "./pages/settings/Settings";
+import Reports from  "./pages/dashboard/Reports";
+
 import { Navigate } from "react-router-dom";
 
 import Clients from "./pages/clients/Clients";
@@ -96,6 +99,22 @@ function App() {
             <Activity />
           </ProtectedRoute>
         }
+      />
+
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+             <Settings />
+          </ProtectedRoute>}
+      />
+
+      <Route 
+        path="/reports"
+        element={
+          <ProtectedRoute>
+             <Reports />
+          </ProtectedRoute>}
       />
 
     </Routes>

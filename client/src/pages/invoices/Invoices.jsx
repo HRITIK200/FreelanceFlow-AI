@@ -60,9 +60,38 @@ export default function Invoices() {
     invoices
       .filter((i) => i.status === "PAID")
       .reduce((sum, i) => sum + (i.amount || 0), 0);
+  
+  const pendingAmount =
+    invoices
+      .filter((i) => i.status === "PENDING")
+      .reduce((sum, i) => sum + (i.amount || 0), 0);
+
+  const averageInvoice =
+    invoices.length > 0
+      ? Math.round(
+        invoices.reduce(
+          (sum, i) => sum + (i.amount || 0),0
+        ) / invoices.length
+      ) : 0;
+
+  const collectionRate =
+    invoices.length > 0
+      ? Math.round(
+        (paidInvoices / invoices.length) * 100
+      ) : 0;
+
+  const overdueInvoices =
+    invoices.filter(
+      (invoice) =>
+         invoice.status === "PENDING" &&
+         new Date(invoice.dueDate) < new Date()
+    ).length;
     
   const [search, setSearch] =
     useState("");
+  
+  const [statusFilter, setStatusFilter] =
+    useState("ALL");
 
   const [isDeleteOpen, setIsDeleteOpen] =
     useState(false);
@@ -75,14 +104,28 @@ export default function Invoices() {
 
   const filteredInvoices =
     invoices.filter(
-      (invoice) =>
+      (invoice) => {
+
+       const matchesSearch =
         invoice.invoiceNumber
             .toLowerCase()
             .includes(search.toLowerCase()) ||
+
         (invoice.project?.title || "")
             .toLowerCase()
-            .includes(search.toLowerCase())
+            .includes(search.toLowerCase());
+       
+      const matchesStatus =
+        statusFilter === "ALL"
+          ? true
+          : invoice.status === statusFilter;
+    
+    return(
+      matchesSearch  &&
+      matchesStatus
     );
+});
+
 
 return (
 <DashboardLayout>
@@ -124,7 +167,7 @@ return (
 
       {/*Statistics Cards*/}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-         <div className="bg-white rounded-2xl shadow-md p-5">
+         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
 
           <FileText className="text-blue-600 mb-3"/>
           <p className="text-gray-500 text-sm">
@@ -135,7 +178,7 @@ return (
           </h3>
          </div>
 
-         <div className="bg-white rounded-2xl shadow-md p-5">
+         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
 
           <CheckCircle2 className="text-green-600 mb-3"/>
           <p className="text-gray-500 text-sm">
@@ -147,7 +190,7 @@ return (
           </h3>
          </div>
 
-         <div className="bg-white rounded-2xl shadow-md p-5">
+         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
 
           <Clock3 className="text-yellow-600 mb-3"/>
           <p className="text-gray-500 text-sm">
@@ -158,42 +201,157 @@ return (
           </h3>
          </div>
 
-         <div className="bg-white rounded-2xl shadow-md p-5">
+         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
 
           <IndianRupee className="text-purple-600 mb-3"/>
           <p className="text-gray-500 text-sm">
             Revenue
           </p>
-          <h3 className="text-2xl font-bold text-purple-600">
+          <h3 className="text-3xl font-bold text-yellow-600">
             ₹{paidRevenue.toLocaleString()}
           </h3>
+          <p className="text-xs text-gray-500 mt-1">
+             Total collected revenue
+          </p>
          </div>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-4 mb-8">
+        
+        {/* Average Invoice */}
+
+        <div className="bg-blue-50 rounded-3xl p-6">
+
+          <p className="text-gray-500">
+            Average Invoice
+          </p>
+
+          <h3 className="text-3xl font-bold text-blue-600 mt-2">
+            ₹{averageInvoice.toLocaleString()}
+          </h3>
+
+        </div>
+
+        {/* Collection Rate */}
+
+        <div className="bg-green-50 rounded-3xl p-6">
+
+          <p className="text-gray-500">
+            Collection Rate
+          </p>
+
+          <h3 className="text-3xl font-bold text-green-600 mt-2">
+            {collectionRate}%
+          </h3>
+
+          <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+
+            <div className="bg-green-600 h-2 rounded-full"
+               style={{
+                width: `${collectionRate}%`,
+               }} />
+        </div>
+        </div>
+        
+        {/* Pending Amount */}
+        
+        <div className="bg-yellow-50 rounded-3xl p-6">
+          <p className="text-gray-500">
+            Pending Amount
+          </p>
+
+          <h3 className="text-3xl font-bold text-purple-600 mt-2">
+            ₹{pendingAmount.toLocaleString()}
+          </h3>
+        </div>
+
+        {/* Overdue */}
+        
+       <div className="bg-indigo-50 rounded-3xl p-6">
+
+        <p className="text-gray-500">
+          Invoice Health
+        </p>
+
+        <h3 className="text-3xl font-bold text-indigo-600 mt-2">
+          <span className={
+            collectionRate >= 80
+              ? "text-green-600"
+              : collectionRate >= 50
+              ? "text-yellow-600"
+              : "text-red-600"
+          }
+          >
+          {collectionRate >= 80
+            ? "Excellent"
+            : collectionRate >= 50
+            ? "Good"
+            : "Poor"}
+          </span>
+        </h3>
+       </div>
+
+        <div className="bg-red-50 rounded-3xl p-6">
+
+          <p className="text-gray-500">
+            Overdue Invoices
+          </p>
+
+          <h3 className="text-3xl font-bold text-red-600 mt-2">
+            {overdueInvoices}
+          </h3>
+        </div>
+
       </div>
 
       <div className="bg-white rounded-2xl  shadow-md overflow-hidden">
 
-        <div className="p-4 border-b">
-            <div className="relative">
+      <div className="p-6 border-b border-gray-100">
 
-              <Search size={18}
-                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"/>
-                   <input type="text"
-                      placeholder="Search invoices..."
-                      value={search}
-                      onChange={(e) =>
-                        setSearch(e.target.value)
+        <div className="flex flex-col md:flex-row gap-4">
+
+          {/* Search */}
+
+          <div className="realtive flex-1">
+
+            <Search size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"/>
+
+                <input type="text" placeholder="Search invoices..." 
+                      value={search} onChange={(e) => 
+                         setSearch(e.target.value)
                       }
-                      className="w-full border rounded-xl py-3 pl-11 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none"/>
-            
-            </div>
+                      className="w-full bg-slate-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none"/>               
+          </div>
+
+          {/* Status Filter */}
+
+          <select value={statusFilter}
+                  onChange={(e) => 
+                  setStatusFilter(e.target.value)
+                  }
+                className="border border-gray-200 rounded-2xl px-4 py-4 bg-white min-w-[180px]">
+
+                 <option value="ALL">
+                  All Invoices
+                 </option> 
+                 <option value="PAID">
+                  Paid
+                 </option>
+                 <option value="PENDING">
+                  Pending
+                 </option>
+
+                </select>
         </div>
+      </div>
         
         <div className="hidden md:block overflow-x-auto">
            <table className="w-full min-w-[900px]">
 
           <thead>
 
-            <tr className="border-b">
+            <tr className="bg-slate-50 border-b">
 
               <th className="p-3 text-left">
                 Invoice No
@@ -230,7 +388,21 @@ return (
               <tr>
                 <td colSpan="6"
                     className="text-center p-6 text-gray-500">
-                  No invoices found
+                  
+                  <p className="text-gray-500">
+                    <div className="py-16 text-center">
+                      <FileText size={50}
+                      className="mx-auto text-gray-300 mb-4"/>
+
+                      <h3 className="text-xl font-bold">
+                        No Invoices Yet
+                      </h3>
+
+                      <p className="text-gray-500 mt-2">
+                        Generate invoices and manage payments here.
+                      </p>
+                    </div>
+                  </p>
                 </td>
               </tr>
             ) : (
@@ -259,8 +431,8 @@ return (
 
                   <span
                     className={`
-                      px-3
-                      py-1
+                      px-4
+                      py-2
                       rounded-full
                       text-xs
                       font-semibold
@@ -276,8 +448,8 @@ return (
                     `}
                   >
                     {invoice.status === "PAID"
-                      ? "🟢 PAID"
-                      : "🟡 PENDING"}
+                      ? "✅ PAID"
+                      : "⏳ PENDING"}
 
                   </span>
 
@@ -318,7 +490,7 @@ return (
 
                       }}
                       title="Toggle Status"
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-lg transition"
+                      className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
                     >
                       <CheckCircle2 size={16} />
                     </button>
@@ -364,7 +536,7 @@ return (
                         }
                         }}
                         title="Download PDF"
-                        className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition"
+                        className="bg-green-500 hover:bg-green-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
                         >
                         <Download size={16} />
                     </button>
@@ -396,7 +568,7 @@ return (
 
                         }}
                         title="Send Email"
-                        className="bg-purple-500 hover:bg-purple-600 text-white p-2 rounded-lg transition"
+                        className="bg-purple-500 hover:bg-purple-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
                         >
                         <Mail size={16} />
                     </button>
@@ -407,7 +579,7 @@ return (
                         setIsDeleteOpen(true);
                     }}
                     title="Delete Invoice"
-                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition"
+                    className="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
                     >
                         <Trash2 size={16} />
                     </button>
@@ -432,7 +604,12 @@ return (
           {filteredInvoices.length === 0 ? (
 
             <div className="bg-white rounded-2xl shadow-md p-6 text-center text-gray-500">
-              No invoices found
+              <div className="py-10 text-center">
+                <FileText size={50} className="mx-auto text-gray-300 mb-4"/>
+                <p className="text-gray-500">
+                  No invoices match your search
+                </p>
+              </div>
             </div>
 
           ) : (
@@ -441,7 +618,7 @@ return (
               (invoice) => (
 
                 <div key={invoice.id}
-                  className="bg-white rounded-2xl shadow-md p-5">
+                  className="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
 
                 {/* Invoice Number */}
 
@@ -456,7 +633,7 @@ return (
                   </p>
                 </div>
 
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold
+                <span className={`px-4 py-2 rounded-full text-xs font-semibold
                     ${
                       invoice.status === "PAID"
                         ? "bg-green-100 text-green-700"
@@ -466,8 +643,8 @@ return (
                     >
                       {
                        invoice.status === "PAID"
-                         ? "🟢 PAID"
-                         : "🟡 PENDING"
+                         ? "✅ PAID"
+                         : "⏳ PENDING"
                       }
                 </span>
               </div>  
@@ -554,7 +731,7 @@ return (
                   );
                 } catch(error){
                   toast.error(
-                    "Failed to downlaod pdf"
+                    "Failed to download PDF"
                   );
                 }
               }}
@@ -597,8 +774,48 @@ return (
           )}
       </div>
       </div>
+      
+    <div className="mt-8 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
 
-      <ConfirmModal
+      <h2 className="text-xl font-bold mb-4">
+        Invoice Summary
+      </h2>
+
+      <div className="grid md:grid-cols-3 gap-4">
+
+        <div>
+          <p className="text-gray-500">
+            Paid Revenue
+          </p>
+
+          <h3 className="text-2xl font-bold text-green-600">
+            ₹{paidRevenue.toLocaleString()}
+          </h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">
+            Pending Amount
+          </p>
+
+          <h3 className="text-2xl font-bold text-yellow-600">
+            ₹{pendingAmount.toLocaleString()}
+          </h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">
+            Collection Rate
+          </p>
+
+          <h3 className="text-2xl font-bold text-blue-600">
+            {collectionRate}%
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <ConfirmModal
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         title="Delete Invoice"

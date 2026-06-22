@@ -92,7 +92,7 @@ const getActivityIcon = (text) => {
         </p>
       </div>
 
-      <div className="mt-4 md:mt-0 bg-white rounded-xl shadow px-5 py-3">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4">
 
         <div className="flex items-center gap-3">
           <ActivityIcon size={22} />
@@ -114,7 +114,7 @@ const getActivityIcon = (text) => {
 
     {/* Search */}
 
-    <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 mb-6">
 
       <div className="relative">
 
@@ -138,10 +138,12 @@ const getActivityIcon = (text) => {
           }
           className="
             w-full
+            bg-slate-50
             border
-            rounded-xl
-            py-3
-            pl-10
+            border-gray-200
+            rounded-2xl
+            py-4
+            pl-12
             pr-4
             outline-none
             focus:ring-2
@@ -159,8 +161,27 @@ const getActivityIcon = (text) => {
 
       {filteredActivities.length === 0 ? (
 
-        <div className="p-10 text-center text-gray-500">
-          No activity found
+        <div className="py-16 text-center">
+
+
+          <h3 className="text-xl font-bold">
+            <div className="py-16 text-center">
+              <ActivityIcon size={60}
+               className="mx-auto text-gray-300 mb-4"/>
+              
+              <h3 className="text-xl font-bold">
+                No Activity Yet
+              </h3>
+
+              <p className="text-gray-500 mt-2">
+                Your recent actions will appear here.
+              </p>
+            </div>
+          </h3>
+
+          <p className="text-gray-500 mt-2">
+            Activity logs will appear here.
+          </p>  
         </div>
 
       ) : (
@@ -175,17 +196,21 @@ const getActivityIcon = (text) => {
               gap-4
               p-5
               border-b
-              hover:bg-slate-50
-              transition
+              border-gray-100
+              hover:bg-blue-50
+              transition-all
+              duration-300
             "
           >
 
             <div
               className="
-                h-10
-                w-10
-                rounded-full
-                bg-blue-50
+                h-12
+                w-12
+                rounded-2xl
+                bg-gradient-to-r
+                from-blue-50
+                to-indigo-50
                 flex
                 items-center
                 justify-center
@@ -206,7 +231,11 @@ const getActivityIcon = (text) => {
               <p className="text-sm text-gray-500 mt-1">
                 {new Date(
                   activity.createdAt
-                ).toLocaleString()}
+                ).toLocaleDateString()}.
+                {" "}
+                {new Date(
+                  activity.createdAt
+                ).toLocaleDateString()}
               </p>
 
             </div>

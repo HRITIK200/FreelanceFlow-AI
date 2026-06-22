@@ -10,9 +10,18 @@ import StatCard from "../../components/ui/StatCard";
 
 import AIInsights
 from "../../components/dashboard/AIInsights";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 import {
+  PlusCircle,
+  Pencil,
+  Trash2,
+  Mail,
   Users,
+  UserPlus,
+  FolderPlus,
+  ReceiptText,
   FolderKanban,
   IndianRupee,
   Clock3,
@@ -21,10 +30,13 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
     totalClients: 0,
     totalProjects: 0,
-    completedprojects: 0,
+    completedProjects: 0,
     totalInvoices: 0,
     paidRevenue: 0,
     pendingRevenue: 0,
@@ -33,9 +45,24 @@ export default function Dashboard() {
 
   const [activities, setActivities] = useState([]);
 
+  const { user } = useAuth();
+
+
+  const completionRate =
+    stats.totalProjects > 0
+      ? Math.round(
+        (
+          stats.completedProjects /
+          stats.totalProjects
+        ) * 100
+      ) : 0;
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+
+
         const statsData =
           await getDashboardStats();
 
@@ -44,31 +71,75 @@ export default function Dashboard() {
 
         setStats(statsData);
         setActivities(activityData);
+
       } catch (error) {
         console.log(error);
+
       }
     };
 
     fetchData();
   }, []);
 
+  const getActivityIcon = (text) => {
+
+    const value = text.toLowerCase();
+
+    if (value.includes("created"))
+      return <PlusCircle size={20} />;
+
+    if (value.includes("updated"))
+      return <Pencil size={20} />;
+
+    if(value.includes("deleted"))
+      return <Trash2 size={20} />;
+
+    if(value.includes("email"))
+      return <Mail size={20} />;
+
+    if(value.includes("invoice"))
+      return <ReceiptText size={20} />
+
+    if(value.includes("project"))
+      return <FolderKanban size={20} />
+
+    return <Clock3 size={20} />
+  };
+
+
+  
   return (
     <DashboardLayout>
 
       {/* Header */}
 
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-          Welcome Back 👋
+        <h1 className="text-4xl font-bold text-gray-900">
+          Welcome Back, {user?.name}
         </h1>
+
+        {
+          stats.totalClients === 0 &&
+          stats.totalProjects === 0 && (
+            <div className="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p className="text-blue-700">
+              🚀 Start by adding your first client and project.
+            </p>
+            </div>
+          )
+        }
+        <p className="text-gray-500 mt-2">
+          Here's your business performance overview today.
+        </p>
         <div className="
           mt-4
           grid
           grid-cols-1
-          md:grid-cols-3
+          md:grid-cols-4
           gap-4">
 
         <div className="
+          md:col-span-2
           bg-gradient-to-r
          from-blue-600
          to-indigo-600
@@ -77,13 +148,12 @@ export default function Dashboard() {
            rounded-2xl ">
          <p>Total Revenue</p>
          <h2 className="text-3xl font-bold">
-           ₹{stats.paidRevenue}
+           ₹{(stats.paidRevenue || 0).toLocaleString()}
          </h2>
         </div>
 
         <div className="
          bg-white
-          dark:bg-slate-800
            p-5
            rounded-2xl
            shadow ">
@@ -96,7 +166,6 @@ export default function Dashboard() {
         <div className="
         bg-white
           p-5
-        dark:bg-slate-800
           rounded-2xl
           shadow ">
         <p>Projects</p>
@@ -107,27 +176,81 @@ export default function Dashboard() {
 
 </div>
 
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-gray-500 mt-2">
           Here's an overview of your freelance business.
         </p>
       </div>
+     
+    {/* Business Performance Banner */}
+    
+    <div className="mb-8 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-3xl p-6 shadow-lg">
+      <div className="flex items-start gap-4">
+
+        <div className="text-4xl">
+          🎉
+        </div>
+
+        <div>
+
+          <h2 className="text-2xl font-bold">
+            Business Performance
+          </h2>
+
+          <p className="mt-2 text-green-100">
+            {
+              stats.totalProjects === 0
+                ? "Start by creating your first project."
+                : completionRate >= 80
+                ? "Excellent performance. Keep growing."
+                : "Focus on completing more projects."
+            }
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-6">
+            <div>
+              <p className="text-green-100 text-sm">
+                Success Rate
+              </p>
+
+              <p className="text-xl font-bold">
+                {completionRate}%
+              </p>
+            </div>
+            <div>
+              <p className="text-green-100 text-sm">
+                Completed Projects
+              </p>
+              <p className="text-xl font-bold">
+                {stats.completedProjects}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-green-100 text-sm">
+                Revenue Generated
+              </p>
+              <p className="text-xl font-bold">
+                ₹{(stats.paidRevenue || 0).toLocaleString()}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
 
       {/* Stats Cards */}
 
-      <div
-        className="
-        flex
-        gap-4
-        overflow-x-auto
-        dark:bg-slate-800
-        pb-2
-        lg:grid
-        lg:grid-cols-3
-        xl:grid-cols-6
-        mb-8
-      "
-      >
-        <div className="min-w-[220px]">
+      <div className="
+          grid
+          grid-cols-1
+          xl:grid-cols-2
+          gap-6
+          mb-8 ">
+        <div >
           <StatCard
             title="Clients"
             value={stats.totalClients}
@@ -135,7 +258,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="min-w-[220px]">
+        <div >
           <StatCard
             title="Projects"
             value={stats.totalProjects}
@@ -143,35 +266,43 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="min-w-[220px]">
+        <div >
           <StatCard
             title="Paid Revenue"
-            value={`₹${stats.paidRevenue}`}
+            value={`₹${stats.paidRevenue?.toLocaleString()}`}
             icon={<IndianRupee size={28} />}
           />
         </div>
 
-        <div className="min-w-[220px]">
+        <div >
           <StatCard
             title="Pending Revenue"
-            value={`₹${stats.pendingRevenue}`}
+            value={`₹${stats.pendingRevenue?.toLocaleString()}`}
             icon={<Clock3 size={28} />}
           />
         </div>
 
-        <div className="min-w-[220px]">
+        <div >
           <StatCard
             title="Completed"
-            value={stats.completedprojects}
+            value={stats.completedProjects}
             icon={<CheckCircle2 size={28} />}
           />
         </div>
-
-        <div className="min-w-[220px]">
+        
+        <div >
           <StatCard
             title="Overdue"
             value={stats.overdueInvoices}
-            icon={<AlertTriangle size={28} />}
+           icon={<AlertTriangle size={28} />}
+          />
+        </div>
+        
+        <div >
+          <StatCard
+            title="Success Rate"
+            value={`${completionRate}%`}
+            icon={<CheckCircle2 size={28} />}
           />
         </div>
       </div>
@@ -182,7 +313,9 @@ export default function Dashboard() {
         className="
         grid
         grid-cols-1
-        xl:grid-cols-3
+        sm:grid-cols-2
+        lg:grid-cols-3
+        xl:grid-cols-4
         gap-6
         mb-8
       "
@@ -198,13 +331,14 @@ export default function Dashboard() {
           p-6
         "
         >
-          <h2 className="text-xl font-bold mb-4 dark:text-white">
+          <h2 className="text-xl font-bold mb-4">
             Business Overview
           </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Clients, Projects and Invoice Analytics
+          </p>
 
-          <div className="h-[350px">
-            <DashboardChart stats={stats} />
-          </div>
+          <DashboardChart stats={stats} />
         </div>
 
         {/* Quick Actions */}
@@ -212,79 +346,84 @@ export default function Dashboard() {
         <div
           className="
           bg-white
-          dark:bg-slate-800
           rounded-2xl
           shadow-md
           p-6
         "
         >
-          <h2 className="text-xl font-bold mb-5 dark:text-white">
+          <h2 className="text-xl font-bold mb-5">
             Quick Actions
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
 
-            <button
+            <button onClick={() => navigate("/clients")}
               className="
-              p-5
+              py-4
+              px-5
               rounded-2xl
               bg-gradient-to-r
               from-blue-500
               to-blue-600
               text-white
+              flex
+              items-center
+              gap-3
               hover:scale-105
               transition
             "
             >
-            <div className="text-3xl mb-2">
-              👤
-            </div>
-            <h3 className="font-semibold">
+              <UserPlus size={24} />
+            <span className="font-semibold">
               Add Client
-            </h3>
+            </span>
 
             </button>
 
-            <button
+            <button onClick={() => navigate("/projects")}
               className="
-              p-5
+              py-4
+              px-5
               rounded-2xl
               bg-gradient-to-r
-              from-indigo-500
-              to-indigo-600
+              from-blue-500
+              to-blue-600
               text-white
+              flex
+              items-center
+              gap-3
               hover:scale-105
               transition
             "
             >
-              <div className="text-3xl mb-2">
-                📁
-              </div>
+             <FolderPlus size={32} />
 
-              <h3 className="font-semibold">
+              <span className="font-semibold">
                 Add Project
-              </h3>
+              </span>
             </button>
 
-            <button
+            <button onClick={() => navigate("/invoices")}
               className="
-              p-5
+              py-4
+              px-5
               rounded-2xl
               bg-gradient-to-r
-            from-purple-500
-            to-purple-600
-            text-white
+              from-blue-500
+              to-blue-600
+              text-white
+              flex
+              items-center
+              gap-3
               hover:scale-105
               transition
             "
             >
-              <div className="text-3xl mb-2">
-                🧾
-              </div>
+              <ReceiptText size={32} />
 
-              <h3 className="font-semibold">
+              <span className="font-semibold">
                 Create Invoice
-              </h3>
+              </span>
             </button>
           </div>
         </div>
@@ -300,10 +439,11 @@ export default function Dashboard() {
       <div
         className="
         bg-white
-        dark:bg-slate-800
         rounded-2xl
-        shadow-md
-        p-6
+        shadow-lg
+        border
+        border-gray-100
+        p-8
       "
       >
         <div
@@ -314,19 +454,32 @@ export default function Dashboard() {
           mb-6
         "
         >
-          <h2 className="text-xl font-bold dark:text-white">
+          <h2 className="text-xl font-bold">
             Recent Activity
           </h2>
 
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            Latest Updates
-          </span>
+          <button onClick={() => 
+            navigate("/activity")
+          }
+           className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition">
+            View All →
+           </button>
         </div>
 
         {activities.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400">
-            No activity found
-          </p>
+          <div className="py-12 text-center">
+             <div className="text-5xl mb-3">
+              📋
+             </div>
+
+             <h3 className="font-semibold text-lg">
+               No Activity Yet
+             </h3>
+
+             <p className="text-gray-500 mt-2">
+               Your recent actions will appear here.
+             </p>
+             </div>
         ) : (
           activities
             .slice(0, 5)
@@ -335,40 +488,41 @@ export default function Dashboard() {
                 key={activity.id}
                 className="
                 flex
-                items-start
+                items-center
                 gap-4
-                p-4
+                p-5
                 mb-4
-                rounded-xl
+                rounded-2xl
                 border
                 border-gray-100
-                dark:border-slate-700
-                dark:bg-slate-900
-                hover:shadow-md
-                transition
+                hover:border-blue-200
+                hover:shadow-lg
+                transition-all
+                duration-300
               "
               >
                 <div
                   className="
-                  h-10
-                  w-10
-                  rounded-full
+                  h-12
+                  w-12
+                  rounded-2xl
                   bg-blue-100
+                  text-blue-600
                   flex
                   items-center
                   justify-center
                   shrink-0
                 "
                 >
-                  📌
+                  {getActivityIcon(activity.details)}
                 </div>
 
                 <div>
-                  <p className="font-medium text-gray-800 dark:text-white">
+                  <p className="font-semibold text-gray-900">
                     {activity.details}
                   </p>
 
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-gray-400 mt-1">
                     {new Date(
                       activity.createdAt
                     ).toLocaleString()}

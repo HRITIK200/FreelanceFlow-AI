@@ -92,6 +92,16 @@ export default function Projects() {
     (sum, p) => sum + (p.budget || 0),
     0
   );
+
+  
+
+  const averageProgress =
+   projects.length > 0
+    ? Math.round(
+      projects.reduce(
+        (sum, p) => sum + (p.progress || 0), 0
+      ) / projects.length
+    ) : 0;
   
 return(
     <DashboardLayout>
@@ -134,15 +144,15 @@ return(
   <div className="
     grid
     grid-cols-2
-    lg:grid-cols-4
+    lg:grid-cols-5
     gap-4
     mb-8
   ">
 
-    <div className="bg-white rounded-2xl shadow-md p-5">
-      <FolderKanban
-        className="text-blue-600 mb-3"
-      />
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100  p-6 hover:shadow-lg transition">
+      <div  className="h-12 w-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+        <FolderKanban className="text-blue-600 mb-3" />
+      </div>
       <p className="text-gray-500 text-sm">
         Total Projects
       </p>
@@ -151,10 +161,10 @@ return(
       </h3>
     </div>
 
-    <div className="bg-white rounded-2xl shadow-md p-5">
-      <CheckCircle2
-        className="text-green-600 mb-3"
-      />
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100  p-6 hover:shadow-lg transition">
+      <div className="h-12 w-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mb-4">
+        <CheckCircle2 size={22} />
+      </div>
       <p className="text-gray-500 text-sm">
         Completed
       </p>
@@ -163,10 +173,10 @@ return(
       </h3>
     </div>
 
-    <div className="bg-white rounded-2xl shadow-md p-5">
-      <Clock3
-        className="text-yellow-600 mb-3"
-      />
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100  p-6 hover:shadow-lg transition">
+      <div className="h-12 w-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center mb-4">
+        <Clock3 size={22} />
+      </div>
       <p className="text-gray-500 text-sm">
         In Progress
       </p>
@@ -175,16 +185,28 @@ return(
       </h3>
     </div>
 
-    <div className="bg-white rounded-2xl shadow-md p-5">
-      <IndianRupee
-        className="text-purple-600 mb-3"
-      />
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100  p-6 hover:shadow-lg transition">
+      <div className="h-12 w-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mb-4">
+        <IndianRupee size={22} />
+      </div>
+      
       <p className="text-gray-500 text-sm">
         Revenue
       </p>
       <h3 className="text-2xl font-bold">
         ₹{totalRevenue.toLocaleString()}
       </h3>
+    </div>
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition">
+       <div className="h-12 w-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
+        🚀
+       </div>
+       <p className="text-gray-500 text-sm">
+        Avg Progress
+       </p>
+       <h3 className="text-2xl font-bold">
+        {averageProgress}%
+       </h3>
     </div>
 
   </div>
@@ -202,7 +224,7 @@ return(
     <div className="relative">
 
       <Search
-        size={18}
+        size={20}
         className="
           absolute
           left-4
@@ -214,21 +236,12 @@ return(
 
       <input
         type="text"
-        placeholder="Search projects..."
+        placeholder="Search projects by title or client..."
         value={search}
         onChange={(e) =>
           setSearch(e.target.value)
         }
-        className="
-          w-full
-          border
-          rounded-xl
-          py-3
-          pl-11
-          pr-4
-        "
-      />
-
+        className="w-full bg-slate-50 border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"/>
     </div>
 
   </div>
@@ -248,27 +261,31 @@ return(
 
     <table className="w-full">
 
-      <thead className="bg-slate-50">
+      <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
 
         <tr>
 
-          <th className="p-4 text-left">
+          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
             Project
           </th>
 
-          <th className="p-4 text-left">
+          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
             Client
           </th>
 
-          <th className="p-4 text-left">
+          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
             Budget
           </th>
 
-          <th className="p-4 text-left">
+          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
             Status
           </th>
 
-          <th className="p-4 text-center">
+          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
+            Progress
+          </th>
+
+          <th className="p-4 text-center text-xs uppercase tracking-wider text-gray-500 font-semibold">
             Actions
           </th>
 
@@ -290,7 +307,21 @@ return(
                 text-gray-500
               "
             >
-              No projects found
+              <div className="py-12 text-center">
+                
+                <p className="text-gray-500">
+                  <div className="py-16 text-center">
+                    <FolderKanban size={50} className="mx-auto text-gray-300 mb-4"/>
+
+                    <h3 className="text-xl font-bold">
+                      No Projects Yet
+                    </h3>
+                    <p className="text-gray-500 mt-2">
+                      Create your first project and start Tracking progress.
+                    </p>
+                  </div>
+                </p>
+              </div>
             </td>
 
           </tr>
@@ -304,11 +335,14 @@ return(
               key={project.id}
               className="
                 border-t
-                hover:bg-gray-50
+                border-gray-100
+                hover:bg-blue-50
+                transition
+                duration-200
               "
             >
 
-              <td className="p-4 font-medium">
+              <td className="p-5 font-semibold text-gray-800">
                 {project.title}
               </td>
 
@@ -316,7 +350,7 @@ return(
                 {project.client?.name}
               </td>
 
-              <td className="p-4 font-semibold">
+              <td className="p-5 font-bold text-green-600">
                 ₹{project.budget}
               </td>
 
@@ -324,11 +358,14 @@ return(
 
                 <span
                   className={`
-                  px-3
-                  py-1
-                  rounded-full
-                  text-xs
-                  font-semibold
+                    inline-flex
+                    items-center
+                    px-4
+                    py-2
+                    rounded-full
+                    text-xs
+                    font-semibold
+                    tracking-wide
 
                   ${
                     project.status === "COMPLETED"
@@ -341,12 +378,26 @@ return(
                   }
                   `}
                 >
+                  {project.status === "COMPLETED" && "✅ "}
+                  {project.status === "IN_PROGRESS" && "🚀 "}
+                  {project.status === "PENDING" && "⏳ "}
+                  
                   {project.status.replace(
                     "_",
                     " "
                   )}
                 </span>
 
+              </td>
+
+              <td className="p-4 min-w-[180px]">
+                 <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                       style={{width: `${project.progress || 0}%`,}}/>
+                 </div>
+                 <p className="text-xs mt-2 font-medium text-gray-600">
+                  {project.progress || 0}%
+                 </p>
               </td>
 
               <td className="p-4">
@@ -363,10 +414,13 @@ return(
                       setIsEditOpen(true);
                     }}
                     className="
-                      bg-yellow-500
-                      text-white
-                      p-2
-                      rounded-lg
+                      bg-yellow-100
+                      text-yellow-600
+                      p-2.5
+                      rounded-xl
+                      hover:bg-yellow-200
+                      hover:scale-110
+                      transition
                     "
                   >
                     <Pencil size={16} />
@@ -380,10 +434,13 @@ return(
                       setIsDeleteOpen(true);
                     }}
                     className="
-                      bg-red-500
-                      text-white
-                      p-2
-                      rounded-lg
+                      bg-red-100
+                      text-red-600
+                      p-2.5
+                      rounded-xl
+                      hover:bg-red-200
+                      hover:scale-110
+                      transition
                     "
                   >
                     <Trash2 size={16} />
@@ -452,6 +509,24 @@ return(
           ">
             ₹{project.budget}
           </p>
+
+          <div className="mt-3">
+            <div className="flex justify-between mb-1">
+             <span className="text-sm text-gray-500">
+              Progress
+             </span>
+
+             <span className="text-sm font-medium">
+              {project.progress || 0}%
+             </span>
+            </div>
+
+             <div className="w-full bg-gray-200 rounded-full h-2">
+
+               <div className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                    style={{width: `${project.progress || 0}%`,}}/>
+             </div>
+            </div>
 
         </div>
 
@@ -544,6 +619,12 @@ return(
         e.preventDefault();
 
         try {
+          
+          const updatedStatus =
+           (selectedProject?.progress || 0) >= 100
+             ? "COMPLETED"
+             : selectedProject.status;
+
 
           await updateProject(
             selectedProject.id,
@@ -558,15 +639,18 @@ return(
                 Number(
                   selectedProject.budget
                 ),
+              progress:
+                Number(selectedProject.progress) || 0,
 
               status:
-                selectedProject.status,
+                updatedStatus,
 
               deadline:
                 selectedProject.deadline,
 
               clientId:
-                selectedProject.clientId,
+                selectedProject.clientId ||
+                selectedProject.client?.id,
             }
           );
 
@@ -646,6 +730,23 @@ return(
           mb-4
         "
       />
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value={selectedProject.progress || 0}
+        onChange={(e) => 
+          setSelectedProject({
+            ...selectedProject,
+            progress: Number(e.target.value),
+          })
+        }
+        className="w-full"/>
+
+      <p className="text-center mt-2 font-semibold">
+        {selectedProject.progress || 0}%
+      </p>
 
       <select
         value={selectedProject.status}

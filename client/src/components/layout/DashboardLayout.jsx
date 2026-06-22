@@ -27,13 +27,9 @@ export default function DashboardLayout({
         <main
           className="
             flex-1
-            p-4
-            md:p-6
-            lg:p-8
-            bg-gradient-to-br
-            from-slate-50
-            via-blue-50
-            to-indigo-50
+            p-6
+            md:p-8
+            bg-slate-50
           "
         >
           {children}

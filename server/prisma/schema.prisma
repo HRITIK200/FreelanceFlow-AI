@@ -49,6 +49,8 @@ model Project {
 
   status String @default("PENDING")
 
+  progress Int @default(0)
+
   deadline DateTime?
 
   clientId String

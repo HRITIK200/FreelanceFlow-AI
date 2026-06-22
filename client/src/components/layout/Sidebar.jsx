@@ -2,6 +2,8 @@ import { NavLink } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 
+
+
 import {
   LayoutDashboard,
   Users,
@@ -9,6 +11,8 @@ import {
   Receipt,
   Activity,
   BriefcaseBusiness,
+  Settings,
+  BarChart3,
 } from "lucide-react";
 
 export default function Sidebar({
@@ -44,6 +48,17 @@ export default function Sidebar({
       path: "/activity",
       icon: Activity,
     },
+    {
+      name: "Settings",
+      path: "/settings",
+      icon: Settings,
+    },
+    {
+      name: "Reports",
+      path: "/reports",
+      icon: BarChart3,
+    }
+
   ];
 
   return (
@@ -72,14 +87,13 @@ export default function Sidebar({
           top-0
           left-0
           h-screen
-          w-64
+          w-72
           bg-slate-900
           text-white
           z-50
           flex
           flex-col
-          transition-transform
-          duration-300
+          overflow-hidden
 
           ${
             sidebarOpen
@@ -103,8 +117,8 @@ export default function Sidebar({
           <div className="flex items-center gap-3">
             <div
               className="
-                w-12
-                h-12
+                w-14
+                h-14
                 rounded-xl
                 bg-blue-600
                 flex
@@ -113,7 +127,7 @@ export default function Sidebar({
               "
             >
               <BriefcaseBusiness
-                size={24}
+                size={28}
               />
             </div>
 
@@ -144,6 +158,7 @@ export default function Sidebar({
         <div
           className="
             flex-1
+            overflow-y-auto
             px-4
             py-6
           "
@@ -186,10 +201,12 @@ export default function Sidebar({
                       py-3
                       rounded-xl
                       transition-all
+                      duration-300
+                      hover:translate-x-1
 
                       ${
                         isActive
-                          ? "bg-blue-600 text-white shadow-lg"
+                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }
                     `
@@ -213,6 +230,9 @@ export default function Sidebar({
           </nav>
         </div>
 
+        
+
+
         {/* Footer */}
 
         <div
@@ -222,20 +242,29 @@ export default function Sidebar({
             border-slate-800
           "
         >
+        <div className="text-center mb-4">
+          <span className="text-center text-xs text-slate-500 mb-3">
+            FreelanceFlow AI v1.0
+          </span>
+        </div>
+
           <div
             className="
               flex
               items-center
               gap-3
               bg-slate-800
-              rounded-xl
-              p-3
+              rounded-2xl
+              p-4
+              shadow-lg
+              hover:bg-slate-700
+              trasition
             "
           >
             <div
               className="
-                w-10
-                h-10
+                w-12
+                h-12
                 rounded-full
                 bg-blue-600
                 flex
@@ -248,7 +277,7 @@ export default function Sidebar({
             </div>
 
             <div>
-              <p className="font-medium">
+              <p className="font-semibold text-white">
                 {user?.name || "User"}
               </p>
 
@@ -264,7 +293,21 @@ export default function Sidebar({
               </p>
             </div>
           </div>
+
+        <div className="mt-4 border-t border-slate-700 pt-4">
+
+          <NavLink to="/profile" 
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-white">
+                  👤My Profile
+                </NavLink>
+   
         </div>
+
+        <p className="text-xs text-slate-500 mt-4">
+           © {new Date().getFullYear()} FreelanceFlow
+        </p>
+
+      </div>
       </aside>
     </>
   );

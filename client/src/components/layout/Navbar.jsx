@@ -9,7 +9,6 @@ from "../search/GlobalSearch";
 
 import {
   Bell,
-  Search,
   Menu,
   LogOut,
 } from "lucide-react";
@@ -26,6 +25,8 @@ export default function Navbar({
   setNotificationCount] =
   useState(0);
 
+  const [activities, setActivities] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const handleLogout =
     () => {
@@ -40,12 +41,14 @@ export default function Navbar({
 
       try {
 
-        const activities =
-          await getActivities();
+        const data = await getActivities();
+
+        setActivities(data);
 
         setNotificationCount(
           Math.min(
-          activities.length,9)
+            data.length,9
+          )
         );
         
 
@@ -59,6 +62,38 @@ export default function Navbar({
     fetchNotifications();
      
    }, []);
+
+  const getNotificationIcon = (text) => {
+
+  const message =
+    text.toLowerCase();
+
+  if (
+    message.includes("client")
+  ) {
+    return "👤";
+  }
+
+  if (
+    message.includes("project")
+  ) {
+    return "📁";
+  }
+
+  if (
+    message.includes("invoice")
+  ) {
+    return "🧾";
+  }
+
+  if (
+    message.includes("email")
+  ) {
+    return "✉️";
+  }
+
+  return "🔔";
+};
 
   return (
     <header
@@ -107,12 +142,15 @@ export default function Navbar({
 
       {/* Right Side */}
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 relative">
 
         {/* Notification */}
 
-        <button
-          className="
+        <button 
+           onClick={() =>
+             setShowNotifications(!showNotifications)
+           }
+         className="
             relative
             p-2
             rounded-xl
@@ -120,6 +158,64 @@ export default function Navbar({
           "
         >
           <Bell size={20} />
+        
+        {showNotifications && (
+          <div className="absolute top-16 right-28 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="font-bold">
+                Notifications
+              </h3>
+            </div>
+
+            <div className="max-h-80 overflow-y-auto">
+
+              {activities.length === 0 ? (
+
+                <p className="p-4 text-gray-500">
+                  No notifications
+                </p>
+
+              ) : (
+
+              activities.slice(0, 5)
+                        .map((activity) => (
+
+            <div 
+              key={activity.id}
+              className="flex gap-3 p-4 border-b border-gray-100 hover:bg-gray-50">
+              <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 text-lg">
+                 {getNotificationIcon(
+                  activity.details
+                 )}
+              </div>
+              <div>
+                <p className="text-sm font-semibold">
+                  {activity.details}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(
+                    activity.createdAt
+                  ).toLocaleString()}
+                </p>
+            </div>
+          </div>
+    
+        ))
+        )}
+      </div>
+
+      <div className="p-3 border-t border-gray-100 text-center">
+        <button onClick={() => {
+          navigate("/activity");
+          setShowNotifications(false);
+        }}
+        className="text-blue-600 font-medium hover:underline">
+          View All Activity
+        </button>
+      </div>
+      </div>
+        )}
 
           <span
             className="
