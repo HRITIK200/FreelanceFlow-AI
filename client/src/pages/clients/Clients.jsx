@@ -14,6 +14,7 @@ import {
 } from "../../api/clientApi";
 
 import { toast } from "react-hot-toast";
+import { Link } from "react-router-dom";
 import Modal from "../../components/ui/Modal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import {
@@ -348,7 +349,10 @@ export default function Clients() {
               </div>
               <div>
                 <p className="font-semibold">
-                  {client.name}
+                  <Link to={`/clients/${client.id}`}
+                      className="text-blue-600 font-semibold hover:underline">
+                        {client.name}
+                      </Link>
                 </p>
                 <p className="text-xs text-gray-500">
                   Client

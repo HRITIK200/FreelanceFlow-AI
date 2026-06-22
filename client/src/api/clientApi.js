@@ -18,6 +18,18 @@ export const getClients =
     return response.data;
 };
 
+export const getClientDetails =
+  async (id) => {
+
+    const response =
+      await api.get(
+        `/clients/${id}`,
+        getAuthHeaders()
+      );
+
+    return response.data;
+};
+
 export const createClient =
   async (data) => {
     const response =

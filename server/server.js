@@ -32,7 +32,6 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/invoices", invoiceRoutes);
-console.log("PDF Routes Loaded");
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/activity", activityRoutes);

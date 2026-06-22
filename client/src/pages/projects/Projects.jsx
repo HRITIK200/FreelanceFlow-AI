@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import DashboardLayout
 from "../../components/layout/DashboardLayout";
 
+import { getClients } from "../../api/clientApi";
+
 import {
   getProjects,
+  createProject,
   updateProject,
   deleteProject,
 } from "../../api/projectApi";
@@ -31,6 +34,27 @@ export default function Projects() {
 
   const [projects, setProjects] =
     useState([]);
+
+  const [showModal, setShowModal] =
+    useState(false);
+
+  const [editingProject, setEditingProject] =
+    useState(null);
+
+  const [formData, setFormData] =
+    useState({
+      title: "",
+      description: "",
+      budget: "",
+      progress: 0,
+      status: "PENDING",
+      deadline: "",
+      clientId: "",
+    });
+
+  const [clients, setClients] =
+    useState([]);
+
 
   const [isEditOpen, setIsEditOpen] =
     useState(false);
@@ -60,7 +84,25 @@ export default function Projects() {
     };
 
     useEffect(() => {
-    fetchProjects();
+
+    const fetchData = async () => {
+
+      try{
+        const projectData =
+          await getProjects();
+
+        const clientData =
+          await getClients();
+
+        setProjects(projectData);
+
+        setClients(clientData);
+      } catch(error){
+        console.log(error);
+      }
+    };
+
+    fetchData();
     }, []);
 
 
@@ -120,6 +162,15 @@ return(
 
   </div>
   <div className="flex gap-3 mb-6">
+    
+    <button onClick={() => {
+       setShowModal(true);
+       setEditingProject(null);
+      }}
+      className="bg-blue-600 text-white px-5 py-3 rounded-2xl font-semibold">
+        + New Project
+      </button>
+
 
     <button onClick={() =>
        exportToExcel(
@@ -849,6 +900,152 @@ return(
 
   }}
 />
+
+{
+  showModal && (
+
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-3xl p-6 w-full max-w-xl">
+        <h2 className="text-2xl font-bold mb-5">
+          Create project
+        </h2>
+
+        <input type="text" placeholder="Project Title"
+             value={formData.title}
+             onChange={(e) => 
+               setFormData({
+                ...formData,
+                title: e.target.value,
+               })
+             }
+             className="w-full border rounded-xl p-3 mb-4"/>
+
+        <textarea placeholder="Description"
+             value={formData.description}
+             onChange={(e) =>
+               setFormData({
+                ...formData,
+                description: e.target.value,
+               })
+             }
+             className="w-full border rounded-xl p-3 mb-4"/>
+
+        <input type="number" placeholder="Budget"
+            value={formData.budget}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                budget: e.target.value,
+              })
+            }
+             className="w-full border rounded-xl p-3 mb-4"/>
+        
+        <select value={formData.clientId}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                clientId: e.target.value,
+              })
+            }
+            className="w-full border rounded-xl p-3 mb-4">
+
+              <option value="">
+                Select Client
+              </option>
+
+              {clients.map((client) =>(
+                <option key={client.id}
+                        value={client.id}
+                >
+                  {client.name}
+                </option>
+              ))}
+
+            </select>
+        
+        <input type="date"
+            value={formData.deadline}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                deadline: e.target.value,
+              })
+            }
+             className="w-full border rounded-xl p-3 mb-4"/>
+        
+        <select value={formData.clientId}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                status: e.target.value,
+              })
+            }
+            className="w-full border rounded-xl p-3 mb-4">
+
+              <option value="PENDING">
+                Pending
+              </option>
+
+              <option value="IN_PROGRESS">
+                In Progress
+              </option>
+
+              <option value="COMPLETED">
+                Completed
+              </option>
+            </select>
+
+        <div className="flex gap-3">
+
+          <button onClick={async () => {
+
+            try{
+
+              await createProject({
+                ...formData,
+                budget: Number(formData.budget),
+                progress: Number(formData.progress),
+              });
+
+              toast.success(
+                "Project created successfully"
+              );
+
+              setShowModal(false);
+
+              setFormData({
+                title: "",
+                description: "",
+                budget: "",
+                progress: 0,
+                status: "PENDING",
+                deadline: "",
+                clientId: "",
+              });
+
+              fetchProjects();
+            } catch (error){
+              console.log(error);
+
+              toast.error("Failed to create project");
+            }
+          }}
+          className="flex-1 bg-blue-600 text-white py-3 rounded-xl">
+            Create Project
+          </button>
+
+          <button onClick={() =>
+            setShowModal(false)
+          }
+          className="flex-1 bg-gray-100 py-3 rounded-xl">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+    
+  )
+}
   </DashboardLayout>
   );
 }

@@ -23,6 +23,8 @@ import Clients from "./pages/clients/Clients";
 import Projects from "./pages/projects/Projects";
 import Invoices from "./pages/invoices/Invoices";
 import Activity from "./pages/activity/Activity";
+import ClientDetails
+from "./pages/clients/ClientDetails";
 
 function App() {
   return (
@@ -70,6 +72,15 @@ function App() {
         element={
           <ProtectedRoute>
             <Clients />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route 
+        path="/clients/:id"
+        element={
+          <ProtectedRoute>
+            <ClientDetails />
           </ProtectedRoute>
         }
       />

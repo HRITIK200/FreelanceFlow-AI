@@ -4,6 +4,7 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 
 import {
   getInvoices,
+  createInvoice,
   updateInvoice,
   deleteInvoice,
 } from "../../api/invoiceApi";
@@ -14,6 +15,9 @@ import {
 import {
     sendInvoiceEmail,
 } from "../../api/emailApi";
+
+import { getProjects }
+from "../../api/projectApi";
 
 import { Search } from "lucide-react";
 
@@ -86,7 +90,21 @@ export default function Invoices() {
          invoice.status === "PENDING" &&
          new Date(invoice.dueDate) < new Date()
     ).length;
-    
+  
+  const [showModal, setShowModal] =
+     useState(false);
+
+  const [projects, setProjects] =
+     useState([]);
+
+  const [formData, setFormData] =
+     useState({
+      amount: "",
+      dueDate: "",
+      notes: "",
+      projectId: "",
+    });
+  
   const [search, setSearch] =
     useState("");
   
@@ -99,7 +117,25 @@ export default function Invoices() {
     useState(null);
 
   useEffect(() => {
-    fetchInvoices();
+    
+    const fetchData = async () => {
+
+      try{
+        const invoiceData =
+         await getInvoices();
+
+        const projectData =
+         await getProjects();
+
+        setInvoices(invoiceData);
+        setProjects(projectData);
+      }catch(error){
+        console.log(error);
+
+        toast.error("Failed to load data");
+      }
+    };
+    fetchData();
   }, []);
 
   const filteredInvoices =
@@ -142,7 +178,15 @@ return (
       </div>
 
       <div className="flex gap-3 mb-6">
-      
+          
+          <button onClick={() =>
+              setShowModal(true)
+            }
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold">
+              + Create Invoice
+            </button>
+
+
           <button onClick={() =>
              exportToExcel(
               invoices.map(
@@ -814,6 +858,117 @@ return (
         </div>
       </div>
     </div>
+    
+    {
+      showModal && (
+
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-xl">
+
+            <h2 className="text-2xl font-bold mb-5">
+              Create Invoice
+            </h2>
+
+            <input type="number" placeholder="Amount"
+                  value={formData.amount}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      amount:
+                       e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-xl p-3 mb-4"/>
+
+            <select value={formData.projectId}
+                  onChange={(e) =>
+                    setFormData({
+                       ...formData,
+                       projectId:
+                         e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-xl p-3 mb-4">
+                  
+                  <option value="">
+                    Select Project
+                  </option>
+
+                  {projects.map(
+                    (project) => (
+                      <option key={project.id}
+                              value={project.id}
+                      >
+                        {project.title}
+                      </option>
+                    )
+                  )}
+             </select>
+
+          <input type="date"
+                 value={formData.dueDate}
+                 onChange={(e) =>
+                   setFormData({
+                     ...formData,
+                     dueDate: e.target.value,
+                   })
+                 }
+                 className="w-full border rounded-xl p-3 mb-4"/>
+
+          <textarea placeholder="Notes"
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    notes: e.target.value,
+                  })
+                }
+                className="w-full border rounded-xl p-3 mb-4"/>
+          
+          <div className="flex gap-3">
+
+            <button onClick={async () => {
+
+              try{
+                await createInvoice({
+                  ...formData,
+                  amount: Number(formData.amount),
+                });
+
+                toast.success("Invoice created successfully");
+
+                setShowModal(false);
+                setFormData({
+                  invoiceNumber: "",
+                  amount: "",
+                  dueDate: "",
+                  notes: "",
+                  projectId: "",
+                });
+
+                fetchInvoices();
+              }catch (error){
+
+                console.log(error);
+
+                toast.error("Failed to create invoice");
+              }
+            }}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold">
+              Create Invoice
+            </button>
+
+          <button onClick={() =>
+             setShowModal(false)
+            }
+            className="flex-1 bg-gray-100 hover:bg-gray-200 py-3 rounded-xl font-semibold">
+              Cancel
+            </button>
+          </div>
+          </div>
+        </div>
+      )
+    }
 
     <ConfirmModal
         isOpen={isDeleteOpen}

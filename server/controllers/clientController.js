@@ -160,3 +160,96 @@ export const deleteClient = async (req, res) => {
 
   }
 };
+
+export const getClientDetails = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const { id } = req.params;
+
+    const client =
+      await prisma.client.findFirst({
+        where: {
+          id,
+          userId: req.user.userId,
+        },
+
+        include: {
+          projects: {
+            include: {
+              invoices: true,
+            },
+          },
+        },
+      });
+
+    if (!client) {
+      return res.status(404).json({
+        message: "Client not found",
+      });
+    }
+
+    const totalProjects =
+      client.projects.length;
+
+    const completedProjects =
+      client.projects.filter(
+        (p) => p.status === "COMPLETED"
+      ).length;
+
+    const totalRevenue =
+      client.projects.reduce(
+        (sum, project) =>
+          sum + (project.budget || 0),
+        0
+      );
+
+    const pendingRevenue =
+      client.projects
+        .flatMap(
+          (project) => project.invoices
+        )
+        .filter(
+          (invoice) =>
+            invoice.status !== "PAID"
+        )
+        .reduce(
+          (sum, invoice) =>
+            sum + invoice.amount,
+          0
+        );
+
+    const recentInvoices =
+      client.projects
+        .flatMap(
+          (project) => project.invoices
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
+        )
+        .slice(0, 5);
+
+    res.json({
+      client,
+      totalProjects,
+      completedProjects,
+      totalRevenue,
+      pendingRevenue,
+      recentInvoices,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+};

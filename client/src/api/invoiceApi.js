@@ -6,6 +6,16 @@ const getAuthHeaders = () => ({
   },
 });
 
+export const createInvoice = async (data) => {
+  const response = await api.post(
+    "/invoices",
+    data,
+    getAuthHeaders()
+  );
+
+  return response.data;
+};
+
 export const getInvoices = async () => {
   const response = await api.get(
     "/invoices",
@@ -14,6 +24,7 @@ export const getInvoices = async () => {
 
   return response.data;
 };
+
 
 export const updateInvoice = async (
   id,

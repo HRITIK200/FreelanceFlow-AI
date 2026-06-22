@@ -8,7 +8,6 @@ export const createInvoice = async (
   try {
 
     const {
-      invoiceNumber,
       amount,
       dueDate,
       projectId,
@@ -31,6 +30,29 @@ export const createInvoice = async (
           "Project not found",
       });
     }
+
+    const lastInvoice =
+      await prisma.invoice.findFirst({
+        orderBy: {
+          createdAt: "desc",
+        }
+      });
+    let nextNumber = 1;
+
+    if(lastInvoice){
+
+      const lastNumber =
+        parseInt(
+          lastInvoice.invoiceNumber
+            .replace("INV-", "")
+        );
+      nextNumber =
+        lastNumber + 1;
+    }
+
+    const invoiceNumber =
+      `INV-${String(nextNumber)
+        .padStart(3, "0")}`;
 
     const invoice =
       await prisma.invoice.create({
