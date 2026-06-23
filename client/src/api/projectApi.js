@@ -15,6 +15,18 @@ export const getProjects = async () => {
   return response.data;
 };
 
+export const getProjectDetails =
+async (id) => {
+
+  const response =
+    await api.get(
+      `/projects/${id}`,
+      getAuthHeaders()
+    );
+
+  return response.data;
+};
+
 export const createProject = async (data) => {
   const response = await api.post(
     "/projects",

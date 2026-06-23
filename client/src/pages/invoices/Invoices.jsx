@@ -260,7 +260,7 @@ return (
          </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
         
         {/* Average Invoice */}
 
@@ -356,7 +356,7 @@ return (
 
           {/* Search */}
 
-          <div className="realtive flex-1">
+          <div className="relative flex-1">
 
             <Search size={18}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"/>
@@ -391,7 +391,7 @@ return (
       </div>
         
         <div className="hidden md:block overflow-x-auto">
-           <table className="w-full min-w-[900px]">
+           <table className="w-full min-w-[700px]">
 
           <thead>
 
@@ -939,7 +939,6 @@ return (
 
                 setShowModal(false);
                 setFormData({
-                  invoiceNumber: "",
                   amount: "",
                   dueDate: "",
                   notes: "",

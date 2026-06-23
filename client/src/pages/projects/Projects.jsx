@@ -16,6 +16,7 @@ import Modal from "../../components/ui/Modal";
 import { toast } from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { exportToExcel } from "../../utils/exportToExcel";
+import { Link } from "react-router-dom";
 
 import {
   FolderKanban,
@@ -394,7 +395,10 @@ return(
             >
 
               <td className="p-5 font-semibold text-gray-800">
-                {project.title}
+                <Link to={`/projects/${project.id}`}
+                   className="text-blue-600 hover:underline font-semibold">
+                    {project.title}
+                   </Link>
               </td>
 
               <td className="p-4">

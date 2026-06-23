@@ -6,6 +6,7 @@ from "../middleware/authMiddleware.js";
 import {
   createProject,
   getProjects,
+  getProjectDetails,
   updateProject,
   deleteProject,
 }
@@ -24,6 +25,11 @@ router.get(
   "/",
   authMiddleware,
   getProjects
+);
+router.get(
+  "/:id",
+  authMiddleware,
+  getProjectDetails
 );
 
 router.put(

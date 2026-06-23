@@ -110,6 +110,58 @@ export const getProjects = async (
   }
 };
 
+export const getProjectDetails =
+async (req, res) => {
+
+ console.log("=================================");
+  console.log("PROJECT DETAILS ROUTE HIT");
+  console.log("PROJECT ID:", req.params.id);
+  console.log("USER:", req.user);
+  console.log("=================================");
+
+  try {
+
+    const { id } = req.params;
+
+    const project =
+      await prisma.project.findFirst({
+        where: {
+          id,
+
+          client: {
+            userId:
+              req.user.userId,
+          },
+        },
+
+        include: {
+          client: true,
+
+          invoices: true,
+        },
+      });
+
+    if (!project) {
+      return res.status(404).json({
+        message:
+          "Project not found",
+      });
+    }
+
+    res.json(project);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message:
+        "Server Error",
+    });
+
+  }
+};
+
 export const updateProject = async (
   req,
   res
