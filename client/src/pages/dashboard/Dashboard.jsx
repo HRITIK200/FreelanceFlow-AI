@@ -8,8 +8,8 @@ import { getActivities } from "../../api/activityApi";
 import DashboardChart from "../../components/dashboard/DashboardChart";
 import StatCard from "../../components/ui/StatCard";
 
-import AIInsights
-from "../../components/dashboard/AIInsights";
+import AIInsights from "../../components/dashboard/AIInsights";
+import AIAssistant from "../../components/dashboard/AIAssistant";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -533,6 +533,7 @@ export default function Dashboard() {
         )}
       </div>
 
+      <AIAssistant stats={stats} />
     </DashboardLayout>
   );
 }

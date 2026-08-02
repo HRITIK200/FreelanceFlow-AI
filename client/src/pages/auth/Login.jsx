@@ -78,6 +78,25 @@ export default function Login() {
       }
   };
 
+  const handleDemoLogin = async () => {
+    try {
+      const demoData = {
+        email: "demo@freelanceflow.ai",
+        password: "demopassword",
+      };
+
+      const data = await loginUser(demoData);
+      console.log("DEMO LOGIN RESPONSE:", data);
+
+      login(data.token, data.user);
+      toast.success("Welcome! Recruiter demo account logged in.");
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Demo login failed");
+    }
+  };
+
   return (
   <div
     className="
@@ -341,6 +360,33 @@ export default function Login() {
                 "
               >
                 Login
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                className="
+                  w-full
+                  py-4
+                  rounded-xl
+                  text-blue-600
+                  font-semibold
+                  bg-blue-50
+                  border
+                  border-blue-200
+                  transition-all
+                  duration-300
+                  hover:-translate-y-1
+                  hover:bg-blue-100
+                  hover:border-blue-300
+                  hover:shadow-lg
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                "
+              >
+                💼 Recruiter Demo Access
               </button>
 
             </div>
