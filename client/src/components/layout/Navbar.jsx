@@ -98,9 +98,10 @@ export default function Navbar({
   return (
     <header
       className="
-        bg-white
+        bg-white/85
+        backdrop-blur-md
         border-b
-        border-gray-200
+        border-white/20
         px-4
         md:px-8
         py-4
@@ -110,6 +111,7 @@ export default function Navbar({
         sticky
         top-0
         z-30
+        shadow-[0_2px_20px_rgba(0,0,0,0.015)]
       "
     >
       {/* Left Side */}
@@ -252,8 +254,8 @@ export default function Navbar({
         <button onClick={() =>
            navigate("/profile")
          }
-         className="h-11 w-11 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md">
-          {user?.name?.charAt(0)}
+         className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold shadow-md hover:scale-105 active:scale-95 transition-all duration-300 ring-2 ring-blue-500/20">
+          {user?.name?.charAt(0)?.toUpperCase()}
          </button>
         
 
@@ -271,11 +273,17 @@ export default function Navbar({
             rounded-xl
             bg-red-50
             text-red-600
-            hover:bg-red-100
-            transition
+            hover:bg-red-500
+            hover:text-white
+            hover:shadow-md
+            hover:shadow-red-500/10
+            text-xs
+            font-bold
+            transition-all
+            duration-300
           "
         >
-          <LogOut size={18} />
+          <LogOut size={16} />
           Logout
         </button>
 

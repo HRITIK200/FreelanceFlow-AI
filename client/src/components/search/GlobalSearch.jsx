@@ -88,20 +88,27 @@ export default function GlobalSearch() {
           flex
           items-center
           gap-3
-          bg-gray-100
+          bg-slate-100/80
+          focus-within:bg-white
+          border
+          border-transparent
+          focus-within:border-blue-500/30
           rounded-xl
           px-4
           py-2
+          transition-all
+          duration-300
+          focus-within:shadow-[0_8px_30px_rgba(59,130,246,0.08)]
         "
       >
         <Search
-          size={18}
-          className="text-gray-500"
+          size={16}
+          className="text-gray-400"
         />
 
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search items..."
           value={query}
           onChange={(e) =>
             setQuery(e.target.value)
@@ -110,6 +117,9 @@ export default function GlobalSearch() {
             bg-transparent
             outline-none
             w-full
+            text-sm
+            text-gray-700
+            placeholder-gray-400
           "
         />
       </div>
@@ -119,16 +129,19 @@ export default function GlobalSearch() {
         <div
           className="
             absolute
-            top-14
+            top-12
             left-0
             right-0
-            bg-white
-            rounded-xl
+            bg-white/95
+            backdrop-blur-md
+            rounded-2xl
             shadow-xl
             border
+            border-gray-100
             max-h-96
             overflow-y-auto
             z-50
+            p-2
           "
         >
 
