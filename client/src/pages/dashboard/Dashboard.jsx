@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 
 import { getDashboardStats } from "../../api/dashboardApi";
 import { getActivities } from "../../api/activityApi";
+import { getClients } from "../../api/clientApi";
+import { getProjects } from "../../api/projectApi";
 
 import DashboardChart from "../../components/dashboard/DashboardChart";
 import StatCard from "../../components/ui/StatCard";
@@ -12,6 +14,7 @@ import AIInsights from "../../components/dashboard/AIInsights";
 import AIAssistant from "../../components/dashboard/AIAssistant";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 
 import {
   PlusCircle,
@@ -83,6 +86,16 @@ export default function Dashboard() {
 
   const { user } = useAuth();
 
+  const [chartTab, setChartTab] = useState("overview");
+  const [projects, setProjects] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [calcIncome, setCalcIncome] = useState(100000);
+  const [calcHours, setCalcHours] = useState(30);
+  const [calcExpenses, setCalcExpenses] = useState(15000);
+  const [scratchNotes, setScratchNotes] = useState(() => localStorage.getItem("ff_scratch_notes") || "");
+  const [scratchClient, setScratchClient] = useState("");
+
+  const COLORS = ["#2563eb", "#8b5cf6", "#f59e0b", "#10b981", "#ec4899"];
 
   const completionRate =
     stats.totalProjects > 0
@@ -92,25 +105,24 @@ export default function Dashboard() {
           stats.totalProjects
         ) * 100
       ) : 0;
-  
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-
-
-        const statsData =
-          await getDashboardStats();
-
-        const activityData =
-          await getActivities();
+        const statsData = await getDashboardStats();
+        const activityData = await getActivities();
+        const clientsData = await getClients();
+        const projectsData = await getProjects();
 
         setStats(statsData);
         setActivities(activityData);
-
+        setClients(clientsData);
+        setProjects(projectsData);
+        if (clientsData.length > 0) {
+          setScratchClient(clientsData[0].company || clientsData[0].name);
+        }
       } catch (error) {
         console.log(error);
-
       }
     };
 
@@ -283,15 +295,69 @@ export default function Dashboard() {
           duration-300
         "
         >
-          <h2 className="text-xl font-bold text-gray-800 tracking-tight">
-            Business Overview
-          </h2>
-          <p className="text-xs text-gray-400 font-bold uppercase mt-1 tracking-wider">
-            Clients, Projects and Invoice Analytics
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-800 tracking-tight">
+                {chartTab === "overview" ? "Business Overview" : "Revenue Share"}
+              </h2>
+              <p className="text-xs text-gray-400 font-bold uppercase mt-1 tracking-wider">
+                {chartTab === "overview" ? "Clients, Projects and Invoice Analytics" : "Revenue Share by Client"}
+              </p>
+            </div>
+            
+            <div className="flex bg-gray-100/80 p-1 rounded-xl">
+              <button 
+                onClick={() => setChartTab("overview")}
+                className={`text-[10px] uppercase tracking-wider font-extrabold px-3 py-1.5 rounded-lg transition-all ${chartTab === "overview" ? "bg-white text-gray-800 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+              >
+                Overview
+              </button>
+              <button 
+                onClick={() => setChartTab("shares")}
+                className={`text-[10px] uppercase tracking-wider font-extrabold px-3 py-1.5 rounded-lg transition-all ${chartTab === "shares" ? "bg-white text-gray-800 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+              >
+                Share
+              </button>
+            </div>
+          </div>
 
           <div className="mt-6">
-            <DashboardChart stats={stats} />
+            {chartTab === "overview" ? (
+              <DashboardChart stats={stats} />
+            ) : !stats.clientRevenueShares || stats.clientRevenueShares.length === 0 ? (
+              <div className="h-[220px] flex flex-col items-center justify-center text-gray-400 italic text-sm">
+                <span>No revenue shares metrics available.</span>
+                <span className="text-xs mt-1 not-italic font-medium text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">Paid Invoices required</span>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={stats.clientRevenueShares}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {stats.clientRevenueShares.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value) => `₹${value.toLocaleString()}`}
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "none",
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                      fontSize: "12px",
+                      fontWeight: "bold"
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -634,6 +700,191 @@ export default function Dashboard() {
           
           <div className="text-xs text-gray-400 mt-6 pt-4 border-t border-gray-100 font-medium">
             💡 Local storage active. Tasks persist in this browser.
+          </div>
+        </div>
+      </div>
+
+      {/* 3-Column Advanced Features Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8 mb-8">
+        
+        {/* Card 1: Urgent Deadlines */}
+        <div className="bg-white/70 backdrop-blur-md rounded-3xl p-6 border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(59,130,246,0.04)] transition-all duration-300">
+          <div>
+            <h3 className="text-lg font-bold tracking-tight text-gray-800">
+              ⏳ Urgent Deadlines
+            </h3>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">
+              Upcoming Project Timelines
+            </p>
+            
+            <div className="mt-5 space-y-3">
+              {projects.filter(p => p.status !== "COMPLETED").length === 0 ? (
+                <p className="text-xs text-gray-400 italic py-6 text-center">No active project deadlines.</p>
+              ) : (
+                [...projects]
+                  .filter(p => p.status !== "COMPLETED")
+                  .sort((a,b) => new Date(a.deadline) - new Date(b.deadline))
+                  .slice(0, 3)
+                  .map(p => {
+                    const diff = new Date(p.deadline) - new Date();
+                    let infoText = "";
+                    let infoBg = "";
+                    if (diff <= 0) {
+                      infoText = "Overdue ⚠️";
+                      infoBg = "bg-red-50 text-red-700 border-red-100";
+                    } else {
+                      const days = Math.floor(diff / 86400000);
+                      if (days === 0) {
+                        infoText = "Due Today 🚨";
+                        infoBg = "bg-orange-50 text-orange-700 border-orange-100 animate-pulse";
+                      } else if (days < 7) {
+                        infoText = `${days}d remaining 🚨`;
+                        infoBg = "bg-amber-50 text-amber-700 border-amber-100";
+                      } else {
+                        infoText = `${days}d left`;
+                        infoBg = "bg-blue-50 text-blue-700 border-blue-100";
+                      }
+                    }
+                    return (
+                      <div key={p.id} className="p-3 bg-white/40 border border-white/10 rounded-2xl flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-gray-800 truncate">{p.title}</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5 truncate">Progress: {p.progress}%</p>
+                        </div>
+                        <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border shrink-0 ${infoBg}`}>
+                          {infoText}
+                        </span>
+                      </div>
+                    );
+                  })
+              )}
+            </div>
+          </div>
+          <div className="text-[10px] text-gray-400 mt-5 pt-3 border-t border-gray-100 font-medium uppercase tracking-wider">
+            Urgency heatmap calculated in real-time
+          </div>
+        </div>
+
+        {/* Card 2: Client Scratchpad */}
+        <div className="bg-white/70 backdrop-blur-md rounded-3xl p-6 border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(59,130,246,0.04)] transition-all duration-300">
+          <div>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold tracking-tight text-gray-800">
+                📝 Notes Scratchpad
+              </h3>
+              <span className="text-[9px] font-bold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Autosaved
+              </span>
+            </div>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">
+              Quick Client Contract Drafts
+            </p>
+            
+            <div className="flex gap-1.5 mt-4">
+              <button 
+                onClick={() => {
+                  setScratchNotes("Scope of Work:\n- Objective:\n- Deliverables:\n- Timeline:\n- Fee: ");
+                  localStorage.setItem("ff_scratch_notes", "Scope of Work:\n- Objective:\n- Deliverables:\n- Timeline:\n- Fee: ");
+                }}
+                className="text-[9px] font-extrabold uppercase tracking-wider bg-gray-50 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 rounded-lg px-2 py-1 transition-all"
+              >
+                Scope
+              </button>
+              <button 
+                onClick={() => {
+                  setScratchNotes("Dear [Client],\nThank you for working with me! Please review Invoice details below.\nAmount: \nDue Date: ");
+                  localStorage.setItem("ff_scratch_notes", "Dear [Client],\nThank you for working with me! Please review Invoice details below.\nAmount: \nDue Date: ");
+                }}
+                className="text-[9px] font-extrabold uppercase tracking-wider bg-gray-50 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 rounded-lg px-2 py-1 transition-all"
+              >
+                Invoice
+              </button>
+              <button 
+                onClick={() => {
+                  setScratchNotes("Hi [Client],\nJust a friendly reminder that Invoice is due on [Date]. Please process at your earliest convenience.");
+                  localStorage.setItem("ff_scratch_notes", "Hi [Client],\nJust a friendly reminder that Invoice is due on [Date]. Please process at your earliest convenience.");
+                }}
+                className="text-[9px] font-extrabold uppercase tracking-wider bg-gray-50 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 rounded-lg px-2 py-1 transition-all"
+              >
+                Reminder
+              </button>
+            </div>
+
+            <textarea 
+              rows={4}
+              value={scratchNotes}
+              onChange={(e) => {
+                setScratchNotes(e.target.value);
+                localStorage.setItem("ff_scratch_notes", e.target.value);
+              }}
+              placeholder="Start drafting contracts or scope details..."
+              className="w-full mt-4 bg-white/50 border border-gray-200 focus:border-blue-500 rounded-2xl p-3 text-xs outline-none resize-none transition-all"
+            />
+          </div>
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText(scratchNotes);
+              toast.success("Copied to clipboard!");
+            }}
+            className="text-[10px] text-blue-600 hover:text-blue-700 font-extrabold uppercase tracking-wider mt-4 pt-3 border-t border-gray-100 text-left transition"
+          >
+            📋 Copy to clipboard
+          </button>
+        </div>
+
+        {/* Card 3: Hourly Billing Rate Calculator */}
+        <div className="bg-white/70 backdrop-blur-md rounded-3xl p-6 border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(59,130,246,0.04)] transition-all duration-300">
+          <div>
+            <h3 className="text-lg font-bold tracking-tight text-gray-800">
+              💼 Billing Rate Estimator
+            </h3>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">
+              Minimum Hourly Pricing Calculator
+            </p>
+            
+            <div className="mt-5 space-y-4">
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
+                  <span>Target Salary (Month):</span>
+                  <span className="font-extrabold text-gray-800">₹{calcIncome.toLocaleString()}</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="30000" 
+                  max="300000" 
+                  step="5000"
+                  value={calcIncome}
+                  onChange={(e) => setCalcIncome(Number(e.target.value))}
+                  className="w-full h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
+                  <span>Weekly Work Hours:</span>
+                  <span className="font-extrabold text-gray-800">{calcHours} hrs</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="10" 
+                  max="60" 
+                  step="2"
+                  value={calcHours}
+                  onChange={(e) => setCalcHours(Number(e.target.value))}
+                  className="w-full h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 pt-3 border-t border-gray-100">
+            <div className="flex justify-between items-baseline">
+              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Required Rate:</span>
+              <div className="text-right">
+                <span className="text-2xl font-extrabold text-blue-600">₹{Math.ceil((calcIncome + calcExpenses) / (calcHours * 4))}</span>
+                <span className="text-[10px] font-bold text-gray-400">/hr</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

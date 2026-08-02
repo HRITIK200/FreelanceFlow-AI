@@ -111,6 +111,36 @@ export const getDashboardStats =
             },
           });
 
+      // Calculate paid client revenue share breakdown
+      const clientStats = await prisma.client.findMany({
+        where: { userId: req.user.userId },
+        select: {
+          name: true,
+          company: true,
+          projects: {
+            select: {
+              invoices: {
+                where: { status: "PAID" },
+                select: { amount: true }
+              }
+            }
+          }
+        }
+      });
+
+      const clientRevenueShares = clientStats.map(client => {
+        let totalPaid = 0;
+        client.projects.forEach(project => {
+          project.invoices.forEach(inv => {
+            totalPaid += inv.amount;
+          });
+        });
+        return {
+          name: client.company || client.name,
+          value: totalPaid
+        };
+      }).filter(share => share.value > 0);
+
       res.json({
         totalClients,
         totalProjects,
@@ -124,8 +154,7 @@ export const getDashboardStats =
           pendingRevenue._sum.amount || 0,
           
         overdueInvoices,
-
-
+        clientRevenueShares,
       });
 
     } catch (error) {
