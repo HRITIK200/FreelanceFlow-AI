@@ -2,6 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Premium Dark Mode Theme Overrides */
+.dark body, 
+.dark main {
+  background-color: #0b0f19 !important; /* Rich deep dark background */
+  color: #f1f5f9 !important;
+}
+
+.dark header {
+  background-color: rgba(11, 15, 25, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark aside {
+  background-color: #111827 !important; /* Premium slate dark sidebar */
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Glassmorphic cards and containers in Dark Mode */
+.dark .bg-white\/70,
+.dark .bg-white\/80,
+.dark .bg-white,
+.dark .bg-slate-50,
+.dark .bg-gray-50 {
+  background-color: rgba(22, 28, 45, 0.7) !important; /* Deep blue-grey tint */
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+.dark p, 
+.dark span, 
+.dark h1, 
+.dark h2, 
+.dark h3, 
+.dark h4,
+.dark label,
+.dark select,
+.dark input {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .font-bold {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-gray-400 {
+  color: #64748b !important;
+}
+
+/* Inputs & Form styling in Dark Mode */
+.dark input, 
+.dark textarea, 
+.dark select {
+  background-color: rgba(17, 24, 39, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark select option {
+  background-color: #111827 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark .bg-slate-100\/80,
+.dark .bg-gray-100 {
+  background-color: #1f2937 !important;
+}
+
+/* Dynamic Hover highlights */
+.dark .hover\:bg-gray-50:hover, 
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-gray-100:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Print layout optimizations */
 @media print {
   /* Hide sidebar navigation, top header items, assistants, action cards, sliders, and form components */
   aside,
