@@ -70,7 +70,10 @@ export default function Login() {
 
         console.log(error);
 
-        toast.error("Login failed");
+        toast.error(
+          error.response?.data?.message ||
+            "Login failed"
+        );
 
       }
   };

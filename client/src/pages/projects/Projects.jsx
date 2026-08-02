@@ -17,6 +17,7 @@ import { toast } from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { exportToExcel } from "../../utils/exportToExcel";
 import { Link } from "react-router-dom";
+import Skeleton from "../../components/ui/Skeleton";
 
 import {
   FolderKanban,
@@ -35,6 +36,8 @@ export default function Projects() {
 
   const [projects, setProjects] =
     useState([]);
+
+  const [loading, setLoading] = useState(true);
 
   const [showModal, setShowModal] =
     useState(false);
@@ -72,39 +75,35 @@ export default function Projects() {
     useState("");
 
   const fetchProjects = async () => {
-     
-      try{
-        const data =
-          await getProjects();
+    try {
+      const data = await getProjects();
+      setProjects(data);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to fetch projects");
+    }
+  };
 
-        setProjects(data);
-
-      } catch(error){
-        console.log(error);
-      }
-    };
-
-    useEffect(() => {
-
+  useEffect(() => {
     const fetchData = async () => {
-
-      try{
-        const projectData =
-          await getProjects();
-
-        const clientData =
-          await getClients();
-
+      try {
+        setLoading(true);
+        const [projectData, clientData] = await Promise.all([
+          getProjects(),
+          getClients()
+        ]);
         setProjects(projectData);
-
         setClients(clientData);
-      } catch(error){
+      } catch (error) {
         console.log(error);
+        toast.error("Failed to load projects data");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-    }, []);
+  }, []);
 
 
 
@@ -296,371 +295,157 @@ return(
         className="w-full bg-slate-50 border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"/>
     </div>
 
-  </div>
+  </div>  {/* Loading/Empty State / Data Rendering */}
 
-  {/* Desktop Table */}
-
-  <div
-    className="
-      hidden
-      md:block
-      bg-white
-      rounded-2xl
-      shadow-md
-      overflow-hidden
-    "
-  >
-
-    <table className="w-full">
-
-      <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
-
-        <tr>
-
-          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
-            Project
-          </th>
-
-          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
-            Client
-          </th>
-
-          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
-            Budget
-          </th>
-
-          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
-            Status
-          </th>
-
-          <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">
-            Progress
-          </th>
-
-          <th className="p-4 text-center text-xs uppercase tracking-wider text-gray-500 font-semibold">
-            Actions
-          </th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        {filteredProjects.length === 0 ? (
-
-          <tr>
-
-            <td
-              colSpan="5"
-              className="
-                text-center
-                py-10
-                text-gray-500
-              "
-            >
-              <div className="py-12 text-center">
-                
-                <p className="text-gray-500">
-                  <div className="py-16 text-center">
-                    <FolderKanban size={50} className="mx-auto text-gray-300 mb-4"/>
-
-                    <h3 className="text-xl font-bold">
-                      No Projects Yet
-                    </h3>
-                    <p className="text-gray-500 mt-2">
-                      Create your first project and start Tracking progress.
-                    </p>
-                  </div>
-                </p>
-              </div>
-            </td>
-
-          </tr>
-
-        ) : (
-
-          filteredProjects.map(
-            (project) => (
-
-            <tr
-              key={project.id}
-              className="
-                border-t
-                border-gray-100
-                hover:bg-blue-50
-                transition
-                duration-200
-              "
-            >
-
-              <td className="p-5 font-semibold text-gray-800">
-                <Link to={`/projects/${project.id}`}
-                   className="text-blue-600 hover:underline font-semibold">
-                    {project.title}
-                   </Link>
-              </td>
-
-              <td className="p-4">
-                {project.client?.name}
-              </td>
-
-              <td className="p-5 font-bold text-green-600">
-                ₹{project.budget}
-              </td>
-
-              <td className="p-4">
-
-                <span
-                  className={`
-                    inline-flex
-                    items-center
-                    px-4
-                    py-2
-                    rounded-full
-                    text-xs
-                    font-semibold
-                    tracking-wide
-
-                  ${
-                    project.status === "COMPLETED"
-                      ? "bg-green-100 text-green-700"
-
-                    : project.status === "IN_PROGRESS"
-                      ? "bg-blue-100 text-blue-700"
-
-                    : "bg-yellow-100 text-yellow-700"
-                  }
-                  `}
-                >
-                  {project.status === "COMPLETED" && "✅ "}
-                  {project.status === "IN_PROGRESS" && "🚀 "}
-                  {project.status === "PENDING" && "⏳ "}
-                  
-                  {project.status.replace(
-                    "_",
-                    " "
-                  )}
-                </span>
-
-              </td>
-
-              <td className="p-4 min-w-[180px]">
-                 <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div className="bg-blue-600 h-3 rounded-full transition-all duration-500"
-                       style={{width: `${project.progress || 0}%`,}}/>
-                 </div>
-                 <p className="text-xs mt-2 font-medium text-gray-600">
-                  {project.progress || 0}%
-                 </p>
-              </td>
-
-              <td className="p-4">
-
-                <div className="
-                  flex
-                  justify-center
-                  gap-2
-                ">
-
-                  <button
-                    onClick={() => {
-                      setSelectedProject(project);
-                      setIsEditOpen(true);
-                    }}
-                    className="
-                      bg-yellow-100
-                      text-yellow-600
-                      p-2.5
-                      rounded-xl
-                      hover:bg-yellow-200
-                      hover:scale-110
-                      transition
-                    "
-                  >
-                    <Pencil size={16} />
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setDeleteProjectId(
-                        project.id
-                      );
-                      setIsDeleteOpen(true);
-                    }}
-                    className="
-                      bg-red-100
-                      text-red-600
-                      p-2.5
-                      rounded-xl
-                      hover:bg-red-200
-                      hover:scale-110
-                      transition
-                    "
-                  >
-                    <Trash2 size={16} />
-                  </button>
-
-                </div>
-
-              </td>
-
+  {loading ? (
+    <div className="bg-white rounded-2xl shadow-md p-6">
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+      </div>
+    </div>
+  ) : filteredProjects.length === 0 ? (
+    <div className="bg-white rounded-2xl shadow-md p-12 text-center">
+      <div className="py-16 text-center">
+        <FolderKanban size={50} className="mx-auto text-gray-300 mb-4"/>
+        <h3 className="text-xl font-bold">No Projects Yet</h3>
+        <p className="text-gray-500 mt-2">
+          Create your first project and start tracking progress.
+        </p>
+      </div>
+    </div>
+  ) : (
+    <>
+      {/* Desktop Table */}
+      <div className="hidden md:block bg-white rounded-2xl shadow-md overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
+            <tr>
+              <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Project</th>
+              <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Client</th>
+              <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Budget</th>
+              <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Status</th>
+              <th className="p-5 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Progress</th>
+              <th className="p-4 text-center text-xs uppercase tracking-wider text-gray-500 font-semibold">Actions</th>
             </tr>
-
-          ))
-        )}
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  {/* Mobile Cards */}
-
-  <div className="
-    md:hidden
-    space-y-4
-  ">
-
-    {filteredProjects.map(
-      (project) => (
-
-      <div
-        key={project.id}
-        className="
-          bg-white
-          rounded-2xl
-          shadow-md
-          p-5
-        "
-      >
-
-        <h3 className="
-          font-bold
-          text-lg
-        ">
-          {project.title}
-        </h3>
-
-        <div className="
-          mt-3
-          space-y-2
-        ">
-
-          <p className="
-            flex
-            items-center
-            gap-2
-            text-gray-600
-          ">
-            <Building2 size={16} />
-            {project.client?.name}
-          </p>
-
-          <p className="
-            font-semibold
-            text-lg
-          ">
-            ₹{project.budget}
-          </p>
-
-          <div className="mt-3">
-            <div className="flex justify-between mb-1">
-             <span className="text-sm text-gray-500">
-              Progress
-             </span>
-
-             <span className="text-sm font-medium">
-              {project.progress || 0}%
-             </span>
-            </div>
-
-             <div className="w-full bg-gray-200 rounded-full h-2">
-
-               <div className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                    style={{width: `${project.progress || 0}%`,}}/>
-             </div>
-            </div>
-
-        </div>
-
-        <div className="mt-4">
-
-          <span
-            className={`
-            px-3
-            py-1
-            rounded-full
-            text-sm
-            font-medium
-
-            ${
-              project.status === "COMPLETED"
-                ? "bg-green-100 text-green-700"
-
-              : project.status === "IN_PROGRESS"
-                ? "bg-blue-100 text-blue-700"
-
-              : "bg-yellow-100 text-yellow-700"
-            }
-            `}
-          >
-            {project.status.replace(
-              "_",
-              " "
-            )}
-          </span>
-
-        </div>
-
-        <div className="
-          flex
-          gap-2
-          mt-4
-        ">
-
-          <button
-            onClick={() => {
-              setSelectedProject(project);
-              setIsEditOpen(true);
-            }}
-            className="
-              flex-1
-              bg-yellow-500
-              text-white
-              py-2
-              rounded-lg
-            "
-          >
-            Edit
-          </button>
-
-          <button
-            onClick={() => {
-              setDeleteProjectId(
-                project.id
-              );
-              setIsDeleteOpen(true);
-            }}
-            className="
-              flex-1
-              bg-red-500
-              text-white
-              py-2
-              rounded-lg
-            "
-          >
-            Delete
-          </button>
-
-        </div>
-
+          </thead>
+          <tbody>
+            {filteredProjects.map((project) => (
+              <tr
+                key={project.id}
+                className="border-t border-gray-100 hover:bg-blue-50 transition duration-200"
+              >
+                <td className="p-5 font-semibold text-gray-800">
+                  <Link to={`/projects/${project.id}`} className="text-blue-600 hover:underline font-semibold">
+                    {project.title}
+                  </Link>
+                </td>
+                <td className="p-4">{project.client?.name}</td>
+                <td className="p-5 font-bold text-green-600">₹{project.budget}</td>
+                <td className="p-4">
+                  <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold tracking-wide ${
+                    project.status === "COMPLETED" ? "bg-green-100 text-green-700" :
+                    project.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" :
+                    "bg-yellow-100 text-yellow-700"
+                  }`}>
+                    {project.status === "COMPLETED" && "✅ "}
+                    {project.status === "IN_PROGRESS" && "🚀 "}
+                    {project.status === "PENDING" && "⏳ "}
+                    {project.status.replace("_", " ")}
+                  </span>
+                </td>
+                <td className="p-4 min-w-[180px]">
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="bg-blue-600 h-3 rounded-full transition-all duration-500" style={{width: `${project.progress || 0}%`}}/>
+                  </div>
+                  <p className="text-xs mt-2 font-medium text-gray-600">{project.progress || 0}%</p>
+                </td>
+                <td className="p-4">
+                  <div className="flex justify-center gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedProject(project);
+                        setIsEditOpen(true);
+                      }}
+                      className="bg-yellow-100 text-yellow-600 p-2.5 rounded-xl hover:bg-yellow-200 hover:scale-110 transition"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDeleteProjectId(project.id);
+                        setIsDeleteOpen(true);
+                      }}
+                      className="bg-red-100 text-red-600 p-2.5 rounded-xl hover:bg-red-200 hover:scale-110 transition"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-    ))}
-
-  </div>
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-4">
+        {filteredProjects.map((project) => (
+          <div key={project.id} className="bg-white rounded-2xl shadow-md p-5">
+            <h3 className="font-bold text-lg">{project.title}</h3>
+            <div className="mt-3 space-y-2">
+              <p className="flex items-center gap-2 text-gray-600">
+                <Building2 size={16} />
+                {project.client?.name}
+              </p>
+              <p className="font-semibold text-lg">₹{project.budget}</p>
+              <div className="mt-3">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-500">Progress</span>
+                  <span className="text-sm font-medium">{project.progress || 0}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full transition-all duration-500" style={{width: `${project.progress || 0}%`}}/>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4">
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                project.status === "COMPLETED" ? "bg-green-100 text-green-700" :
+                project.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" :
+                "bg-yellow-100 text-yellow-700"
+              }`}>
+                {project.status.replace("_", " ")}
+              </span>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => {
+                  setSelectedProject(project);
+                  setIsEditOpen(true);
+                }}
+                className="flex-1 bg-yellow-500 text-white py-2 rounded-lg"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => {
+                  setDeleteProjectId(project.id);
+                  setIsDeleteOpen(true);
+                }}
+                className="flex-1 bg-red-500 text-white py-2 rounded-lg"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )}
   <Modal
   isOpen={isEditOpen}
   onClose={() => setIsEditOpen(false)}
@@ -718,13 +503,8 @@ return(
           setIsEditOpen(false);
 
         } catch (error) {
-
           console.log(error);
-
-          toast.error(
-            "Failed to update project"
-          );
-
+          toast.error(error.response?.data?.message || "Failed to update project");
         }
 
       }}
@@ -893,13 +673,8 @@ return(
       setIsDeleteOpen(false);
 
     } catch (error) {
-
       console.log(error);
-
-      toast.error(
-        "Failed to delete project"
-      );
-
+      toast.error(error.response?.data?.message || "Failed to delete project");
     }
 
   }}
@@ -1028,10 +803,9 @@ return(
               });
 
               fetchProjects();
-            } catch (error){
+            } catch (error) {
               console.log(error);
-
-              toast.error("Failed to create project");
+              toast.error(error.response?.data?.message || "Failed to create project");
             }
           }}
           className="flex-1 bg-blue-600 text-white py-3 rounded-xl">

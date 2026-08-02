@@ -20,6 +20,7 @@ import ConfirmModal from "../../components/ui/ConfirmModal";
 import {
   exportToExcel
 } from "../../utils/exportToExcel";
+import Skeleton from "../../components/ui/Skeleton";
 
 import {
   Users,
@@ -38,6 +39,8 @@ export default function Clients() {
     setClients] =
     useState([]);
 
+  const [loading, setLoading] = useState(true);
+
   const [form,
     setForm] =
     useState({
@@ -52,7 +55,8 @@ export default function Clients() {
   const [selectedClient, setSelectedClient] =
     useState(null);
 
-  const [search, setSearch] =
+  const [search,
+    setSearch] =
     useState("");
   
   const [deleteClientId, setDeleteClientId] =
@@ -63,11 +67,16 @@ export default function Clients() {
 
   const fetchClients =
     async () => {
-
-      const data =
-        await getClients();
-
-      setClients(data);
+      try {
+        setLoading(true);
+        const data = await getClients();
+        setClients(data);
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response?.data?.message || "Failed to fetch clients");
+      } finally {
+        setLoading(false);
+      }
     };
 
   useEffect(() => {
@@ -76,22 +85,20 @@ export default function Clients() {
 
   const handleSubmit =
     async (e) => {
-
       e.preventDefault();
-
-      await createClient(form);
-
-      toast.success(
-        "Client created successfully"
-      );
-
-      setForm({
-        name: "",
-        email: "",
-        company: "",
-      });
-
-      fetchClients();
+      try {
+        await createClient(form);
+        toast.success("Client created successfully");
+        setForm({
+          name: "",
+          email: "",
+          company: "",
+        });
+        fetchClients();
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response?.data?.message || "Failed to create client");
+      }
     };
 
   const filteredClients = clients.filter(
@@ -265,10 +272,19 @@ export default function Clients() {
 
   </div>
 
-{/* Empty State */}
+{/* Loading/Empty State / Data Rendering */}
 
-{filteredClients.length === 0 ? (
-
+{loading ? (
+  <div className="bg-white rounded-2xl shadow-md p-6">
+    <div className="space-y-4">
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-16 w-full" />
+      <Skeleton className="h-16 w-full" />
+      <Skeleton className="h-16 w-full" />
+      <Skeleton className="h-16 w-full" />
+    </div>
+  </div>
+) : filteredClients.length === 0 ? (
   <div
     className="
       bg-white
@@ -278,240 +294,141 @@ export default function Clients() {
       text-center
     "
   >
-    
-
-    <h3 className="text-xl font-bold mt-4">
-      <div className="py-16 text-center">
-        <Users
-          size={48}
-          className="mx-auto text-gray-300"
-        />
-        <h3 className="text-xl font-bold">
-          No Clients Yet
-        </h3>
-        <p className="text-gray-500 mt-2">
-          Add your first client to start managaing projects.
-        </p>
-      </div>
-    </h3>
-
-    <p className="text-gray-500 mt-2">
-      Add your first client to get started.
-    </p>
+    <div className="py-16 text-center">
+      <Users
+        size={48}
+        className="mx-auto text-gray-300 mb-4"
+      />
+      <h3 className="text-xl font-bold">
+        No Clients Yet
+      </h3>
+      <p className="text-gray-500 mt-2">
+        Add your first client to start managing projects.
+      </p>
+    </div>
   </div>
-
 ) : (
-
-<>
-  {/* Desktop Table */}
-
-  <div className="hidden md:block bg-white rounded-2xl shadow-md overflow-hidden">
-
-    <table className="w-full">
-
-      <thead className="bg-slate-50">
-
-        <tr>
-
-          <th className="p-4 text-left">
-            Client
-          </th>
-
-          <th className="p-4 text-left">
-            Email
-          </th>
-
-          <th className="p-4 text-left">
-            Company
-          </th>
-
-          <th className="p-4 text-center">
-            Actions
-          </th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        {filteredClients.map((client) => (
-
-          <tr
-            key={client.id}
-            className="border-t hover:bg-gray-50"
-          >
-
-            <td className="p-4">
-              <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
-                {client.name?.charAt(0)?.toUpperCase()}
-              </div>
-              <div>
-                <p className="font-semibold">
-                  <Link to={`/clients/${client.id}`}
-                      className="text-blue-600 font-semibold hover:underline">
-                        {client.name}
-                      </Link>
-                </p>
-                <p className="text-xs text-gray-500">
-                  Client
-                </p>
-              </div>
-              </div>
-            </td>
-
-            <td className="p-4">
-              {client.email}
-            </td>
-
-            <td className="p-4">
-              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm font-medium">
-                {client.company || "N/A"}
-              </span>
-              
-            </td>
-
-            <td className="p-4">
-
-              <div className="flex justify-center gap-2">
-
-                <button
-                  onClick={() => {
-                    setSelectedClient(client);
-                    setIsEditOpen(true);
-                  }}
-                  className="
-                    bg-yellow-100
-                    text-yellow-600
-                    p-2
-                    rounded-xl
-                    hover:bg-yellow-200
-                    transition
-                  "
-                >
-                  <Pencil size={16} />
-                </button>
-
-                <button
-                  onClick={() => {
-                    setDeleteClientId(client.id);
-                    setIsDeleteOpen(true);
-                  }}
-                  className="
-                    bg-red-500
-                    text-white
-                    p-2
-                    rounded-lg
-                  "
-                >
-                  <Trash2 size={16} />
-                </button>
-
-              </div>
-
-            </td>
-
+  <>
+    {/* Desktop Table */}
+    <div className="hidden md:block bg-white rounded-2xl shadow-md overflow-hidden">
+      <table className="w-full">
+        <thead className="bg-slate-50">
+          <tr>
+            <th className="p-4 text-left">Client</th>
+            <th className="p-4 text-left">Email</th>
+            <th className="p-4 text-left">Company</th>
+            <th className="p-4 text-center">Actions</th>
           </tr>
+        </thead>
+        <tbody>
+          {filteredClients.map((client) => (
+            <tr
+              key={client.id}
+              className="border-t hover:bg-gray-50"
+            >
+              <td className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
+                    {client.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-semibold">
+                      <Link to={`/clients/${client.id}`}
+                          className="text-blue-600 font-semibold hover:underline">
+                            {client.name}
+                          </Link>
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Client
+                    </p>
+                  </div>
+                </div>
+              </td>
+              <td className="p-4">{client.email}</td>
+              <td className="p-4">
+                <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm font-medium">
+                  {client.company || "N/A"}
+                </span>
+              </td>
+              <td className="p-4">
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedClient(client);
+                      setIsEditOpen(true);
+                    }}
+                    className="bg-yellow-100 text-yellow-600 p-2 rounded-xl hover:bg-yellow-200 transition"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDeleteClientId(client.id);
+                      setIsDeleteOpen(true);
+                    }}
+                    className="bg-red-500 text-white p-2 rounded-lg"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
-        ))}
-
-      </tbody>
-
-    </table>
-
-  </div>
+    {/* Mobile Cards */}
+    <div className="md:hidden space-y-4">
+      {filteredClients.map((client) => (
+        <div
+          key={client.id}
+          className="bg-white rounded-2xl shadow-md p-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
+               {client.name?.charAt(0)?.toUpperCase()}
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">{client.name}</h3>
+              <p className="text-sm text-gray-500">Client</p>
+            </div>
+          </div>
+          <div className="mt-3 space-y-2 text-gray-600">
+            <div className="flex items-center gap-2">
+              <Mail size={16} />
+              {client.email}
+            </div>
+            <div className="flex items-center gap-2">
+              <Building2 size={16} />
+              {client.company || "N/A"}
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => {
+                setSelectedClient(client);
+                setIsEditOpen(true);
+              }}
+              className="flex-1 bg-yellow-500 text-white py-2 rounded-lg"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                setDeleteClientId(client.id);
+                setIsDeleteOpen(true);
+              }}
+              className="flex-1 bg-red-500 text-white py-2 rounded-lg"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
   </>
 )}
-
-  {/* Mobile Cards */}
-
-  <div className="md:hidden space-y-4">
-
-    {filteredClients.map((client) => (
-
-      <div
-        key={client.id}
-        className="
-          bg-white
-          rounded-2xl
-          shadow-md
-          p-4
-        "
-      >
-
-        <div className="flex items-center gap-3">
-
-          <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
-             {client.name?.charAt(0)?.toUpperCase()}
-          </div>
-
-          <div>
-            <h3 className="font-bold text-lg">
-              {client.name}
-            </h3>
-
-            <p className="text-sm text-gray-500">
-              Client
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-3 space-y-2 text-gray-600">
-
-          <div className="flex items-center gap-2">
-            <Mail size={16} />
-            {client.email}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Building2 size={16} />
-            {client.company}
-          </div>
-
-        </div>
-
-        <div className="flex gap-2 mt-4">
-
-          <button
-            onClick={() => {
-              setSelectedClient(client);
-              setIsEditOpen(true);
-            }}
-            className="
-              flex-1
-              bg-yellow-500
-              text-white
-              py-2
-              rounded-lg
-            "
-          >
-            Edit
-          </button>
-
-          <button
-            onClick={() => {
-              setDeleteClientId(client.id);
-              setIsDeleteOpen(true);
-            }}
-            className="
-              flex-1
-              bg-red-500
-              text-white
-              py-2
-              rounded-lg
-            "
-          >
-            Delete
-          </button>
-
-        </div>
-
-      </div>
-
-    ))}
-
-  </div>
 <Modal
   isOpen={isEditOpen}
   onClose={() => setIsEditOpen(false)}
@@ -541,9 +458,7 @@ export default function Clients() {
 
         } catch (error) {
           console.log(error);
-          toast.error(
-            "Failed to update client"
-          );
+          toast.error(error.response?.data?.message || "Failed to update client");
         }
       }}
     >
@@ -642,12 +557,8 @@ export default function Clients() {
       setIsDeleteOpen(false);
 
     } catch (error) {
-
       console.log(error);
-
-      toast.error(
-        "Failed to delete client"
-      );
+      toast.error(error.response?.data?.message || "Failed to delete client");
     }
   }}
 />

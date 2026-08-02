@@ -24,6 +24,7 @@ import { Search } from "lucide-react";
 import { toast } from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { exportToExcel } from "../../utils/exportToExcel";
+import Skeleton from "../../components/ui/Skeleton";
 
 import {
   CheckCircle2,
@@ -40,13 +41,17 @@ export default function Invoices() {
   const [invoices, setInvoices] =
     useState([]);
 
+  const [loading, setLoading] = useState(true);
+
   const fetchInvoices =
     async () => {
-
-      const data =
-        await getInvoices();
-
-      setInvoices(data);
+      try {
+        const data = await getInvoices();
+        setInvoices(data);
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response?.data?.message || "Failed to fetch invoices");
+      }
     };
   
   const paidInvoices =
@@ -119,20 +124,19 @@ export default function Invoices() {
   useEffect(() => {
     
     const fetchData = async () => {
-
-      try{
-        const invoiceData =
-         await getInvoices();
-
-        const projectData =
-         await getProjects();
-
+      try {
+        setLoading(true);
+        const [invoiceData, projectData] = await Promise.all([
+          getInvoices(),
+          getProjects()
+        ]);
         setInvoices(invoiceData);
         setProjects(projectData);
-      }catch(error){
+      } catch (error) {
         console.log(error);
-
-        toast.error("Failed to load data");
+        toast.error("Failed to load invoices data");
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -390,433 +394,222 @@ return (
         </div>
       </div>
         
-        <div className="hidden md:block overflow-x-auto">
-           <table className="w-full min-w-[700px]">
-
-          <thead>
-
-            <tr className="bg-slate-50 border-b">
-
-              <th className="p-3 text-left">
-                Invoice No
-              </th>
-
-              <th className="p-3 text-left">
-                Project
-              </th>
-
-              <th className="p-3 text-left">
-                Amount
-              </th>
-
-              <th className="p-3 text-left">
-                Status
-              </th>
-
-              <th className="p-3 text-left">
-                Due Date
-              </th>
-
-              <th className="p-3 text-left">
-                Actions
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-            
-            {filteredInvoices.length === 0 ? (
-
-              <tr>
-                <td colSpan="6"
-                    className="text-center p-6 text-gray-500">
-                  
-                  <p className="text-gray-500">
-                    <div className="py-16 text-center">
-                      <FileText size={50}
-                      className="mx-auto text-gray-300 mb-4"/>
-
-                      <h3 className="text-xl font-bold">
-                        No Invoices Yet
-                      </h3>
-
-                      <p className="text-gray-500 mt-2">
-                        Generate invoices and manage payments here.
-                      </p>
-                    </div>
-                  </p>
-                </td>
-              </tr>
-            ) : (
-
-            filteredInvoices.map(
-              (invoice) => (
-
-              <tr
-                key={invoice.id}
-                className="border-b hover:bg-slate-50 transition"
-              >
-
-                <td className="p-3">
-                  {invoice.invoiceNumber}
-                </td>
-
-                <td className="p-3">
-                  {invoice.project?.title || "No Project"}
-                </td>
-
-                <td className="p-3 font-medium">
-                  ₹{(invoice.amount || 0).toLocaleString()}
-                </td>
-
-                <td className="p-3">
-
-                  <span
-                    className={`
-                      px-4
-                      py-2
-                      rounded-full
-                      text-xs
-                      font-semibold
-                      inline-flex
-                      items-center
-                      gap-1
-
-                      ${
-                      invoice.status === "PAID"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-orange-100 text-orange-700"
-                    }
-                    `}
-                  >
-                    {invoice.status === "PAID"
-                      ? "✅ PAID"
-                      : "⏳ PENDING"}
-
-                  </span>
-
-                </td>
-
-                <td className="p-3">
-                  {
-                    new Date(
-                      invoice.dueDate
-                    ).toLocaleDateString()
-                  }
-                </td>
-
-                <td className="p-3">
-
-                  <div className="flex flex-wrap gap-2">
-
-                    <button
-                      onClick={async () => {
-
-                        const newStatus =
-                          invoice.status ===
-                          "PAID"
-                            ? "PENDING"
-                            : "PAID";
-     
-                      try {
-                        await updateInvoice(invoice.id,{
-                          status: newStatus,
-                        });
-                        fetchInvoices();
-                        toast.success("Status updated");
-                      } catch(error){
-                        toast.error("Failed to update status");
-                      }  
-
-                    
-
-                      }}
-                      title="Toggle Status"
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
+        {loading ? (
+          <div className="p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          </div>
+        ) : filteredInvoices.length === 0 ? (
+          <div className="p-12 text-center text-gray-500 bg-white rounded-b-2xl">
+            <div className="py-16 text-center">
+              <FileText size={50} className="mx-auto text-gray-300 mb-4"/>
+              <h3 className="text-xl font-bold">No Invoices Found</h3>
+              <p className="text-gray-500 mt-2">
+                Create your first invoice or adjust search filters to get started.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[700px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b">
+                    <th className="p-3 text-left">Invoice No</th>
+                    <th className="p-3 text-left">Project</th>
+                    <th className="p-3 text-left">Amount</th>
+                    <th className="p-3 text-left">Status</th>
+                    <th className="p-3 text-left">Due Date</th>
+                    <th className="p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredInvoices.map((invoice) => (
+                    <tr
+                      key={invoice.id}
+                      className="border-b hover:bg-slate-50 transition"
                     >
-                      <CheckCircle2 size={16} />
-                    </button>
-                    
+                      <td className="p-3">{invoice.invoiceNumber}</td>
+                      <td className="p-3">{invoice.project?.title || "No Project"}</td>
+                      <td className="p-3 font-medium">₹{(invoice.amount || 0).toLocaleString()}</td>
+                      <td className="p-3">
+                        <span className={`px-4 py-2 rounded-full text-xs font-semibold inline-flex items-center gap-1 ${
+                          invoice.status === "PAID" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
+                        }`}>
+                          {invoice.status === "PAID" ? "✅ PAID" : "⏳ PENDING"}
+                        </span>
+                      </td>
+                      <td className="p-3">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                      <td className="p-3">
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={async () => {
+                              const newStatus = invoice.status === "PAID" ? "PENDING" : "PAID";
+                              try {
+                                await updateInvoice(invoice.id, { status: newStatus });
+                                fetchInvoices();
+                                toast.success("Status updated");
+                              } catch (error) {
+                                toast.error(error.response?.data?.message || "Failed to update status");
+                              }
+                            }}
+                            title="Toggle Status"
+                            className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
+                          >
+                            <CheckCircle2 size={16} />
+                          </button>
+                          
+                          <button
+                            onClick={async () => {
+                              try {
+                                const pdfBlob = await downloadInvoicePDF(invoice.id);
+                                const url = window.URL.createObjectURL(pdfBlob);
+                                const link = document.createElement("a");
+                                link.href = url;
+                                link.download = `Invoice-${invoice.invoiceNumber}.pdf`;
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+                                window.URL.revokeObjectURL(url);
+                              } catch (error) {
+                                console.log(error);
+                                toast.error("Failed to download PDF");
+                              }
+                            }}
+                            title="Download PDF"
+                            className="bg-green-500 hover:bg-green-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
+                          >
+                            <Download size={16} />
+                          </button>
+
+                          <button
+                            onClick={async () => {
+                              try {
+                                await sendInvoiceEmail(invoice.id);
+                                toast.success("Email sent successfully");
+                                fetchInvoices();
+                              } catch (error) {
+                                console.log(error);
+                                toast.error("Failed to send email");
+                              }
+                            }}
+                            title="Send Email"
+                            className="bg-purple-500 hover:bg-purple-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
+                          >
+                            <Mail size={16} />
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setDeleteInvoiceId(invoice.id);
+                              setIsDeleteOpen(true);
+                            }}
+                            title="Delete Invoice"
+                            className="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4 p-4">
+              {filteredInvoices.map((invoice) => (
+                <div key={invoice.id} className="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-lg">{invoice.invoiceNumber}</h3>
+                      <p className="text-gray-500 text-sm">{invoice.project?.title || "No Project"}</p>
+                    </div>
+                    <span className={`px-4 py-2 rounded-full text-xs font-semibold ${
+                      invoice.status === "PAID" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                    }`}>
+                      {invoice.status === "PAID" ? "✅ PAID" : "⏳ PENDING"}
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-gray-500 text-sm">Amount</p>
+                    <h4 className="text-2xl font-bold">₹{(invoice.amount || 0).toLocaleString()}</h4>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-gray-500 text-sm">Due Date</p>
+                    <p className="font-medium">{new Date(invoice.dueDate).toLocaleDateString()}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-5">
                     <button
                       onClick={async () => {
-
+                        const newStatus = invoice.status === "PAID" ? "PENDING" : "PAID";
                         try {
-                          const pdfBlob =
-                            await downloadInvoicePDF(
-                              invoice.id
-                            );
-
-                        const url =
-                          window.URL.createObjectURL(
-                            pdfBlob
-                          );
-
-                        const link =
-                          document.createElement("a");
-
-                        link.href = url;
-
-                        link.download = 
-                          `Invoice-${invoice.invoiceNumber}.pdf`;
-
-                        document.body.appendChild(link);
-
-                        link.click();
-
-                        link.remove();
-
-                        window.URL.revokeObjectURL(url);
-
+                          await updateInvoice(invoice.id, { status: newStatus });
+                          fetchInvoices();
+                          toast.success("Status updated");
                         } catch (error) {
-
-                          console.log(error);
-
-                          toast.error(
-                            "Failed to download PDF"
-                          );
-
+                          toast.error(error.response?.data?.message || "Failed to update status");
                         }
-                        }}
-                        title="Download PDF"
-                        className="bg-green-500 hover:bg-green-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
-                        >
-                        <Download size={16} />
+                      }}
+                      className="bg-blue-500 text-white p-2.5 rounded-lg transition"
+                    >
+                      Status
                     </button>
-
                     <button
                       onClick={async () => {
-
                         try {
-
-                          await sendInvoiceEmail(
-                            invoice.id
-                            );
-
-                            toast.success(
-                                "Email sent successfully"
-                            );
-
-                        fetchInvoices();
-
+                          const pdfBlob = await downloadInvoicePDF(invoice.id);
+                          const url = window.URL.createObjectURL(pdfBlob);
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = `Invoice-${invoice.invoiceNumber}.pdf`;
+                          document.body.appendChild(link);
+                          link.click();
+                          link.remove();
+                          window.URL.revokeObjectURL(url);
                         } catch (error) {
-
-                          console.log(error);
-
-                            toast.error(
-                                "Failed to send email"
-                            );
-
+                          toast.error("Failed to download PDF");
                         }
-
-                        }}
-                        title="Send Email"
-                        className="bg-purple-500 hover:bg-purple-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
-                        >
-                        <Mail size={16} />
+                      }}
+                      className="bg-green-500 text-white py-2 rounded-lg"
+                    >
+                      PDF
                     </button>
-
-                    <button onClick={() => {
-                      
+                    <button
+                      onClick={async () => {
+                        try {
+                          await sendInvoiceEmail(invoice.id);
+                          toast.success("Email sent successfully");
+                        } catch (error) {
+                          toast.error("Failed to send email");
+                        }
+                      }}
+                      className="bg-purple-500 text-white py-2 rounded-lg"
+                    >
+                      Email
+                    </button>
+                    <button
+                      onClick={() => {
                         setDeleteInvoiceId(invoice.id);
                         setIsDeleteOpen(true);
-                    }}
-                    title="Delete Invoice"
-                    className="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-xl hover:scale-110 transition"
+                      }}
+                      className="bg-red-500 text-white py-2 rounded-lg"
                     >
-                        <Trash2 size={16} />
+                      Delete
                     </button>
-
                   </div>
-
-                </td>
-
-              </tr>
-
-            ))
-            )}
-
-          </tbody>
-
-           </table>
-        
-        
-      </div>
-      <div className="md:hidden space-y-4">
-
-          {filteredInvoices.length === 0 ? (
-
-            <div className="bg-white rounded-2xl shadow-md p-6 text-center text-gray-500">
-              <div className="py-10 text-center">
-                <FileText size={50} className="mx-auto text-gray-300 mb-4"/>
-                <p className="text-gray-500">
-                  No invoices match your search
-                </p>
-              </div>
-            </div>
-
-          ) : (
-
-            filteredInvoices.map(
-              (invoice) => (
-
-                <div key={invoice.id}
-                  className="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
-
-                {/* Invoice Number */}
-
-                <div className="flex justify-between items-start">
-
-                <div>
-                  <h3 className="font-bold text-lg">
-                     {invoice.invoiceNumber}
-                  </h3>
-                  <p className="text-gray-500 text-sm">
-                     {invoice.project?.title || "No Project"}
-                  </p>
                 </div>
-
-                <span className={`px-4 py-2 rounded-full text-xs font-semibold
-                    ${
-                      invoice.status === "PAID"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                     }
-                    `}
-                    >
-                      {
-                       invoice.status === "PAID"
-                         ? "✅ PAID"
-                         : "⏳ PENDING"
-                      }
-                </span>
-              </div>  
-
-              {/* Amount */}
-
-              <div className="mt-4">
-
-                <p className="text-gray-500 text-sm">
-                  Amount
-                </p>
-                <h4 className="text-2xl font-bold">
-                   ₹{(invoice.amount || 0).toLocaleString()}
-                </h4>
-              </div>
-
-              {/* Due Date */}
-
-              <div className="mt-3">
-
-               <p className="text-gray-500 text-sm">
-                Due Date
-               </p>
-               <p className="font-medium">
-                {
-                  new Date(
-                    invoice.dueDate
-                  ).toLocaleDateString()
-                }
-               </p>
+              ))}
             </div>
-
-              {/* Actions */}
-               
-               <div className="grid grid-cols-2 gap-2 mt-5">
-
-                <button onClick={async () => {
-
-                  const newStatus =
-                    invoice.status === "PAID"
-                     ? "PENDING"
-                     : "PAID";
-                  
-                  try {
-                        await updateInvoice(invoice.id,{
-                          status: newStatus,
-                        });
-                        fetchInvoices();
-                        toast.success("Status updated");
-                      } catch(error){
-                        toast.error("Failed to update status");
-                      }  
-                }}
-              className="bg-blue-500 text-white p-2.5 rounded-lg transition">
-                Status
-              </button>
-              <button onClick={async () => {
-
-                try {
-                  const pdfBlob =
-                   await downloadInvoicePDF(
-                    invoice.id
-                   );
-                  const url =
-                   window.URL.createObjectURL(
-                    pdfBlob
-                   );
-                  const link =
-                    document.createElement("a");
-                  
-                  link.href = url;
-                  link.download =
-                   `Invoice-${invoice.invoiceNumber}.pdf`;
-
-                  document.body.appendChild(
-                    link
-                  );
-
-                  link.click();
-                  link.remove();
-
-                  window.URL.revokeObjectURL(
-                    url
-                  );
-                } catch(error){
-                  toast.error(
-                    "Failed to download PDF"
-                  );
-                }
-              }}
-              className="bg-green-500 text-white py-2 rounded-lg">
-                PDF
-              </button>
-
-              <button onClick={async () => {
-
-                try{
-                  await sendInvoiceEmail(
-                    invoice.id
-                  );
-                  toast.success(
-                    "Email sent Successfully"
-                  );
-                } catch(error){
-                  toast.error(
-                    "failed to send email"
-                  );
-                }
-              }}
-              className="bg-purple-500 text-white py-2 rounded-lg">
-                Email
-              </button>
-
-              <button onClick={() =>{
-                setDeleteInvoiceId(
-                  invoice.id
-                );
-                setIsDeleteOpen(true);
-          
-              }}
-              className="bg-red-500 text-white py-2 rounded-lg">
-                Delete
-              </button>
-        </div>
-        </div>
-              ))
-          )}
-      </div>
+          </>
+        )}
       </div>
       
     <div className="mt-8 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
@@ -946,11 +739,9 @@ return (
                 });
 
                 fetchInvoices();
-              }catch (error){
-
+              } catch (error) {
                 console.log(error);
-
-                toast.error("Failed to create invoice");
+                toast.error(error.response?.data?.message || "Failed to create invoice");
               }
             }}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold">
@@ -984,9 +775,7 @@ return (
                 setIsDeleteOpen(false);
             } catch (error) {
                 console.log(error);
-                toast.error(
-                    "Failed to delete invoice"
-                );
+                toast.error(error.response?.data?.message || "Failed to delete invoice");
             }
         }}
       />
