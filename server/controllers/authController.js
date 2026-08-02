@@ -52,23 +52,23 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Handle Recruiter Demo Mode login
+    // Handle Demo Mode login
     if (email === "demo@freelanceflow.ai") {
       let user = await prisma.user.findUnique({
         where: { email },
       });
 
       if (!user) {
-        console.log("Seeding recruiter demo account...");
+        console.log("Seeding demo account...");
         const hashedPassword = await bcrypt.hash("demopassword", 10);
         
         // 1. Create User
         user = await prisma.user.create({
           data: {
-            name: "Recruiter Demo",
+            name: "Demo User",
             email: "demo@freelanceflow.ai",
             password: hashedPassword,
-            role: "USER",
+            role: "DEMO",
           },
         });
 
@@ -245,7 +245,15 @@ export const login = async (req, res) => {
           },
         });
 
-        console.log("Recruiter demo seeding complete!");
+        console.log("Demo seeding complete!");
+      } else {
+        // Automatically sync role to DEMO and name to Demo User for existing records
+        if (user.name !== "Demo User" || user.role !== "DEMO") {
+          user = await prisma.user.update({
+            where: { email },
+            data: { name: "Demo User", role: "DEMO" },
+          });
+        }
       }
 
       // Bypass password check for demo user if they clicked Demo Access
@@ -256,7 +264,7 @@ export const login = async (req, res) => {
       }
 
       const token = jwt.sign(
-        { userId: user.id, role: user.role },
+        { userId: user.id, role: "DEMO" },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );

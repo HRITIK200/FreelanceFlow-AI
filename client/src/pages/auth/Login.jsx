@@ -89,7 +89,7 @@ export default function Login() {
       console.log("DEMO LOGIN RESPONSE:", data);
 
       login(data.token, data.user);
-      toast.success("Welcome! Recruiter demo account logged in.");
+      toast.success("Welcome! Demo account logged in.");
       navigate("/dashboard");
     } catch (error) {
       console.log(error);
@@ -386,7 +386,7 @@ export default function Login() {
                   gap-2
                 "
               >
-                💼 Recruiter Demo Access
+                ✨ Explore Guest Demo
               </button>
 
             </div>
@@ -409,40 +409,6 @@ export default function Login() {
               Secure Authentication • JWT Protected
             </p>
 
-            {/* Recruiter Navigation links */}
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <p className="text-center text-xs text-gray-500 font-semibold mb-3">
-                Candidate Professional Profiles:
-              </p>
-              <div className="flex justify-center gap-4 text-gray-600">
-                <a 
-                  href="https://github.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-semibold hover:text-blue-600 transition"
-                >
-                  🐙 GitHub
-                </a>
-                <span className="text-gray-300">|</span>
-                <a 
-                  href="https://linkedin.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-semibold hover:text-blue-600 transition"
-                >
-                  💼 LinkedIn
-                </a>
-                <span className="text-gray-300">|</span>
-                <a 
-                  href="https://portfolio.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-semibold hover:text-blue-600 transition"
-                >
-                  🚀 Portfolio
-                </a>
-              </div>
-            </div>
 
           </form>
         </div>

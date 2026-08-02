@@ -31,6 +31,13 @@ const authMiddleware = (
 
     req.user = decoded;
 
+    // Restrict mutations in DEMO mode
+    if (req.user.role === "DEMO" && req.method !== "GET") {
+      return res.status(403).json({
+        message: "Action disabled in Demo mode. Register for an account to use all features!",
+      });
+    }
+
     next();
 
   } catch (error) {
