@@ -2,90 +2,295 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Premium Dark Mode Theme Overrides */
-.dark body, 
-.dark main {
-  background-color: #0b0f19 !important; /* Rich deep dark background */
-  color: #f1f5f9 !important;
-}
+/* ============================================
+   DARK MODE - Full Premium Theme Overrides
+   ============================================ */
 
-.dark header {
-  background-color: rgba(11, 15, 25, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.dark aside {
-  background-color: #111827 !important; /* Premium slate dark sidebar */
-  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Glassmorphic cards and containers in Dark Mode */
-.dark .bg-white\/70,
-.dark .bg-white\/80,
-.dark .bg-white,
-.dark .bg-slate-50,
-.dark .bg-gray-50 {
-  background-color: rgba(22, 28, 45, 0.7) !important; /* Deep blue-grey tint */
-  border-color: rgba(255, 255, 255, 0.08) !important;
+/* 1. Global page background & text */
+.dark,
+.dark body {
+  background-color: #0d1117 !important;
   color: #e2e8f0 !important;
 }
 
-.dark p, 
-.dark span, 
-.dark h1, 
-.dark h2, 
-.dark h3, 
-.dark h4,
-.dark label,
-.dark select,
-.dark input {
-  color: #cbd5e1 !important;
+/* 2. Main content area */
+.dark main {
+  background-color: #0d1117 !important;
+  color: #e2e8f0 !important;
 }
 
-.dark .text-gray-800,
-.dark .text-gray-700,
-.dark .font-bold {
+/* 3. Header / Navbar */
+.dark header {
+  background-color: rgba(13, 17, 23, 0.92) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* 4. Sidebar - already dark slate, keep as-is */
+.dark aside {
+  background-color: #0d1117 !important;
+  border-right-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ============================================
+   CARD & CONTAINER BACKGROUNDS
+   ============================================ */
+
+/* Glassmorphic dashboard cards */
+.dark .bg-white\/70,
+.dark .bg-white\/80,
+.dark .bg-white\/95,
+.dark .bg-white\/90,
+.dark .bg-white\/40,
+.dark .bg-white\/50 {
+  background-color: rgba(22, 27, 40, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Solid white cards (tables, modals etc) */
+.dark .bg-white {
+  background-color: #161b28 !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Slate / Gray page backgrounds */
+.dark .bg-slate-50,
+.dark .bg-gray-50,
+.dark .bg-slate-100 {
+  background-color: #0d1117 !important;
+}
+
+/* Lighter gray utility backgrounds */
+.dark .bg-gray-100,
+.dark .bg-slate-100\/80,
+.dark .bg-gray-100\/80 {
+  background-color: #1e2433 !important;
+}
+
+/* Inner sub-card surfaces */
+.dark .bg-white\/40,
+.dark .bg-gray-50\/50 {
+  background-color: rgba(30, 36, 51, 0.6) !important;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5 {
   color: #f1f5f9 !important;
 }
 
-.dark .text-gray-600,
-.dark .text-gray-500 {
+.dark p {
+  color: #cbd5e1 !important;
+}
+
+.dark span {
+  color: inherit !important;
+}
+
+.dark label {
   color: #94a3b8 !important;
 }
 
-.dark .text-gray-400 {
-  color: #64748b !important;
+/* Tailwind text utilities */
+.dark .text-gray-900 { color: #f1f5f9 !important; }
+.dark .text-gray-800 { color: #e2e8f0 !important; }
+.dark .text-gray-700 { color: #cbd5e1 !important; }
+.dark .text-gray-600 { color: #94a3b8 !important; }
+.dark .text-gray-500 { color: #64748b !important; }
+.dark .text-gray-400 { color: #475569 !important; }
+
+.dark .text-slate-900 { color: #f1f5f9 !important; }
+.dark .text-slate-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600 { color: #94a3b8 !important; }
+.dark .text-slate-500 { color: #64748b !important; }
+
+/* Don't override accent / semantic colors */
+.dark .text-blue-600 { color: #60a5fa !important; }
+.dark .text-blue-700 { color: #93c5fd !important; }
+.dark .text-green-600 { color: #4ade80 !important; }
+.dark .text-red-600  { color: #f87171 !important; }
+.dark .text-amber-600 { color: #fbbf24 !important; }
+.dark .text-purple-600 { color: #c084fc !important; }
+.dark .text-emerald-600 { color: #34d399 !important; }
+
+/* ============================================
+   BORDERS
+   ============================================ */
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-slate-100,
+.dark .border-white\/40,
+.dark .border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.07) !important;
 }
 
-/* Inputs & Form styling in Dark Mode */
-.dark input, 
-.dark textarea, 
-.dark select {
-  background-color: rgba(17, 24, 39, 0.6) !important;
+.dark .border-gray-300 {
   border-color: rgba(255, 255, 255, 0.1) !important;
-  color: #f1f5f9 !important;
+}
+
+.dark .border-t,
+.dark .border-b,
+.dark .border-l,
+.dark .border-r,
+.dark .border {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* ============================================
+   INPUTS, TEXTAREAS, SELECTS
+   ============================================ */
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark input[type="search"],
+.dark textarea,
+.dark select {
+  background-color: #1e2433 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #475569 !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: rgba(96, 165, 250, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 
 .dark select option {
-  background-color: #111827 !important;
+  background-color: #1e2433 !important;
+  color: #e2e8f0 !important;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+/* Generic light buttons */
+.dark .bg-blue-50   { background-color: rgba(59, 130, 246, 0.12) !important; }
+.dark .bg-green-50  { background-color: rgba(34, 197, 94, 0.10) !important; }
+.dark .bg-red-50    { background-color: rgba(239, 68, 68, 0.10) !important; }
+.dark .bg-amber-50  { background-color: rgba(245, 158, 11, 0.10) !important; }
+.dark .bg-purple-50 { background-color: rgba(168, 85, 247, 0.10) !important; }
+.dark .bg-slate-100\/80 { background-color: #1e2433 !important; }
+
+.dark .hover\:bg-gray-100:hover  { background-color: rgba(255,255,255,0.04) !important; }
+.dark .hover\:bg-slate-100:hover { background-color: rgba(255,255,255,0.04) !important; }
+.dark .hover\:bg-gray-50:hover   { background-color: rgba(255,255,255,0.03) !important; }
+.dark .hover\:bg-blue-50:hover   { background-color: rgba(59,130,246,0.15) !important; }
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+.dark table {
+  background-color: #161b28 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark thead,
+.dark thead tr,
+.dark thead th {
+  background-color: #1e2433 !important;
+  color: #94a3b8 !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+
+.dark tbody tr {
+  border-color: rgba(255,255,255,0.04) !important;
+}
+
+.dark tbody tr:hover {
+  background-color: rgba(255,255,255,0.025) !important;
+}
+
+.dark tbody td {
   color: #cbd5e1 !important;
+  border-color: rgba(255,255,255,0.04) !important;
 }
 
-.dark .bg-slate-100\/80,
-.dark .bg-gray-100 {
-  background-color: #1f2937 !important;
+/* ============================================
+   MODALS & OVERLAYS
+   ============================================ */
+
+.dark .modal-content,
+.dark [role="dialog"] > div,
+.dark .fixed .bg-white {
+  background-color: #161b28 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #e2e8f0 !important;
 }
 
-/* Dynamic Hover highlights */
-.dark .hover\:bg-gray-50:hover, 
-.dark .hover\:bg-slate-50:hover,
-.dark .hover\:bg-gray-100:hover {
-  background-color: rgba(255, 255, 255, 0.03) !important;
+/* ============================================
+   BADGES / STATUS PILLS
+   ============================================ */
+
+.dark .bg-blue-100   { background-color: rgba(59,130,246,0.15) !important; }
+.dark .bg-green-100  { background-color: rgba(34,197,94,0.12) !important; }
+.dark .bg-red-100    { background-color: rgba(239,68,68,0.12) !important; }
+.dark .bg-amber-100  { background-color: rgba(245,158,11,0.12) !important; }
+.dark .bg-yellow-100 { background-color: rgba(234,179,8,0.12) !important; }
+.dark .bg-purple-100 { background-color: rgba(168,85,247,0.12) !important; }
+
+/* ============================================
+   CHART CONTAINERS
+   ============================================ */
+
+.dark .recharts-wrapper,
+.dark .recharts-surface {
+  background-color: transparent !important;
 }
 
-/* Print layout optimizations */
+.dark .recharts-cartesian-axis-tick-value,
+.dark .recharts-legend-item-text {
+  fill: #64748b !important;
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #1e2433 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+/* ============================================
+   SCROLLBARS (subtle dark styling)
+   ============================================ */
+
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #1e2433;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #2d3748;
+}
+
+/* ============================================
+   PRINT LAYOUT
+   ============================================ */
+
 @media print {
-  /* Hide sidebar navigation, top header items, assistants, action cards, sliders, and form components */
   aside,
   header,
   .no-print,
@@ -98,7 +303,6 @@
     display: none !important;
   }
 
-  /* Expand main workspace page margins and remove background styles */
   main {
     padding: 0 !important;
     margin: 0 !important;
@@ -111,14 +315,12 @@
     color: black !important;
   }
 
-  /* Ensure grid layout formats in 2 clean columns on paper sheets */
   .grid {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 20px !important;
   }
 
-  /* Keep full height and width on visualization charts */
   .recharts-responsive-container {
     width: 100% !important;
     height: 300px !important;
