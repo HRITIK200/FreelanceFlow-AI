@@ -29,6 +29,24 @@ export default function Register() {
   const [loading, setLoading] =
     useState(false);
 
+  const getPasswordStrength = (pass) => {
+    if (!pass) return { score: 0, label: "None", color: "bg-gray-200", width: "w-0" };
+    let score = 0;
+    if (pass.length >= 6) score += 1;
+    if (pass.length >= 8) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+
+    if (score <= 1) {
+      return { score, label: "Weak 🔴", color: "bg-red-500", width: "w-1/3" };
+    } else if (score <= 3) {
+      return { score, label: "Medium 🟡", color: "bg-yellow-500", width: "w-2/3" };
+    } else {
+      return { score, label: "Strong 🟢", color: "bg-green-500", width: "w-full" };
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -330,6 +348,20 @@ export default function Register() {
                 </button>
 
               </div>
+
+              {formData.password && (
+                <div className="mt-2 px-1">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-gray-500 font-semibold">Password Strength:</span>
+                    <span className="text-xs font-bold">{getPasswordStrength(formData.password).label}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${getPasswordStrength(formData.password).color} ${getPasswordStrength(formData.password).width}`}
+                    />
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
