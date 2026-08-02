@@ -6,13 +6,14 @@ export default function StatCard({
   return (
     <div
       className="
-        bg-white
+        bg-white/75
+        backdrop-blur-md
         rounded-3xl
         p-6
-        shadow-sm
         border
-        border-gray-100
-        hover:shadow-lg
+        border-white/40
+        shadow-[0_8px_30px_rgb(0,0,0,0.02)]
+        hover:shadow-[0_20px_40px_rgba(59,130,246,0.08)]
         hover:-translate-y-1
         transition-all
         duration-300
@@ -24,9 +25,11 @@ export default function StatCard({
 
           <p
             className="
-              text-sm
-              text-gray-500
-              font-medium
+              text-xs
+              text-gray-400
+              font-bold
+              uppercase
+              tracking-wider
             "
           >
             {title}
@@ -34,11 +37,12 @@ export default function StatCard({
 
           <h2
             className="
-              text-xl
-              font-bold
-              text-gray-900
+              text-3xl
+              font-extrabold
+              text-gray-800
               mt-2
               whitespace-nowrap
+              tracking-tight
             "
           >
             {value}
@@ -52,7 +56,7 @@ export default function StatCard({
             w-12
             rounded-2xl
             bg-gradient-to-br
-            from-blue-500
+            from-blue-600
             to-indigo-600
             text-white
             flex
@@ -60,6 +64,8 @@ export default function StatCard({
             justify-center
             shrink-0
             ml-2
+            shadow-md
+            shadow-blue-500/20
           "
         >
           {icon}
