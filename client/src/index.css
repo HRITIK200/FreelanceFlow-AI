@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+  /* Hide sidebar navigation, top header items, assistants, action cards, sliders, and form components */
+  aside,
+  header,
+  .no-print,
+  button,
+  form,
+  input,
+  textarea,
+  .quick-actions,
+  #ai-assistant-root {
+    display: none !important;
+  }
+
+  /* Expand main workspace page margins and remove background styles */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    width: 100% !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Ensure grid layout formats in 2 clean columns on paper sheets */
+  .grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  /* Keep full height and width on visualization charts */
+  .recharts-responsive-container {
+    width: 100% !important;
+    height: 300px !important;
+  }
+}

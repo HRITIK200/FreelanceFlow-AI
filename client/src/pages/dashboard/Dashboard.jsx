@@ -36,7 +36,7 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
 
-  const [stats, setStats] = useState({
+  const [rawStats, setStats] = useState({
     totalClients: 0,
     totalProjects: 0,
     completedProjects: 0,
@@ -87,13 +87,47 @@ export default function Dashboard() {
   const { user } = useAuth();
 
   const [chartTab, setChartTab] = useState("overview");
-  const [projects, setProjects] = useState([]);
+  const [rawProjects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
   const [calcIncome, setCalcIncome] = useState(100000);
   const [calcHours, setCalcHours] = useState(30);
   const [calcExpenses, setCalcExpenses] = useState(15000);
   const [scratchNotes, setScratchNotes] = useState(() => localStorage.getItem("ff_scratch_notes") || "");
   const [scratchClient, setScratchClient] = useState("");
+
+  const [clientFilter, setClientFilter] = useState(() => localStorage.getItem("ff_active_client_filter") || "all");
+
+  useEffect(() => {
+    const handleFilterChange = () => {
+      setClientFilter(localStorage.getItem("ff_active_client_filter") || "all");
+    };
+    window.addEventListener("clientFilterChanged", handleFilterChange);
+    return () => window.removeEventListener("clientFilterChanged", handleFilterChange);
+  }, []);
+
+  const displayStats = (() => {
+    if (clientFilter === "all") return rawStats;
+    const selectedClient = clients.find(c => (c.company || c.name) === clientFilter);
+    const clientProjects = rawProjects.filter(p => p.clientId === selectedClient?.id);
+    const clientCompleted = clientProjects.filter(p => p.status === "COMPLETED");
+    return {
+      ...rawStats,
+      totalClients: 1,
+      totalProjects: clientProjects.length,
+      completedProjects: clientCompleted.length,
+      clientRevenueShares: rawStats.clientRevenueShares ? rawStats.clientRevenueShares.filter(s => s.name === clientFilter) : [],
+    };
+  })();
+
+  const stats = displayStats;
+
+  const displayedProjects = (() => {
+    if (clientFilter === "all") return rawProjects;
+    const selectedClient = clients.find(c => (c.company || c.name) === clientFilter);
+    return rawProjects.filter(p => p.clientId === selectedClient?.id);
+  })();
+
+  const projects = displayedProjects;
 
   const COLORS = ["#2563eb", "#8b5cf6", "#f59e0b", "#10b981", "#ec4899"];
 
@@ -305,19 +339,29 @@ export default function Dashboard() {
               </p>
             </div>
             
-            <div className="flex bg-gray-100/80 p-1 rounded-xl">
-              <button 
-                onClick={() => setChartTab("overview")}
-                className={`text-[10px] uppercase tracking-wider font-extrabold px-3 py-1.5 rounded-lg transition-all ${chartTab === "overview" ? "bg-white text-gray-800 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={() => window.print()}
+                className="no-print bg-slate-100/80 hover:bg-slate-200 text-[10px] text-gray-600 font-extrabold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all duration-300 shadow-sm"
+                title="Export summary report"
               >
-                Overview
+                📄 Export
               </button>
-              <button 
-                onClick={() => setChartTab("shares")}
-                className={`text-[10px] uppercase tracking-wider font-extrabold px-3 py-1.5 rounded-lg transition-all ${chartTab === "shares" ? "bg-white text-gray-800 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
-              >
-                Share
-              </button>
+
+              <div className="flex bg-gray-100/80 p-1 rounded-xl">
+                <button 
+                  onClick={() => setChartTab("overview")}
+                  className={`text-[10px] uppercase tracking-wider font-extrabold px-3 py-1.5 rounded-lg transition-all ${chartTab === "overview" ? "bg-white text-gray-800 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                >
+                  Overview
+                </button>
+                <button 
+                  onClick={() => setChartTab("shares")}
+                  className={`text-[10px] uppercase tracking-wider font-extrabold px-3 py-1.5 rounded-lg transition-all ${chartTab === "shares" ? "bg-white text-gray-800 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                >
+                  Share
+                </button>
+              </div>
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 
 import { useEffect, useState } from "react";
 import { getActivities } from "../../api/activityApi";
+import { getClients } from "../../api/clientApi";
 
 import GlobalSearch
 from "../search/GlobalSearch";
@@ -28,11 +29,47 @@ export default function Navbar({
   const [activities, setActivities] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("ff_theme");
+    return saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  });
+
+  const [clients, setClients] = useState([]);
+  const [activeClient, setActiveClient] = useState(() => localStorage.getItem("ff_active_client_filter") || "all");
+
   const handleLogout =
     () => {
       logout();
       navigate("/login");
     };
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("ff_theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("ff_theme", "light");
+    }
+  }, [darkMode]);
+
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const list = await getClients();
+        setClients(list);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    loadClients();
+  }, []);
+
+  const handleClientFilterChange = (clientId) => {
+    setActiveClient(clientId);
+    localStorage.setItem("ff_active_client_filter", clientId);
+    window.dispatchEvent(new Event("clientFilterChanged"));
+  };
 
   useEffect(() => {
 
@@ -145,6 +182,34 @@ export default function Navbar({
       {/* Right Side */}
 
       <div className="flex items-center gap-4 relative">
+
+        {/* Client Switcher Dropdown */}
+        <div className="relative hidden lg:block">
+          <select
+            value={activeClient}
+            onChange={(e) => handleClientFilterChange(e.target.value)}
+            className="bg-slate-100/80 hover:bg-slate-100 text-xs font-bold text-gray-600 rounded-xl px-3.5 py-2.5 outline-none border border-transparent focus:border-blue-500/20 transition cursor-pointer appearance-none pr-8 shadow-sm"
+          >
+            <option value="all">📁 All Clients</option>
+            {clients.map(c => (
+              <option key={c.id} value={c.company || c.name}>
+                👤 {c.company || c.name}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400 text-[8px]">
+            ▼
+          </div>
+        </div>
+
+        {/* Theme Switcher Toggle */}
+        <button 
+          onClick={() => setDarkMode(!darkMode)}
+          className="p-2 rounded-xl bg-slate-100/80 hover:bg-slate-100 text-gray-500 transition shadow-sm text-sm"
+          title="Toggle light/dark theme"
+        >
+          {darkMode ? "☀️" : "🌙"}
+        </button>
 
         {/* Notification */}
         <div className="relative">
