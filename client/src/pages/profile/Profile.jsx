@@ -23,7 +23,6 @@ import {
   Briefcase,
   Share2,
   TrendingUp,
-  Clock,
   Plus,
   X,
   Target,
@@ -34,6 +33,12 @@ export default function Profile() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
+  // Dynamic user details
+  const [profileName, setProfileName] = useState(() => localStorage.getItem("freelancer_name") || user?.name || "Freelancer User");
+  const [profileEmail, setProfileEmail] = useState(() => localStorage.getItem("freelancer_email") || user?.email || "freelancer@example.com");
+  const [profileTitle, setProfileTitle] = useState(() => localStorage.getItem("freelancer_title") || "Senior Full-Stack Freelancer");
+  const [profileCompany, setProfileCompany] = useState(() => localStorage.getItem("freelancer_company") || "FlowStudio Agency");
+
   const [stats, setStats] = useState({
     totalClients: 0,
     totalProjects: 0,
@@ -41,20 +46,38 @@ export default function Profile() {
     paidRevenue: 0,
   });
 
-  // Customizable skills
-  const [skills, setSkills] = useState([
-    "React.js",
-    "Node.js",
-    "TypeScript",
-    "TailwindCSS",
-    "Next.js",
-    "UI/UX Design",
-    "PostgreSQL",
-    "REST & GraphQL",
-  ]);
+  // Dynamic skills
+  const [skills, setSkills] = useState(() => {
+    const saved = localStorage.getItem("freelancer_skills");
+    return saved ? JSON.parse(saved) : [
+      "React.js",
+      "Node.js",
+      "TypeScript",
+      "TailwindCSS",
+      "Next.js",
+      "UI/UX Design",
+      "PostgreSQL",
+      "REST & GraphQL",
+    ];
+  });
   const [newSkill, setNewSkill] = useState("");
   const [showAddSkill, setShowAddSkill] = useState(false);
-  const [availability, setAvailability] = useState("Available for Work");
+
+  // Dynamic availability
+  const [availability, setAvailability] = useState(() => localStorage.getItem("freelancer_availability") || "Available for Work");
+
+  const syncSettings = () => {
+    setProfileName(localStorage.getItem("freelancer_name") || user?.name || "Freelancer User");
+    setProfileEmail(localStorage.getItem("freelancer_email") || user?.email || "freelancer@example.com");
+    setProfileTitle(localStorage.getItem("freelancer_title") || "Senior Full-Stack Freelancer");
+    setProfileCompany(localStorage.getItem("freelancer_company") || "FlowStudio Agency");
+  };
+
+  useEffect(() => {
+    syncSettings();
+    window.addEventListener("userSettingsChanged", syncSettings);
+    return () => window.removeEventListener("userSettingsChanged", syncSettings);
+  }, [user]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -79,15 +102,28 @@ export default function Profile() {
       toast.error("Skill already added");
       return;
     }
-    setSkills([...skills, newSkill.trim()]);
+    const updated = [...skills, newSkill.trim()];
+    setSkills(updated);
+    localStorage.setItem("freelancer_skills", JSON.stringify(updated));
     setNewSkill("");
     setShowAddSkill(false);
     toast.success("Skill tag added! ⚡");
   };
 
   const handleRemoveSkill = (skillToRemove) => {
-    setSkills(skills.filter((s) => s !== skillToRemove));
+    const updated = skills.filter((s) => s !== skillToRemove);
+    setSkills(updated);
+    localStorage.setItem("freelancer_skills", JSON.stringify(updated));
     toast.success("Skill removed");
+  };
+
+  const handleToggleAvailability = () => {
+    const options = ["Available for Work", "In a Sprint", "Busy / Fully Booked"];
+    const currentIdx = options.indexOf(availability);
+    const nextOption = options[(currentIdx + 1) % options.length];
+    setAvailability(nextOption);
+    localStorage.setItem("freelancer_availability", nextOption);
+    toast.success(`Status updated: "${nextOption}"`);
   };
 
   const handleShareProfile = () => {
@@ -99,11 +135,26 @@ export default function Profile() {
     }
   };
 
-  // Performance calculations
+  // Dynamic computations
   const avgDealSize = useMemo(() => {
     if (!stats.totalProjects) return 0;
-    return Math.round(stats.paidRevenue / stats.totalProjects);
+    return Math.round((stats.paidRevenue || 0) / stats.totalProjects);
   }, [stats]);
+
+  const profileStrength = useMemo(() => {
+    let score = 50;
+    if (profileName) score += 10;
+    if (profileTitle) score += 10;
+    if (profileCompany) score += 10;
+    if (skills.length >= 5) score += 10;
+    if (stats.totalProjects > 0) score += 10;
+    return Math.min(score, 100);
+  }, [profileName, profileTitle, profileCompany, skills, stats]);
+
+  const memberSinceYear = useMemo(() => {
+    if (user?.createdAt) return new Date(user.createdAt).getFullYear();
+    return 2026;
+  }, [user]);
 
   return (
     <DashboardLayout>
@@ -152,7 +203,7 @@ export default function Profile() {
             <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
               <div className="relative">
                 <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl font-extrabold shadow-xl border-2 border-white/20">
-                  {user?.name?.charAt(0)?.toUpperCase() || "F"}
+                  {profileName?.charAt(0)?.toUpperCase() || "F"}
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center">
                   <CheckCircle2 size={12} className="text-white" />
@@ -161,23 +212,30 @@ export default function Profile() {
 
               <div className="space-y-1.5">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <h2 className="text-3xl font-extrabold tracking-tight">{user?.name}</h2>
+                  <h2 className="text-3xl font-extrabold tracking-tight">{profileName}</h2>
                   <span className="inline-flex items-center px-3 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold backdrop-blur-md">
                     <Sparkles size={12} className="mr-1 text-amber-300" /> Pro Freelancer
                   </span>
                 </div>
 
                 <p className="text-slate-300 text-sm flex items-center justify-center sm:justify-start gap-1">
-                  <Mail size={14} className="text-indigo-400" /> {user?.email}
+                  <Mail size={14} className="text-indigo-400" /> {profileEmail}
                 </p>
 
+                <p className="text-xs text-indigo-200/80 font-medium">{profileTitle} • {profileCompany}</p>
+
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={handleToggleAvailability}
+                    title="Click to cycle status"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30 transition-colors"
+                  >
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     {availability}
-                  </span>
+                  </button>
                   <span className="text-xs text-slate-400 flex items-center gap-1">
-                    <Calendar size={13} className="text-slate-400" /> Member since 2026
+                    <Calendar size={13} className="text-slate-400" /> Member since {memberSinceYear}
                   </span>
                 </div>
               </div>
@@ -201,9 +259,12 @@ export default function Profile() {
                 <p className="text-[11px] text-slate-300">Profile Strength</p>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="w-24 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-400 rounded-full w-[95%]" />
+                    <div
+                      className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+                      style={{ width: `${profileStrength}%` }}
+                    />
                   </div>
-                  <span className="text-xs font-bold text-emerald-400">95%</span>
+                  <span className="text-xs font-bold text-emerald-400">{profileStrength}%</span>
                 </div>
               </div>
             </div>
@@ -295,14 +356,14 @@ export default function Profile() {
                   <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     <User size={14} /> Full Name
                   </div>
-                  <p className="font-bold text-gray-900 text-sm truncate">{user?.name}</p>
+                  <p className="font-bold text-gray-900 text-sm truncate">{profileName}</p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-gray-100 dark:border-white/[0.04] space-y-1">
                   <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     <Mail size={14} /> Email Address
                   </div>
-                  <p className="font-bold text-gray-900 text-sm truncate">{user?.email}</p>
+                  <p className="font-bold text-gray-900 text-sm truncate">{profileEmail}</p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-gray-100 dark:border-white/[0.04] space-y-1">
@@ -344,7 +405,7 @@ export default function Profile() {
                   <p className="text-2xl font-extrabold text-gray-900 mt-1">
                     ₹{avgDealSize.toLocaleString()}
                   </p>
-                  <p className="text-[11px] text-gray-500 mt-1">per completed project</p>
+                  <p className="text-[11px] text-gray-500 mt-1">per project record</p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-100 dark:border-purple-500/20">

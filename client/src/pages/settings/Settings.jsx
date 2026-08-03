@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
@@ -38,13 +38,13 @@ export default function Settings() {
   const [activeTab, setActiveTab] = useState("profile");
 
   // Profile State
-  const [name, setName] = useState(user?.name || "Freelancer User");
-  const [email, setEmail] = useState(user?.email || "freelancer@example.com");
-  const [title, setTitle] = useState("Senior Full-Stack Freelancer");
-  const [company, setCompany] = useState("FlowStudio Agency");
-  const [phone, setPhone] = useState("+91 98765 43210");
+  const [name, setName] = useState(() => localStorage.getItem("freelancer_name") || user?.name || "Freelancer User");
+  const [email, setEmail] = useState(() => localStorage.getItem("freelancer_email") || user?.email || "freelancer@example.com");
+  const [title, setTitle] = useState(() => localStorage.getItem("freelancer_title") || "Senior Full-Stack Freelancer");
+  const [company, setCompany] = useState(() => localStorage.getItem("freelancer_company") || "FlowStudio Agency");
+  const [phone, setPhone] = useState(() => localStorage.getItem("freelancer_phone") || "+91 98765 43210");
   const [bio, setBio] = useState(
-    "Building high-performance web applications and design systems for global clients."
+    () => localStorage.getItem("freelancer_bio") || "Building high-performance web applications and design systems for global clients."
   );
 
   // Security State
@@ -52,22 +52,29 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [twoFactor, setTwoFactor] = useState(false);
+  const [twoFactor, setTwoFactor] = useState(() => localStorage.getItem("freelancer_2fa") === "true");
 
   // Notifications State
-  const [notifications, setNotifications] = useState({
-    emailAlerts: true,
-    invoiceReminders: true,
-    projectDeadlines: true,
-    weeklyDigest: false,
-    marketingEmails: false,
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem("freelancer_notifications");
+    return saved ? JSON.parse(saved) : {
+      emailAlerts: true,
+      invoiceReminders: true,
+      projectDeadlines: true,
+      weeklyDigest: false,
+      marketingEmails: false,
+    };
   });
 
   // Preferences State
-  const [currency, setCurrency] = useState("INR (₹)");
-  const [hourlyRate, setHourlyRate] = useState("2500");
-  const [taxRate, setTaxRate] = useState("18");
-  const [paymentTerms, setPaymentTerms] = useState("14");
+  const [currency, setCurrency] = useState(() => localStorage.getItem("freelancer_currency") || "INR (₹)");
+  const [hourlyRate, setHourlyRate] = useState(() => localStorage.getItem("freelancer_hourly_rate") || "2500");
+  const [taxRate, setTaxRate] = useState(() => localStorage.getItem("freelancer_tax_rate") || "18");
+  const [paymentTerms, setPaymentTerms] = useState(() => localStorage.getItem("freelancer_payment_terms") || "14");
+
+  // App Preferences
+  const [timezone, setTimezone] = useState(() => localStorage.getItem("freelancer_timezone") || "(GMT+05:30) Asia/Kolkata (IST)");
+  const [dateFormat, setDateFormat] = useState(() => localStorage.getItem("freelancer_date_format") || "DD/MM/YYYY (e.g. 03/08/2026)");
 
   // Modal State
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -82,10 +89,20 @@ export default function Settings() {
       return;
     }
     setSavingProfile(true);
+
+    localStorage.setItem("freelancer_name", name);
+    localStorage.setItem("freelancer_email", email);
+    localStorage.setItem("freelancer_title", title);
+    localStorage.setItem("freelancer_company", company);
+    localStorage.setItem("freelancer_phone", phone);
+    localStorage.setItem("freelancer_bio", bio);
+
+    window.dispatchEvent(new Event("userSettingsChanged"));
+
     setTimeout(() => {
       setSavingProfile(false);
       toast.success("Profile preferences saved successfully! ✨");
-    }, 600);
+    }, 400);
   };
 
   const handleUpdatePassword = (e) => {
@@ -109,7 +126,7 @@ export default function Settings() {
       setNewPassword("");
       setConfirmPassword("");
       toast.success("Security settings updated successfully! 🔒");
-    }, 600);
+    }, 400);
   };
 
   const handleDeleteAccount = () => {
@@ -421,8 +438,10 @@ export default function Settings() {
                   </div>
                   <button
                     onClick={() => {
-                      setTwoFactor(!twoFactor);
-                      toast.success(`2FA ${!twoFactor ? "Enabled" : "Disabled"}`);
+                      const next = !twoFactor;
+                      setTwoFactor(next);
+                      localStorage.setItem("freelancer_2fa", String(next));
+                      toast.success(`2FA ${next ? "Enabled" : "Disabled"}`);
                     }}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       twoFactor ? "bg-indigo-600" : "bg-gray-200 dark:bg-white/20"
@@ -521,10 +540,9 @@ export default function Settings() {
                         type="checkbox"
                         checked={notifications[item.key]}
                         onChange={(e) => {
-                          setNotifications({
-                            ...notifications,
-                            [item.key]: e.target.checked,
-                          });
+                          const updated = { ...notifications, [item.key]: e.target.checked };
+                          setNotifications(updated);
+                          localStorage.setItem("freelancer_notifications", JSON.stringify(updated));
                           toast.success("Preferences updated");
                         }}
                         className="h-5 w-5 rounded accent-blue-600 cursor-pointer"
@@ -603,7 +621,14 @@ export default function Settings() {
                 </div>
 
                 <button
-                  onClick={() => toast.success("Billing preferences saved!")}
+                  onClick={() => {
+                    localStorage.setItem("freelancer_hourly_rate", hourlyRate);
+                    localStorage.setItem("freelancer_tax_rate", taxRate);
+                    localStorage.setItem("freelancer_currency", currency);
+                    localStorage.setItem("freelancer_payment_terms", paymentTerms);
+                    window.dispatchEvent(new Event("userSettingsChanged"));
+                    toast.success("Billing preferences saved!");
+                  }}
                   className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md shadow-emerald-500/25 transition-all duration-200"
                 >
                   <CheckCircle2 size={16} /> Save Billing Terms
@@ -624,7 +649,11 @@ export default function Settings() {
                     <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Timezone
                     </label>
-                    <select className="w-full bg-slate-50 dark:bg-[#1e2433] border border-gray-200 dark:border-white/[0.08] rounded-xl p-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
+                    <select
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-[#1e2433] border border-gray-200 dark:border-white/[0.08] rounded-xl p-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                    >
                       <option>(GMT+05:30) Asia/Kolkata (IST)</option>
                       <option>(GMT+00:00) UTC / London</option>
                       <option>(GMT-05:00) Eastern Time (US & Canada)</option>
@@ -636,7 +665,11 @@ export default function Settings() {
                     <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Date Format
                     </label>
-                    <select className="w-full bg-slate-50 dark:bg-[#1e2433] border border-gray-200 dark:border-white/[0.08] rounded-xl p-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
+                    <select
+                      value={dateFormat}
+                      onChange={(e) => setDateFormat(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-[#1e2433] border border-gray-200 dark:border-white/[0.08] rounded-xl p-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                    >
                       <option>DD/MM/YYYY (e.g. 03/08/2026)</option>
                       <option>MM/DD/YYYY (e.g. 08/03/2026)</option>
                       <option>YYYY-MM-DD (e.g. 2026-08-03)</option>
@@ -645,7 +678,12 @@ export default function Settings() {
                 </div>
 
                 <button
-                  onClick={() => toast.success("System preferences saved!")}
+                  onClick={() => {
+                    localStorage.setItem("freelancer_timezone", timezone);
+                    localStorage.setItem("freelancer_date_format", dateFormat);
+                    window.dispatchEvent(new Event("userSettingsChanged"));
+                    toast.success("System preferences saved!");
+                  }}
                   className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold shadow-md shadow-purple-500/25 transition-all duration-200"
                 >
                   <Save size={16} /> Save Preferences
