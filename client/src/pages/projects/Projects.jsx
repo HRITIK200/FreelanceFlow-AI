@@ -89,7 +89,23 @@ export default function Projects() {
   const [isDeleteOpen, setIsDeleteOpen]     = useState(false);
   const [deleteProjectId, setDeleteProjectId] = useState(null);
 
-  /* ── Fetch ─────────────────────────────────────────────── */
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  /* ── Fetch & Refresh ───────────────────────────────────── */
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      const [pd, cd] = await Promise.all([getProjects(), getClients()]);
+      setProjects(pd);
+      setClients(cd);
+      toast.success("Projects & Clients data refreshed! 🔄");
+    } catch (error) {
+      toast.error("Failed to refresh project data");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const fetchProjects = async () => {
     try {
       const data = await getProjects();
@@ -145,10 +161,14 @@ export default function Projects() {
     if (!formData.clientId) { toast.error("Please select a client"); return; }
     try {
       setSubmitting(true);
+      // Auto-set 100% progress if status is COMPLETED
+      let finalProgress = Number(formData.progress) || 0;
+      if (formData.status === "COMPLETED") finalProgress = 100;
+
       const payload = {
         ...formData,
         budget: formData.budget !== "" ? Number(formData.budget) : 0,
-        progress: Number(formData.progress) || 0,
+        progress: finalProgress,
         deadline: formData.deadline ? formData.deadline : null,
       };
       await createProject(payload);
@@ -212,8 +232,13 @@ export default function Projects() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={fetchProjects} className="p-2.5 rounded-xl border border-gray-200 dark:border-white/[0.07] text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all duration-200" title="Refresh">
-              <RefreshCw size={16} />
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2.5 rounded-xl border border-gray-200 dark:border-white/[0.07] text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all duration-200 disabled:opacity-50"
+              title="Refresh projects"
+            >
+              <RefreshCw size={16} className={isRefreshing ? "animate-spin text-blue-600" : ""} />
             </button>
             <button
               onClick={() => exportToExcel(projects.map(p => ({ Title: p.title, Status: p.status, Budget: p.budget, Client: p.client?.name, Progress: `${p.progress}%`, Deadline: p.deadline })), "Projects")}
@@ -558,11 +583,45 @@ export default function Projects() {
                 </div>
                 <div className="space-y-1">
                   <label className={labelCls}>Status</label>
-                  <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className={inputCls}>
+                  <select
+                    value={formData.status}
+                    onChange={e => {
+                      const newStatus = e.target.value;
+                      let newProg = formData.progress;
+                      if (newStatus === "COMPLETED") newProg = 100;
+                      else if (newStatus === "IN_PROGRESS" && newProg === 0) newProg = 25;
+                      else if (newStatus === "PENDING") newProg = 0;
+                      setFormData({ ...formData, status: newStatus, progress: newProg });
+                    }}
+                    className={inputCls}
+                  >
                     <option value="PENDING">Pending</option>
                     <option value="IN_PROGRESS">In Progress</option>
                     <option value="COMPLETED">Completed</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Progress Slider */}
+              <div className="space-y-2 pt-1">
+                <div className="flex justify-between items-center">
+                  <label className={labelCls}>Initial Progress</label>
+                  <span className="text-sm font-bold text-violet-600 dark:text-violet-400">{formData.progress || 0}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={formData.progress || 0}
+                  onChange={e => setFormData({ ...formData, progress: Number(e.target.value) })}
+                  className="w-full accent-violet-600 cursor-pointer"
+                />
+                <div className="w-full h-2 bg-gray-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-600 transition-all duration-300"
+                    style={{ width: `${formData.progress || 0}%` }}
+                  />
                 </div>
               </div>
 
