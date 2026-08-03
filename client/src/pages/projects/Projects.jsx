@@ -142,15 +142,23 @@ export default function Projects() {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) { toast.error("Project title is required"); return; }
+    if (!formData.clientId) { toast.error("Please select a client"); return; }
     try {
       setSubmitting(true);
-      await createProject({ ...formData, budget: Number(formData.budget), progress: Number(formData.progress) });
+      const payload = {
+        ...formData,
+        budget: formData.budget !== "" ? Number(formData.budget) : 0,
+        progress: Number(formData.progress) || 0,
+        deadline: formData.deadline ? formData.deadline : null,
+      };
+      await createProject(payload);
       toast.success("Project created! 🚀");
       setFormData({ title: "", description: "", budget: "", progress: 0, status: "PENDING", deadline: "", clientId: "" });
       setShowAddModal(false);
       fetchProjects();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create project");
+      const serverMsg = error.response?.data?.errors?.[0]?.message || error.response?.data?.message || "Failed to create project";
+      toast.error(serverMsg);
     } finally {
       setSubmitting(false);
     }
