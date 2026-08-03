@@ -16,11 +16,18 @@ export default function Navbar({ setSidebarOpen }) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const [userName, setUserName] = useState(() => localStorage.getItem("freelancer_name") || user?.name || "User");
+  const getValidName = () => {
+    const saved = localStorage.getItem("freelancer_name");
+    if (saved && saved !== "undefined" && saved !== "null") return saved;
+    if (user?.name) return user.name;
+    return "User";
+  };
+
+  const [userName, setUserName] = useState(getValidName);
 
   useEffect(() => {
     const handleSync = () => {
-      setUserName(localStorage.getItem("freelancer_name") || user?.name || "User");
+      setUserName(getValidName());
     };
     handleSync();
     window.addEventListener("userSettingsChanged", handleSync);
@@ -86,13 +93,16 @@ export default function Navbar({ setSidebarOpen }) {
   }, []);
 
   const getNotificationIcon = (text) => {
-    const message = text.toLowerCase();
+    const message = (text || "").toLowerCase();
     if (message.includes("client")) return "👤";
     if (message.includes("project")) return "📁";
     if (message.includes("invoice")) return "🧾";
     if (message.includes("email")) return "✉️";
     return "🔔";
   };
+
+  const displayName = userName || user?.name || "User";
+  const avatarLetter = displayName.charAt(0)?.toUpperCase() || "U";
 
   return (
     <header
@@ -251,7 +261,7 @@ export default function Navbar({ setSidebarOpen }) {
         {/* Profile */}
         <div className="hidden md:flex flex-col text-right">
           <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-            {userName}
+            {displayName}
           </p>
           <p className="text-xs text-gray-500">
             {user?.role === "USER" ? "Freelancer" : user?.role || "Freelancer"}
@@ -262,7 +272,7 @@ export default function Navbar({ setSidebarOpen }) {
           onClick={() => navigate("/profile")}
           className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold shadow-md hover:scale-105 active:scale-95 transition-all duration-300 ring-2 ring-blue-500/20"
         >
-          {userName.charAt(0)?.toUpperCase()}
+          {avatarLetter}
         </button>
 
         {/* Logout */}

@@ -58,11 +58,19 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, collapsed, setCol
   const navigate = useNavigate();
   const [clientCount, setClientCount] = useState(null);
   const [projectCount, setProjectCount] = useState(null);
-  const [userName, setUserName] = useState(() => localStorage.getItem("freelancer_name") || user?.name || "User");
+
+  const getValidName = () => {
+    const saved = localStorage.getItem("freelancer_name");
+    if (saved && saved !== "undefined" && saved !== "null") return saved;
+    if (user?.name) return user.name;
+    return "User";
+  };
+
+  const [userName, setUserName] = useState(getValidName);
 
   useEffect(() => {
     const handleSync = () => {
-      setUserName(localStorage.getItem("freelancer_name") || user?.name || "User");
+      setUserName(getValidName());
     };
     handleSync();
     window.addEventListener("userSettingsChanged", handleSync);
@@ -79,7 +87,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, collapsed, setCol
     navigate("/login");
   };
 
-  const avatarLetter = userName.charAt(0)?.toUpperCase() || "U";
+  const displayName = userName || user?.name || "User";
+  const avatarLetter = displayName.charAt(0)?.toUpperCase() || "U";
   const roleLabel = user?.role === "USER" ? "Freelancer" : user?.role || "Freelancer";
 
   return (
@@ -300,7 +309,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, collapsed, setCol
 
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-bold text-white truncate leading-none">
-                    {userName}
+                    {displayName}
                   </p>
                   <p className="text-[10px] text-slate-500 mt-0.5">{roleLabel}</p>
                 </div>
