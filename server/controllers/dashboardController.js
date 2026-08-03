@@ -1,119 +1,37 @@
 import prisma from "../utils/prisma.js";
 
-export const getDashboardStats =
-  async (req, res) => {
+export const getDashboardStats = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+    const userFilter = { client: { userId } };
 
-    try {
-
-      const totalClients =
-        await prisma.client.count({
-          where: {
-            userId:
-              req.user.userId,
-          },
-        });
-
-      const totalProjects =
-        await prisma.project.count({
-          where: {
-            client: {
-              userId:
-                req.user.userId,
-            },
-          },
-        });
-
-      const completedProjects =
-        await prisma.project.count({
-          where: {
-            status: "COMPLETED",
-
-            client: {
-              userId:
-                req.user.userId,
-            },
-          },
-        });
-
-      const revenue =
-        await prisma.project.aggregate({
-          _sum: {
-            budget: true,
-          },
-
-          where: {
-            status: "COMPLETED",
-
-            client: {
-              userId:
-                req.user.userId,
-            },
-          },
-        });
-
-        const totalInvoices =
-          await prisma.invoice.count({
-            where: {
-              project: {
-                client: {
-                  userId:
-                    req.user.userId,
-                },
-              },
-            },
-          });
-
-        const paidRevenue =
-          await prisma.invoice.aggregate({
-            _sum: {
-              amount: true,
-            },
-            where: {
-              status: "PAID",
-              project: {
-                client: {
-                  userId:
-                    req.user.userId,
-                },
-              },
-            },
-          });
-        
-        const pendingRevenue =
-          await prisma.invoice.aggregate({
-            _sum: {
-              amount: true,
-            },
-            where: {
-              status: "PENDING",
-              project: {
-                client: {
-                  userId:
-                    req.user.userId,
-                },
-              },
-            },
-          });
-
-        const overdueInvoices =
-          await prisma.invoice.count({
-            where: {
-              status: "PENDING",
-              dueDate: {
-                lt: new Date(),
-              },
-              project: {
-                client: {
-                  userId:
-                    req.user.userId,
-                },
-              },
-            },
-          });
-
-      // Calculate paid client revenue share breakdown
-      const clientStats = await prisma.client.findMany({
-        where: { userId: req.user.userId },
+    const [
+      totalClients,
+      totalProjects,
+      completedProjects,
+      totalInvoices,
+      paidRevenue,
+      pendingRevenue,
+      overdueInvoices,
+      clientStats,
+    ] = await Promise.all([
+      prisma.client.count({ where: { userId } }),
+      prisma.project.count({ where: userFilter }),
+      prisma.project.count({ where: { ...userFilter, status: "COMPLETED" } }),
+      prisma.invoice.count({ where: { project: userFilter.client } }),
+      prisma.invoice.aggregate({
+        _sum: { amount: true },
+        where: { status: "PAID", project: userFilter.client },
+      }),
+      prisma.invoice.aggregate({
+        _sum: { amount: true },
+        where: { status: "PENDING", project: userFilter.client },
+      }),
+      prisma.invoice.count({
+        where: { status: "PENDING", dueDate: { lt: new Date() }, project: userFilter.client },
+      }),
+      prisma.client.findMany({
+        where: { userId },
         select: {
           name: true,
           company: true,
@@ -121,50 +39,130 @@ export const getDashboardStats =
             select: {
               invoices: {
                 where: { status: "PAID" },
-                select: { amount: true }
-              }
-            }
-          }
-        }
-      });
+                select: { amount: true },
+              },
+            },
+          },
+        },
+      }),
+    ]);
 
-      const clientRevenueShares = clientStats.map(client => {
-        let totalPaid = 0;
-        client.projects.forEach(project => {
-          project.invoices.forEach(inv => {
-            totalPaid += inv.amount;
-          });
-        });
-        return {
-          name: client.company || client.name,
-          value: totalPaid
-        };
-      }).filter(share => share.value > 0);
+    const clientRevenueShares = clientStats
+      .map((client) => ({
+        name: client.company || client.name,
+        value: client.projects.reduce(
+          (sum, p) => sum + p.invoices.reduce((s, inv) => s + inv.amount, 0),
+          0
+        ),
+      }))
+      .filter((share) => share.value > 0);
 
-      res.json({
-        totalClients,
-        totalProjects,
-        completedProjects,
-        totalInvoices,
+    res.json({
+      totalClients,
+      totalProjects,
+      completedProjects,
+      totalInvoices,
+      paidRevenue: paidRevenue._sum.amount || 0,
+      pendingRevenue: pendingRevenue._sum.amount || 0,
+      overdueInvoices,
+      clientRevenueShares,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-        paidRevenue:
-          paidRevenue._sum.amount || 0,
-        
-        pendingRevenue:
-          pendingRevenue._sum.amount || 0,
-          
-        overdueInvoices,
-        clientRevenueShares,
-      });
+export const getReports = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+    const userProjectFilter = { project: { client: { userId } } };
 
-    } catch (error) {
+    // Monthly revenue for past 12 months
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+    twelveMonthsAgo.setDate(1);
+    twelveMonthsAgo.setHours(0, 0, 0, 0);
 
-      console.log(error);
+    const paidInvoices = await prisma.invoice.findMany({
+      where: {
+        status: "PAID",
+        createdAt: { gte: twelveMonthsAgo },
+        ...userProjectFilter,
+      },
+      select: { amount: true, createdAt: true },
+    });
 
-      res.status(500).json({
-        message:
-          "Server Error",
-      });
-
+    // Build monthly buckets
+    const monthlyMap = {};
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      monthlyMap[key] = { month: key, revenue: 0, count: 0 };
     }
+    paidInvoices.forEach((inv) => {
+      const d = new Date(inv.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (monthlyMap[key]) {
+        monthlyMap[key].revenue += inv.amount;
+        monthlyMap[key].count += 1;
+      }
+    });
+
+    // Project status breakdown
+    const projectStatusGroups = await prisma.project.groupBy({
+      by: ["status"],
+      where: { client: { userId } },
+      _count: { id: true },
+    });
+
+    // Top clients by paid revenue
+    const clients = await prisma.client.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        company: true,
+        projects: {
+          select: {
+            budget: true,
+            status: true,
+            invoices: { where: { status: "PAID" }, select: { amount: true } },
+          },
+        },
+      },
+    });
+
+    const topClients = clients
+      .map((c) => ({
+        id: c.id,
+        name: c.company || c.name,
+        paidRevenue: c.projects.reduce(
+          (sum, p) => sum + p.invoices.reduce((s, inv) => s + inv.amount, 0),
+          0
+        ),
+        projectCount: c.projects.length,
+        completedCount: c.projects.filter((p) => p.status === "COMPLETED").length,
+      }))
+      .sort((a, b) => b.paidRevenue - a.paidRevenue)
+      .slice(0, 5);
+
+    // Invoice collection stats
+    const [totalInv, paidInv] = await Promise.all([
+      prisma.invoice.count({ where: { project: { client: { userId } } } }),
+      prisma.invoice.count({ where: { status: "PAID", project: { client: { userId } } } }),
+    ]);
+
+    res.json({
+      monthlyRevenue: Object.values(monthlyMap),
+      projectStatusBreakdown: projectStatusGroups.map((g) => ({
+        status: g.status,
+        count: g._count.id,
+      })),
+      topClients,
+      collectionRate: totalInv > 0 ? Math.round((paidInv / totalInv) * 100) : 0,
+    });
+  } catch (error) {
+    next(error);
+  }
 };

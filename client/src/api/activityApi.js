@@ -1,28 +1,22 @@
 import api from "./axios";
 
-const getAuthHeaders = () => ({
-  headers: {
-    Authorization:
-      `Bearer ${localStorage.getItem("token")}`,
-  },
- });
+const authHeaders = () => ({
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+});
 
-export const getActivities =
-  async () => {
+export const getActivities = async ({ page = 1, limit = 20, category } = {}) => {
+  const params = new URLSearchParams({ page, limit });
+  if (category) params.append("category", category);
 
-    const token =
-      localStorage.getItem("token");
+  const response = await api.get(`/activity?${params}`, authHeaders());
+  // Backend now returns { activities, pagination } — support both old and new format
+  return response.data?.activities ?? response.data;
+};
 
-    const response =
-      await api.get(
-        "/activity",
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
-      );
+export const getActivityPage = async ({ page = 1, limit = 20, category } = {}) => {
+  const params = new URLSearchParams({ page, limit });
+  if (category) params.append("category", category);
 
-    return response.data;
+  const response = await api.get(`/activity?${params}`, authHeaders());
+  return response.data; // Full { activities, pagination } object
 };

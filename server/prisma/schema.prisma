@@ -8,14 +8,21 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(cuid())
-  name     String
-  email    String @unique
-  password String
-  role     String @default("USER")
+  id         String  @id @default(cuid())
+  name       String
+  email      String  @unique
+  password   String
+  role       String  @default("USER")
 
-  clients Client[]
+  // Profile fields
+  title      String?
+  company    String?
+  bio        String?
+  phone      String?
+  website    String?
+  hourlyRate Float?
 
+  clients      Client[]
   activityLogs ActivityLog[]
 
   createdAt DateTime @default(now())
@@ -23,15 +30,15 @@ model User {
 }
 
 model Client {
-  id String @id @default(cuid())
-
+  id      String  @id @default(cuid())
   name    String
   email   String
   company String?
+  phone   String?
+  notes   String?
 
   userId String
-
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   projects Project[]
 
@@ -40,22 +47,17 @@ model Client {
 }
 
 model Project {
-  id String @id @default(cuid())
-
+  id          String  @id @default(cuid())
   title       String
   description String?
-
-  budget Float?
-
-  status String @default("PENDING")
-
-  progress Int @default(0)
-
-  deadline DateTime?
+  budget      Float?
+  status      String  @default("PENDING")
+  progress    Int     @default(0)
+  deadline    DateTime?
+  tags        String?
 
   clientId String
-
-  client Client @relation(fields: [clientId], references: [id])
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   invoices Invoice[]
 
@@ -64,42 +66,31 @@ model Project {
 }
 
 model Invoice {
-  id String @id @default(cuid())
-
+  id            String @id @default(cuid())
   invoiceNumber String @unique
-
-  amount Float
-
-  status String @default("PENDING")
-
-  notes String?
+  amount        Float
+  status        String  @default("PENDING")
+  notes         String?
 
   issueDate DateTime @default(now())
-
-  dueDate DateTime
+  dueDate   DateTime
 
   projectId String
-
-  project Project @relation(fields: [projectId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model ActivityLog {
-  id String @id @default(cuid())
-
-  action String
-
+  id         String  @id @default(cuid())
+  action     String
   entityType String
-
-  entityId String?
-
-  details String?
+  entityId   String?
+  details    String?
 
   userId String
-
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
 }
