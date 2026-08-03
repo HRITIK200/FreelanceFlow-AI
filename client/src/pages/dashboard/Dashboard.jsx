@@ -143,20 +143,32 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const statsData = await getDashboardStats();
-        const activityData = await getActivities();
-        const clientsData = await getClients();
-        const projectsData = await getProjects();
+        const [statsData, activityData, clientsData, projectsData] = await Promise.all([
+          getDashboardStats().catch(() => null),
+          getActivities().catch(() => null),
+          getClients().catch(() => null),
+          getProjects().catch(() => null),
+        ]);
 
-        setStats(statsData);
-        setActivities(activityData);
-        setClients(clientsData);
-        setProjects(projectsData);
-        if (clientsData.length > 0) {
-          setScratchClient(clientsData[0].company || clientsData[0].name);
+        if (statsData) setStats(statsData);
+
+        if (activityData) {
+          const actList = Array.isArray(activityData) ? activityData : activityData?.activities || [];
+          setActivities(actList);
+        }
+
+        if (clientsData && Array.isArray(clientsData)) {
+          setClients(clientsData);
+          if (clientsData.length > 0) {
+            setScratchClient(clientsData[0].company || clientsData[0].name);
+          }
+        }
+
+        if (projectsData && Array.isArray(projectsData)) {
+          setProjects(projectsData);
         }
       } catch (error) {
-        console.log(error);
+        console.log("Dashboard fetch error:", error);
       }
     };
 
@@ -611,7 +623,7 @@ export default function Dashboard() {
              </button>
           </div>
 
-          {activities.length === 0 ? (
+          {!Array.isArray(activities) || activities.length === 0 ? (
             <div className="py-12 text-center">
                <div className="text-4xl mb-3">
                 📋
@@ -627,10 +639,10 @@ export default function Dashboard() {
                </div>
           ) : (
             <div className="relative pl-6 border-l-2 border-gray-100 space-y-6">
-              {activities
+              {(Array.isArray(activities) ? activities : [])
                 .slice(0, 5)
                 .map((activity) => {
-                  const text = activity.details.toLowerCase();
+                  const text = (activity?.details || "").toLowerCase();
                   let pulseColor = "bg-blue-500 shadow-blue-500/20";
                   if (text.includes("created")) pulseColor = "bg-green-500 shadow-green-500/20";
                   if (text.includes("deleted")) pulseColor = "bg-red-500 shadow-red-500/20";
