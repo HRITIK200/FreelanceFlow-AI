@@ -3,7 +3,8 @@ import prisma from "../utils/prisma.js";
 export const getDashboardStats = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const userFilter = { client: { userId } };
+    const projectFilter = { client: { userId } };
+    const invoiceFilter = { project: { client: { userId } } };
 
     const [
       totalClients,
@@ -16,19 +17,19 @@ export const getDashboardStats = async (req, res, next) => {
       clientStats,
     ] = await Promise.all([
       prisma.client.count({ where: { userId } }),
-      prisma.project.count({ where: userFilter }),
-      prisma.project.count({ where: { ...userFilter, status: "COMPLETED" } }),
-      prisma.invoice.count({ where: { project: userFilter.client } }),
+      prisma.project.count({ where: projectFilter }),
+      prisma.project.count({ where: { ...projectFilter, status: "COMPLETED" } }),
+      prisma.invoice.count({ where: invoiceFilter }),
       prisma.invoice.aggregate({
         _sum: { amount: true },
-        where: { status: "PAID", project: userFilter.client },
+        where: { status: "PAID", ...invoiceFilter },
       }),
       prisma.invoice.aggregate({
         _sum: { amount: true },
-        where: { status: "PENDING", project: userFilter.client },
+        where: { status: "PENDING", ...invoiceFilter },
       }),
       prisma.invoice.count({
-        where: { status: "PENDING", dueDate: { lt: new Date() }, project: userFilter.client },
+        where: { status: "PENDING", dueDate: { lt: new Date() }, ...invoiceFilter },
       }),
       prisma.client.findMany({
         where: { userId },
@@ -62,8 +63,8 @@ export const getDashboardStats = async (req, res, next) => {
       totalProjects,
       completedProjects,
       totalInvoices,
-      paidRevenue: paidRevenue._sum.amount || 0,
-      pendingRevenue: pendingRevenue._sum.amount || 0,
+      paidRevenue: paidRevenue._sum?.amount || 0,
+      pendingRevenue: pendingRevenue._sum?.amount || 0,
       overdueInvoices,
       clientRevenueShares,
     });

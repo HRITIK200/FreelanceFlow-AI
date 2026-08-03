@@ -1,5 +1,5 @@
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getDashboardStats, getReports } from "../../api/dashboardApi";
 import RevenueChart from "../../components/reports/RevenueChart";
 import { Download, BarChart3, Users, FolderKanban, Receipt, TrendingUp, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
@@ -41,11 +41,22 @@ export default function Reports() {
     fetchData();
   }, []);
 
-  const collectionRate = reportData?.collectionRate ?? (
-    stats.totalInvoices > 0
-      ? Math.round((stats.paidRevenue / (stats.paidRevenue + (stats.pendingRevenue || 0))) * 100)
+  const safeStats = useMemo(() => ({
+    totalClients: Number(stats?.totalClients) || 0,
+    totalProjects: Number(stats?.totalProjects) || 0,
+    completedProjects: Number(stats?.completedProjects) || 0,
+    paidRevenue: Number(stats?.paidRevenue) || 0,
+    totalInvoices: Number(stats?.totalInvoices) || 0,
+    pendingRevenue: Number(stats?.pendingRevenue) || 0,
+    overdueInvoices: Number(stats?.overdueInvoices) || 0,
+  }), [stats]);
+
+  const rawRate = reportData?.collectionRate ?? (
+    safeStats.totalInvoices > 0
+      ? Math.round((safeStats.paidRevenue / (safeStats.paidRevenue + safeStats.pendingRevenue)) * 100)
       : 0
   );
+  const collectionRate = isNaN(rawRate) ? 0 : rawRate;
 
   return (
     <DashboardLayout>
@@ -67,11 +78,11 @@ export default function Reports() {
               exportToExcel(
                 [
                   {
-                    PaidRevenue: stats.paidRevenue,
-                    PendingRevenue: stats.pendingRevenue,
-                    Clients: stats.totalClients,
-                    Projects: stats.totalProjects,
-                    Invoices: stats.totalInvoices,
+                    PaidRevenue: safeStats.paidRevenue,
+                    PendingRevenue: safeStats.pendingRevenue,
+                    Clients: safeStats.totalClients,
+                    Projects: safeStats.totalProjects,
+                    Invoices: safeStats.totalInvoices,
                     CollectionRate: `${collectionRate}%`,
                   },
                 ],
@@ -89,21 +100,21 @@ export default function Reports() {
           <div className="bg-white/70 dark:bg-[#161b28] backdrop-blur-md p-6 rounded-2xl border border-gray-100 dark:border-white/[0.06] shadow-sm">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Collected</p>
             <h2 className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">
-              ₹{(stats.paidRevenue || 0).toLocaleString()}
+              ₹{safeStats.paidRevenue.toLocaleString()}
             </h2>
           </div>
 
           <div className="bg-white/70 dark:bg-[#161b28] backdrop-blur-md p-6 rounded-2xl border border-gray-100 dark:border-white/[0.06] shadow-sm">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Clients</p>
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">
-              {stats.totalClients}
+              {safeStats.totalClients}
             </h2>
           </div>
 
           <div className="bg-white/70 dark:bg-[#161b28] backdrop-blur-md p-6 rounded-2xl border border-gray-100 dark:border-white/[0.06] shadow-sm">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Projects</p>
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">
-              {stats.totalProjects}
+              {safeStats.totalProjects}
             </h2>
           </div>
 
@@ -126,28 +137,28 @@ export default function Reports() {
           <div className="bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 p-6">
             <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Completed Projects</p>
             <h3 className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">
-              {stats.completedProjects}
+              {safeStats.completedProjects}
             </h3>
           </div>
 
           <div className="bg-amber-50/50 dark:bg-amber-500/10 rounded-2xl border border-amber-100 dark:border-amber-500/20 p-6">
             <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Pending Revenue</p>
             <h3 className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-2">
-              ₹{(stats.pendingRevenue || 0).toLocaleString()}
+              ₹{safeStats.pendingRevenue.toLocaleString()}
             </h3>
           </div>
 
           <div className="bg-red-50/50 dark:bg-red-500/10 rounded-2xl border border-red-100 dark:border-red-500/20 p-6">
             <p className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Overdue Invoices</p>
             <h3 className="text-3xl font-extrabold text-red-600 dark:text-red-400 mt-2">
-              {stats.overdueInvoices}
+              {safeStats.overdueInvoices}
             </h3>
           </div>
         </div>
 
         {/* ── Revenue Chart ──────────────────────────────────────── */}
         <div className="mb-8">
-          <RevenueChart stats={stats} />
+          <RevenueChart stats={safeStats} />
         </div>
 
         {/* ── Top Clients Breakdown (if available) ─────────────── */}

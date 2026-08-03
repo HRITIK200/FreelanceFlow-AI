@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 
@@ -106,29 +106,65 @@ export default function Dashboard() {
     return () => window.removeEventListener("clientFilterChanged", handleFilterChange);
   }, []);
 
-  const displayStats = (() => {
-    if (clientFilter === "all") return rawStats;
-    const selectedClient = clients.find(c => (c.company || c.name) === clientFilter);
-    const clientProjects = rawProjects.filter(p => p.clientId === selectedClient?.id);
-    const clientCompleted = clientProjects.filter(p => p.status === "COMPLETED");
+  const isAllClients = useMemo(() => {
+    if (!clientFilter) return true;
+    const lower = String(clientFilter).trim().toLowerCase();
+    return lower === "all" || lower.includes("all client");
+  }, [clientFilter]);
+
+  const displayStats = useMemo(() => {
+    if (isAllClients) return rawStats;
+    const selectedClient = clients.find(
+      (c) =>
+        c.id === clientFilter ||
+        c.name?.toLowerCase() === clientFilter.toLowerCase() ||
+        c.company?.toLowerCase() === clientFilter.toLowerCase()
+    );
+    if (!selectedClient) return rawStats;
+
+    const clientProjects = rawProjects.filter((p) => p.clientId === selectedClient.id);
+    const clientCompleted = clientProjects.filter((p) => p.status === "COMPLETED");
+
     return {
       ...rawStats,
       totalClients: 1,
       totalProjects: clientProjects.length,
       completedProjects: clientCompleted.length,
-      clientRevenueShares: rawStats.clientRevenueShares ? rawStats.clientRevenueShares.filter(s => s.name === clientFilter) : [],
+      clientRevenueShares: Array.isArray(rawStats.clientRevenueShares)
+        ? rawStats.clientRevenueShares.filter(
+            (s) => s.name?.toLowerCase() === (selectedClient.company || selectedClient.name)?.toLowerCase()
+          )
+        : [],
     };
-  })();
+  }, [isAllClients, clientFilter, clients, rawProjects, rawStats]);
 
-  const stats = displayStats;
+  const stats = useMemo(() => {
+    const s = displayStats || rawStats || {};
+    return {
+      totalClients: Number(s.totalClients ?? rawStats.totalClients) || 0,
+      totalProjects: Number(s.totalProjects ?? rawStats.totalProjects) || 0,
+      completedProjects: Number(s.completedProjects ?? rawStats.completedProjects) || 0,
+      totalInvoices: Number(s.totalInvoices ?? rawStats.totalInvoices) || 0,
+      paidRevenue: Number(s.paidRevenue ?? rawStats.paidRevenue) || 0,
+      pendingRevenue: Number(s.pendingRevenue ?? rawStats.pendingRevenue) || 0,
+      overdueInvoices: Number(s.overdueInvoices ?? rawStats.overdueInvoices) || 0,
+      clientRevenueShares: Array.isArray(s.clientRevenueShares) ? s.clientRevenueShares : [],
+    };
+  }, [displayStats, rawStats]);
 
-  const displayedProjects = (() => {
-    if (clientFilter === "all") return rawProjects;
-    const selectedClient = clients.find(c => (c.company || c.name) === clientFilter);
-    return rawProjects.filter(p => p.clientId === selectedClient?.id);
-  })();
+  const displayedProjects = useMemo(() => {
+    if (isAllClients) return rawProjects;
+    const selectedClient = clients.find(
+      (c) =>
+        c.id === clientFilter ||
+        c.name?.toLowerCase() === clientFilter.toLowerCase() ||
+        c.company?.toLowerCase() === clientFilter.toLowerCase()
+    );
+    if (!selectedClient) return rawProjects;
+    return rawProjects.filter((p) => p.clientId === selectedClient.id);
+  }, [isAllClients, clientFilter, clients, rawProjects]);
 
-  const projects = displayedProjects;
+  const projects = displayedProjects || rawProjects;
 
   const COLORS = ["#2563eb", "#8b5cf6", "#f59e0b", "#10b981", "#ec4899"];
 

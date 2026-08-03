@@ -6,27 +6,28 @@ export default function StatCard({
   return (
     <div
       className="
-        bg-white/75
+        bg-white/80
+        dark:bg-[#161b28]
         backdrop-blur-md
         rounded-3xl
         p-6
         border
-        border-white/40
-        shadow-[0_8px_30px_rgb(0,0,0,0.02)]
-        hover:shadow-[0_20px_40px_rgba(59,130,246,0.08)]
+        border-gray-100
+        dark:border-white/[0.06]
+        shadow-sm
+        hover:shadow-md
         hover:-translate-y-1
         transition-all
         duration-300
       "
     >
       <div className="flex items-center justify-between gap-3">
-
-        <div className="flex-1">
-
+        <div className="flex-1 min-w-0">
           <p
             className="
               text-xs
-              text-gray-400
+              text-gray-500
+              dark:text-gray-400
               font-bold
               uppercase
               tracking-wider
@@ -39,15 +40,15 @@ export default function StatCard({
             className="
               text-3xl
               font-extrabold
-              text-gray-800
+              text-gray-900
+              dark:text-white
               mt-2
               whitespace-nowrap
               tracking-tight
             "
           >
-            {value}
+            {value !== undefined && value !== null ? value : 0}
           </h2>
-
         </div>
 
         <div
@@ -70,7 +71,6 @@ export default function StatCard({
         >
           {icon}
         </div>
-
       </div>
     </div>
   );
