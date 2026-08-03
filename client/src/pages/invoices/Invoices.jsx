@@ -46,8 +46,23 @@ export default function Invoices() {
 
   const [isDeleteOpen, setIsDeleteOpen]   = useState(false);
   const [deleteInvoiceId, setDeleteInvoiceId] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  /* ── Fetch ──────────────────────────────────────────────── */
+  /* ── Fetch & Refresh ────────────────────────────────────── */
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      const [inv, proj] = await Promise.all([getInvoices(), getProjects()]);
+      setInvoices(inv);
+      setProjects(proj);
+      toast.success("Invoices & Projects refreshed! 🔄");
+    } catch (error) {
+      toast.error("Failed to refresh invoice data");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const fetchInvoices = async () => {
     try {
       const data = await getInvoices();
@@ -185,8 +200,13 @@ export default function Invoices() {
             <p className="text-gray-500 text-sm ml-[52px]">Track billing, payments, and revenue collection</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={fetchInvoices} className="p-2.5 rounded-xl border border-gray-200 dark:border-white/[0.07] text-gray-500 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all" title="Refresh">
-              <RefreshCw size={16} />
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2.5 rounded-xl border border-gray-200 dark:border-white/[0.07] text-gray-500 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all disabled:opacity-50"
+              title="Refresh invoices"
+            >
+              <RefreshCw size={16} className={isRefreshing ? "animate-spin text-emerald-600" : ""} />
             </button>
             <button
               onClick={() => exportToExcel(invoices.map(i => ({ InvoiceNo: i.invoiceNumber, Project: i.project?.title, Amount: i.amount, Status: i.status, DueDate: new Date(i.dueDate).toLocaleDateString() })), "Invoices")}
