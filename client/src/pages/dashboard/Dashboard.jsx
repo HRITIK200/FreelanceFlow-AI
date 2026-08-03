@@ -44,6 +44,7 @@ export default function Dashboard() {
     paidRevenue: 0,
     pendingRevenue: 0,
     overdueInvoices: 0,
+    clientRevenueShares: [],
   });
 
   const [activities, setActivities] = useState([]);
