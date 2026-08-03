@@ -154,6 +154,19 @@ export default function Projects() {
     [projects, search, statusFilter]
   );
 
+  const handleOpenCreateModal = () => {
+    setFormData({
+      title: "",
+      description: "",
+      budget: "",
+      progress: 50,
+      status: "IN_PROGRESS",
+      deadline: "",
+      clientId: clients[0]?.id || "",
+    });
+    setShowAddModal(true);
+  };
+
   /* ── Create project ────────────────────────────────────── */
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -161,9 +174,16 @@ export default function Projects() {
     if (!formData.clientId) { toast.error("Please select a client"); return; }
     try {
       setSubmitting(true);
-      // Auto-set 100% progress if status is COMPLETED
-      let finalProgress = Number(formData.progress) || 0;
-      if (formData.status === "COMPLETED") finalProgress = 100;
+      let finalProgress = Number(formData.progress);
+      if (isNaN(finalProgress)) finalProgress = 0;
+
+      if (formData.status === "COMPLETED") {
+        finalProgress = 100;
+      } else if (formData.status === "IN_PROGRESS" && finalProgress === 0) {
+        finalProgress = 50;
+      } else if (formData.status === "PENDING") {
+        finalProgress = 0;
+      }
 
       const payload = {
         ...formData,
@@ -173,7 +193,6 @@ export default function Projects() {
       };
       await createProject(payload);
       toast.success("Project created! 🚀");
-      setFormData({ title: "", description: "", budget: "", progress: 0, status: "PENDING", deadline: "", clientId: "" });
       setShowAddModal(false);
       fetchProjects();
     } catch (error) {
@@ -247,7 +266,7 @@ export default function Projects() {
               <Download size={15} /> Export
             </button>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={handleOpenCreateModal}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white text-sm font-semibold shadow-md shadow-violet-500/25 transition-all duration-200"
             >
               <Plus size={15} /> New Project
@@ -351,7 +370,7 @@ export default function Projects() {
               {search || statusFilter !== "ALL" ? "Try adjusting your search or filter." : "Create your first project to start tracking work."}
             </p>
             {!search && statusFilter === "ALL" && (
-              <button onClick={() => setShowAddModal(true)} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200">
+              <button onClick={handleOpenCreateModal} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200">
                 <Plus size={16} /> Create First Project
               </button>
             )}
