@@ -10,7 +10,7 @@ import {
   AlertCircle 
 } from "lucide-react";
 
-export default function AIAssistant({ stats }) {
+export default function AIAssistant({ stats = {} }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -27,38 +27,45 @@ export default function AIAssistant({ stats }) {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
+  const totalProjects = stats?.totalProjects || 0;
+  const completedProjects = stats?.completedProjects || 0;
+  const totalClients = stats?.totalClients || 0;
+  const paidRevenue = stats?.paidRevenue || 0;
+  const pendingRevenue = stats?.pendingRevenue || 0;
+  const overdueInvoices = stats?.overdueInvoices || 0;
+
   const completionRate =
-    stats.totalProjects > 0
-      ? Math.round((stats.completedProjects / stats.totalProjects) * 100)
+    totalProjects > 0
+      ? Math.round((completedProjects / totalProjects) * 100)
       : 0;
 
   const computeScore = () => {
     let score = 50;
-    if (stats.totalClients > 0) score += 10;
-    if (stats.totalProjects > 0) score += 10;
-    if (stats.completedProjects > 0) score += 10;
-    if (stats.paidRevenue > 0) score += 10;
-    score -= stats.overdueInvoices * 5;
+    if (totalClients > 0) score += 10;
+    if (totalProjects > 0) score += 10;
+    if (completedProjects > 0) score += 10;
+    if (paidRevenue > 0) score += 10;
+    score -= overdueInvoices * 5;
     return Math.max(0, Math.min(score, 100));
   };
 
   const getAIResponse = (query) => {
-    const q = query.toLowerCase();
+    const q = (query || "").toLowerCase();
 
     if (q.includes("project") || q.includes("summarize")) {
-      if (stats.totalProjects === 0) {
+      if (totalProjects === 0) {
         return "You don't have any projects registered yet. Tap 'Add Project' in the Quick Actions card to launch your first workspace.";
       }
-      return `You currently have **${stats.totalProjects} projects** in total. **${stats.completedProjects} are completed**, indicating a **${completionRate}% success rate**. Your active partners include Stark Industries and Wayne Enterprises.`;
+      return `You currently have **${totalProjects} projects** in total. **${completedProjects} are completed**, indicating a **${completionRate}% success rate**. Your active partners include Stark Industries and Wayne Enterprises.`;
     }
 
     if (q.includes("revenue") || q.includes("stat") || q.includes("money") || q.includes("finance")) {
-      return `Here's a breakdown of your finances:\n- **Collected Revenue**: ₹${(stats.paidRevenue || 0).toLocaleString()}\n- **Pending Invoices**: ₹${(stats.pendingRevenue || 0).toLocaleString()}\nStark Industries currently represents your largest contract value.`;
+      return `Here's a breakdown of your finances:\n- **Collected Revenue**: ₹${paidRevenue.toLocaleString()}\n- **Pending Invoices**: ₹${pendingRevenue.toLocaleString()}\nStark Industries currently represents your largest contract value.`;
     }
 
     if (q.includes("invoice") || q.includes("overdue") || q.includes("unpaid")) {
-      if (stats.overdueInvoices > 0) {
-        return `⚠️ You have **${stats.overdueInvoices} overdue invoice(s)** waiting for follow-up. I recommend heading to the **Invoices** tab to trigger a reminder email.`;
+      if (overdueInvoices > 0) {
+        return `⚠️ You have **${overdueInvoices} overdue invoice(s)** waiting for follow-up. I recommend heading to the **Invoices** tab to trigger a reminder email.`;
       }
       return "Fantastic! You have zero overdue invoices right now. Your client payment cycle is currently optimal.";
     }
@@ -68,8 +75,8 @@ export default function AIAssistant({ stats }) {
     }
 
     if (q.includes("improve") || q.includes("advice") || q.includes("grow")) {
-      if (stats.overdueInvoices > 0) {
-        return `💡 **Advice**: Reach out to clients on your **${stats.overdueInvoices} overdue invoices** today. For future contracts, structure a **50% deposit upfront** to secure cash flow.`;
+      if (overdueInvoices > 0) {
+        return `💡 **Advice**: Reach out to clients on your **${overdueInvoices} overdue invoices** today. For future contracts, structure a **50% deposit upfront** to secure cash flow.`;
       }
       return `💡 **Advice**: Financials are healthy! Consider raising your baseline service rates by **10-15%** for new incoming projects to optimize revenue per client.`;
     }
@@ -126,7 +133,7 @@ export default function AIAssistant({ stats }) {
 
       {/* Chat Window Panel */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-2rem)] h-[500px] bg-white/90 backdrop-blur-lg border border-slate-100 rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 transition-all duration-300">
+        <div className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-2rem)] h-[500px] bg-white/90 dark:bg-[#161b28]/95 backdrop-blur-lg border border-slate-100 dark:border-white/[0.08] rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 transition-all duration-300">
           
           {/* Header */}
           <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
@@ -151,7 +158,7 @@ export default function AIAssistant({ stats }) {
           </div>
 
           {/* Messages Body */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-[#0b0e1a]/50">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -160,7 +167,7 @@ export default function AIAssistant({ stats }) {
                 }`}
               >
                 {msg.sender === "bot" && (
-                  <div className="h-7 w-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <div className="h-7 w-7 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                     <Bot size={16} />
                   </div>
                 )}
@@ -169,7 +176,7 @@ export default function AIAssistant({ stats }) {
                     className={`p-3 rounded-2xl text-sm font-medium ${
                       msg.sender === "user"
                         ? "bg-blue-600 text-white rounded-tr-none"
-                        : "bg-white text-gray-800 border border-slate-100 rounded-tl-none"
+                        : "bg-white dark:bg-[#1a1f2e] text-gray-800 dark:text-gray-200 border border-slate-100 dark:border-white/[0.06] rounded-tl-none"
                     }`}
                     style={{ whiteSpace: 'pre-line' }}
                   >
@@ -184,10 +191,10 @@ export default function AIAssistant({ stats }) {
 
             {isTyping && (
               <div className="flex gap-2 max-w-[80%] mr-auto">
-                <div className="h-7 w-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <div className="h-7 w-7 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                   <Bot size={16} />
                 </div>
-                <div className="bg-white p-3 rounded-2xl border border-slate-100 rounded-tl-none">
+                <div className="bg-white dark:bg-[#1a1f2e] p-3 rounded-2xl border border-slate-100 dark:border-white/[0.06] rounded-tl-none">
                   <div className="flex gap-1.5 items-center justify-center h-4">
                     <span className="h-2 w-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '0ms' }}></span>
                     <span className="h-2 w-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -200,31 +207,31 @@ export default function AIAssistant({ stats }) {
           </div>
 
           {/* Quick Triggers */}
-          <div className="px-4 py-2 border-t border-slate-50 bg-white flex gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none">
+          <div className="px-4 py-2 border-t border-slate-50 dark:border-white/[0.06] bg-white dark:bg-[#161b28] flex gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none">
             <button
               onClick={() => handleSend("Show Revenue Stats")}
-              className="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
+              className="text-xs font-semibold bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
             >
               <TrendingUp size={12} />
               ₹ Revenue
             </button>
             <button
               onClick={() => handleSend("Project Summary")}
-              className="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
+              className="text-xs font-semibold bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
             >
               <FileText size={12} />
               📁 Projects
             </button>
             <button
               onClick={() => handleSend("Overdue Invoices")}
-              className="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
+              className="text-xs font-semibold bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
             >
               <AlertCircle size={12} />
               ⚠️ Invoices
             </button>
             <button
               onClick={() => handleSend("Improvement Advice")}
-              className="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
+              className="text-xs font-semibold bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 transition flex items-center gap-1 shrink-0"
             >
               <Sparkles size={12} />
               💡 Advice
@@ -237,14 +244,14 @@ export default function AIAssistant({ stats }) {
               e.preventDefault();
               handleSend();
             }}
-            className="p-3 bg-white border-t border-slate-100 flex gap-2"
+            className="p-3 bg-white dark:bg-[#161b28] border-t border-slate-100 dark:border-white/[0.06] flex gap-2"
           >
             <input
               type="text"
               placeholder="Ask Flowy AI..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+              className="flex-1 bg-slate-50 dark:bg-[#1e2433] border border-slate-100 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
             />
             <button
               type="submit"
