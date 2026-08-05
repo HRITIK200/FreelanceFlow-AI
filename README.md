@@ -148,6 +148,12 @@ https://your-backend-url.onrender.com
 
 ---
 
+### Settings
+
+<img width="100%" src="./screenshots/settings.png" alt="settings"/>
+
+---
+
 ## Tech Stack
 
 ### Frontend
