@@ -1,426 +1,174 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
-import { Link } from "react-router-dom";
-
 import {
   Eye,
   EyeOff,
-  BriefcaseBusiness,
-  Users,
-  FolderKanban,
-  Receipt,
-  TrendingUp,
+  Zap,
+  ArrowRight,
+  ShieldCheck,
+  Lock,
+  Mail,
+  ArrowLeft,
+  Loader2,
 } from "lucide-react";
 
 export default function Login() {
-
   const navigate = useNavigate();
-
   const { login } = useAuth();
 
-  const [formData, setFormData] =
-    useState({
-      email: "",
-      password: "",
-    });
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  const [showPassword, setShowPassword] =
-     useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit =
-    async (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.email || !formData.password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
 
-      e.preventDefault();
-
-      try {
-
-        const data =
-          await loginUser(
-            formData
-          );
-        
-        console.log("LOGIN RESPONSE:", data);
-
-        login(
-          data.token,
-          data.user
-        );
-
-        toast.success(
-          "Login successful"
-        );
-
-        navigate(
-          "/dashboard"
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-        toast.error(
-          error.response?.data?.message ||
-            "Login failed"
-        );
-
-      }
-  };
-
-  const handleDemoLogin = async () => {
     try {
-      const demoData = {
-        email: "demo@freelanceflow.ai",
-        password: "demopassword",
-      };
-
-      const data = await loginUser(demoData);
-      console.log("DEMO LOGIN RESPONSE:", data);
-
+      setLoading(true);
+      const data = await loginUser(formData);
       login(data.token, data.user);
-      toast.success("Welcome! Demo account logged in.");
+      toast.success("Login successful!");
       navigate("/dashboard");
     } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Demo login failed");
+      console.error(error);
+      toast.error(error.response?.data?.message || "Invalid credentials. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-  <div
-    className="
-      min-h-screen
-      bg-gradient-to-br
-      from-blue-600
-      via-indigo-600
-      to-purple-700
-      flex
-      items-center
-      justify-center
-      p-4
-      md:p-8
-    "
-  >
-    <div className="w-full max-w-5xl">
-      {/* Back to Home Link */}
-      <div className="mb-4">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl backdrop-blur-md transition shadow-sm"
-        >
-          ← Back to Home
-        </Link>
-      </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex items-center justify-center p-4 sm:p-6 relative overflow-x-hidden selection:bg-blue-500 selection:text-white">
+      {/* Background Ambient Glowing Orbs */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div
-        className="
-          md:hidden
-          text-center
-          text-white
-          mb-6
-        "
-      >
-        <div className="flex items-center justify-center gap-2">
-          <BriefcaseBusiness size={28} />
-          <h1 className="text-3xl font-bold">
-            FreelanceFlow AI
-          </h1>
-        </div>
-
-        <p className="mt-2 text-blue-100">
-          Manage Clients, Projects & Invoices
-        </p>
-
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-            Clients
-          </span>
-
-          <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-            Projects
-          </span>
-
-          <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-            Invoices
-          </span>
-        </div>
-      </div>
-
-      <div
-        className="
-          bg-white/10
-          backdrop-blur-md
-          rounded-3xl
-          overflow-hidden
-          shadow-2xl
-          transition-all
-          duration-300
-          hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)]
-          grid
-          md:grid-cols-2
-        "
-      >
-        {/* LEFT PANEL */}
-
-        <div
-          className="
-            hidden
-            md:flex
-            flex-col
-            justify-center
-            p-14
-            text-white
-            bg-gradient-to-br
-            from-blue-700
-            via-indigo-800
-            to-purple-700
-          "
-        >
-          <div className="flex items-center gap-4 mb-10">
-            <div
-              className="
-                w-16
-                h-16
-                rounded-2xl
-                bg-white/20
-                flex
-                items-center
-                justify-center
-              "
-            >
-              <BriefcaseBusiness size={30} />
-            </div>
-
-            <div>
-              <h2 className="text-3xl font-bold">
-                FreelanceFlow AI
-              </h2>
-
-              <p className="text-blue-100">
-                Smart Freelance Management
-              </p>
-            </div>
-          </div>
-
-          <h1 className="text-5xl font-bold leading-tight mb-6">
-            Welcome Back
-          </h1>
-
-          <p className="text-lg text-blue-100 mb-10">
-            Login to manage clients,
-            projects, invoices and track
-            your freelance business growth.
-          </p>
-
-          <div className="space-y-6">
-
-            <div className="flex items-center gap-3">
-              <Users size={22} />
-              <span>Manage Clients</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <FolderKanban size={22} />
-              <span>Track Projects</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Receipt size={22} />
-              <span>Generate Invoices</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <TrendingUp size={22} />
-              <span>Monitor Growth</span>
-            </div>
-
-          </div>
-        </div>
-
-        {/* RIGHT PANEL */}
-
-        <div
-          className="
-            bg-white
-            p-8
-            md:p-14
-            flex
-            items-center
-          "
-        >
-          <form
-            onSubmit={handleSubmit}
-            className="w-full"
+      <div className="w-full max-w-md relative z-10">
+        {/* ── Top Header & Back to Home Button ─────────────────────── */}
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800 px-4 py-2 rounded-xl border border-slate-800 transition shadow-sm"
           >
-            <h1 className="text-4xl font-bold text-center mb-2">
-              Welcome Back
-            </h1>
+            <ArrowLeft size={14} /> Back to Home
+          </Link>
 
-            <p className="text-center text-gray-500 mb-8">
-              Login to continue managing
-              your freelance business.
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-sm font-extrabold tracking-tight text-white">
+              FreelanceFlow <span className="text-blue-500">AI</span>
+            </span>
+          </div>
+        </div>
+
+        {/* ── Login Glass Card ──────────────────────────────────────── */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Welcome Back</h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-2">
+              Sign in to manage your clients, projects, and PDF invoices.
             </p>
+          </div>
 
-            <div className="space-y-4">
-
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="
-                  w-full
-                  bg-gray-50
-                  border
-                  border-gray-200
-                  rounded-xl
-                  p-4
-                  focus:ring-2
-                  focus:ring-blue-500
-                  focus:outline-none
-                "
-              />
-
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email Field */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                Email Address
+              </label>
               <div className="relative">
-
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <Mail size={18} />
+                </div>
                 <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      password: e.target.value,
-                    })
-                  }
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
-                  className="
-                    w-full
-                    bg-gray-50
-                    border
-                    border-gray-200
-                    rounded-xl
-                    p-4
-                    pr-12
-                    focus:ring-2
-                    focus:ring-blue-500
-                    focus:outline-none
-                  "
+                  placeholder="name@company.com"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                 />
+              </div>
+            </div>
 
+            {/* Password Field */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <Lock size={18} />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="••••••••"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                />
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(
-                      !showPassword
-                    )
-                  }
-                  className="
-                    absolute
-                    right-4
-                    top-1/2
-                    -translate-y-1/2
-                    text-gray-500
-                  "
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 transition"
                 >
-                  {showPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-
               </div>
-
-              <button
-                type="submit"
-                className="
-                  w-full
-                  py-4
-                  rounded-xl
-                  text-white
-                  font-semibold
-                  bg-gradient-to-r
-                  from-blue-600
-                  to-indigo-600
-                  transition-all
-                  duration-300
-                  hover:-translate-y-1
-                  hover:shadow-xl
-                "
-              >
-                Login
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                className="
-                  w-full
-                  py-4
-                  rounded-xl
-                  text-blue-600
-                  font-semibold
-                  bg-blue-50
-                  border
-                  border-blue-200
-                  transition-all
-                  duration-300
-                  hover:-translate-y-1
-                  hover:bg-blue-100
-                  hover:border-blue-300
-                  hover:shadow-lg
-                  flex
-                  items-center
-                  justify-center
-                  gap-2
-                "
-              >
-                ✨ Explore Guest Demo
-              </button>
-
             </div>
 
-            <p className="text-center mt-6">
-              Don't have an account?{" "}
-              <Link
-                to="/register"
-                className="
-                  text-blue-600
-                  font-semibold
-                  hover:underline
-                "
-              >
-                Register
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:opacity-95 text-white font-extrabold text-sm shadow-lg shadow-blue-600/30 transition transform active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" /> Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In to Dashboard <ArrowRight size={16} />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Bottom Footer Switch */}
+          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
+            <p className="text-xs sm:text-sm text-slate-400">
+              Don't have an account yet?{" "}
+              <Link to="/register" className="font-bold text-blue-400 hover:text-blue-300 transition">
+                Create Free Account
               </Link>
             </p>
-
-            <p className="text-center text-xs text-gray-400 mt-6">
-              Secure Authentication • JWT Protected
-            </p>
-
-
-          </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 }
