@@ -1,348 +1,223 @@
-# FreelanceFlow AI
+# FreelanceFlow AI — Full-Stack SaaS Platform
 
-A full-stack freelance management SaaS platform built with React, Node.js, Express, PostgreSQL, and Prisma. FreelanceFlow AI helps freelancers and agencies manage clients, projects, invoices, payments, activity logs, and business analytics from a single dashboard.
-
----
-
-## Live Demo
-
-### Frontend
-
-https://your-frontend-url.vercel.app
-
-### Backend API
-
-https://your-backend-url.onrender.com
+**FreelanceFlow AI** is a production-grade full-stack SaaS platform built with **React 18**, **Node.js**, **Express.js**, **PostgreSQL**, and **Prisma ORM**. It empowers freelancers and boutique agencies to manage clients, track project progress, stream single-page PDF invoices directly in memory, export financial reports to Excel, and monitor business performance through real-time dynamic analytics.
 
 ---
 
-## Features
+## 🌐 Live Demo & Deployment
 
-### Authentication & Security
-
-* JWT Authentication
-* User Registration & Login
-* Protected Routes
-* Secure API Access
-* Role-Based Authorization Ready
-
-### Dashboard Analytics
-
-* Total Clients Overview
-* Total Projects Overview
-* Revenue Tracking
-* Invoice Statistics
-* Collection Rate Analytics
-* Overdue Invoice Monitoring
-* Activity Tracking
-
-### Client Management
-
-* Create Clients
-* Update Client Details
-* Delete Clients
-* Search Clients
-* Client Detail Page
-* Client Revenue Tracking
-* Client Project Tracking
-
-### Project Management
-
-* Create Projects
-* Update Projects
-* Delete Projects
-* Project Progress Tracking
-* Project Detail Page
-* Client Association
-* Status Management
-* Budget Tracking
-
-### Invoice Management
-
-* Create Invoices
-* Edit Invoice Status
-* Mark Invoice as Paid
-* Delete Invoices
-* Invoice Search & Filters
-* Overdue Invoice Tracking
-* Collection Rate Monitoring
-* Create Invoice Directly from Project Page
-
-### PDF Generation
-
-* Download Professional Invoice PDFs
-* Export Invoice Records
-* Printable Documents
-
-### Email Integration
-
-* Send Invoice Emails
-* Client Communication Support
-* Automated Email Workflow Ready
-
-### Activity Logs
-
-* Client Activity Tracking
-* Project Activity Tracking
-* Invoice Activity Tracking
-* User Action History
-
-### Data Export
-
-* Export Projects to Excel
-* Export Invoices to Excel
-* Business Reporting
-
-### Responsive Design
-
-* Desktop Optimized
-* Tablet Responsive
-* Mobile Friendly
-* Modern SaaS UI
+- **Frontend (Vercel):** [https://freelanceflow-ai.vercel.app](https://freelanceflow-ai.vercel.app)
+- **Backend API (Render):** [https://freelanceflow-ai.onrender.com](https://freelanceflow-ai.onrender.com)
+- **Database (Neon PostgreSQL):** Serverless PostgreSQL Cloud Engine
 
 ---
 
-## Screenshots
+## 🌟 Key Features & Architecture
 
-### Register
+### 🏠 SaaS Landing Page (Home Page)
+* **Modern Marketing Hero**: High-converting value proposition banner with glow effects.
+* **Interactive Live Preview Tabs**: Switchable preview widgets for Dashboard, PDF Invoices, and Analytics.
+* **Light / Dark Mode Switcher**: Real-time theme toggling persisted in `localStorage`.
+* **Instant Demo Account Access**: 1-click guest login for recruiters and visitors.
+* **Expandable FAQ Accordion**: Answers common questions on PDF streaming, security, and Excel exports.
 
-<img width="100%" src="./screenshots/register.png"
- alt="Register"/>
+### 🔒 Authentication & Multi-Tenant Security
+* **Stateless JWT Authentication**: Bearer token headers for request authorization.
+* **Row-Level Access Isolation (RLAC)**: Database queries strictly filter by `userId` to guarantee complete multi-tenant user data privacy.
+* **Zod Input Schema Validation**: Sanitizes and validates request payloads before controller execution.
+* **Production Security Middleware**: Integrated `helmet()` headers and `express-rate-limit` DDoS protection.
 
-### Login
+### 📄 Dynamic PDF Invoicing Engine
+* **Zero-Disk In-Memory Streaming**: Pipes PDFKit buffers directly into HTTP response objects (`doc.pipe(res)`), eliminating disk I/O latency and file cleanup scripts.
+* **Single-Page Bounds**: Dynamic margin calculations to prevent unwanted page 2 overflow spills.
+* **Typography & Currency Fix**: Replaced unsupported Helvetica Unicode symbols with standard `INR` text formatting.
 
-<img width="100%" src="./screenshots/login.png"
- alt="Login"/>
+### 📊 Business Analytics & Excel Export
+* **Real-Time Visualizations**: Interactive Recharts bar and pie charts plotting monthly revenue trends.
+* **Executive Excel (.xlsx) Exports**: 1-click SheetJS workbook streaming for accounting.
+* **Collection Efficiency**: Tracks paid vs. pending revenue ratios and overdue invoice alerts.
 
-### Dashboard
+### 👥 Client & Project Management
+* **Client Directory**: Manage contact records, company profiles, and client-specific revenue rankings.
+* **Project Progress Sliders**: Interactive 0-100% completion sliders pre-synced with status badges.
+* **Cascading Relational Deletes**: Configured Prisma `onDelete: Cascade` rules (`Client ➔ Project ➔ Invoice`).
 
-<img width="100%" src="./screenshots/dashboard.png" alt="Dashboard"/>
+### ⚡ Lightweight Real-Time Event Bus
+* Custom browser events (`window.dispatchEvent`) synchronize profile avatar updates and global client header filtering instantly without full page reloads.
 
-### Clients
+---
 
-<img width="100%" src="./screenshots/clients.png" alt="Clients"/>
+## 🖼️ Application Screenshots
 
-### Projects
+### 🏠 Home Page (Landing Page)
+<img width="100%" src="./screenshots/homepage.png" alt="Home Page Landing"/>
 
-<img width="100%" src="./screenshots/projects.png" alt="Projects"/>
+---
 
-### Project Details
+### 🔑 Login Page
+<img width="100%" src="./screenshots/login.png" alt="Login Page"/>
 
-<img width="100%" src="./screenshots/project-details.png" alt="Project Details"/>
+---
 
-### Invoices
+### 📝 Register Page
+<img width="100%" src="./screenshots/register.png" alt="Register Page"/>
 
-<img width="100%" src="./screenshots/invoices.png" alt="Invoices"/>
+---
 
-### Activity
+### 📊 Dashboard
+<img width="100%" src="./screenshots/dashboard.png" alt="Dashboard Overview"/>
 
-<img width="100%" src="./screenshots/activity.png" alt="Activity"/>
+---
 
-### Reports
+### 👥 Clients Directory
+<img width="100%" src="./screenshots/clients.png" alt="Clients Management"/>
 
-<img width="100%" src="./screenshots/reports.png" alt="Reports"/>
+---
 
-### Client Details
-
+### 👤 Client Details
 <img width="100%" src="./screenshots/client-details.png" alt="Client Details"/>
 
 ---
 
-### Settings
-
-<img width="100%" src="./screenshots/settings.png" alt="settings"/>
+### 📁 Projects Management
+<img width="100%" src="./screenshots/projects.png" alt="Projects Management"/>
 
 ---
 
-## Tech Stack
+### 📂 Project Details
+<img width="100%" src="./screenshots/project-details.png" alt="Project Details"/>
+
+---
+
+### 🧾 Invoices Management
+<img width="100%" src="./screenshots/invoices.png" alt="Invoices Management"/>
+
+---
+
+### 📈 Reports & Analytics
+<img width="100%" src="./screenshots/reports.png" alt="Reports & Analytics"/>
+
+---
+
+### 📋 Activity Audit Logs
+<img width="100%" src="./screenshots/activity.png" alt="Activity Audit Logs"/>
+
+---
+
+### ⚙️ User Profile & Settings
+<img width="100%" src="./screenshots/settings.png" alt="Profile Settings"/>
+
+---
+
+## 🛠️ Tech Stack & Dependencies
 
 ### Frontend
-
-* React.js
-* Vite
-* Tailwind CSS
-* React Router DOM
-* Axios
-* Recharts
-* React Hot Toast
-* Lucide React
+* **Core Library:** React 18 + Vite
+* **Styling:** Tailwind CSS + Glassmorphism UI
+* **Icons & UI:** Lucide React, React Hot Toast
+* **Charts:** Recharts (`ResponsiveContainer`, `BarChart`, `PieChart`)
+* **Exports:** SheetJS (`xlsx`)
+* **State & Sync:** React Context API + Custom Browser Event Bus
+* **Routing:** React Router DOM v6
 
 ### Backend
+* **Runtime & Framework:** Node.js + Express.js
+* **Database ORM:** Prisma ORM v5
+* **Validation:** Zod Schema Validation
+* **Security:** JWT (JSON Web Tokens), bcrypt.js, Helmet, Express Rate Limit
+* **PDF Streaming:** PDFKit (HTTP Stream Piping)
+* **Email Workflows:** Nodemailer + Resend API
 
-* Node.js
-* Express.js
-* JWT Authentication
-* Nodemailer
-* PDFKit
-
-### Database
-
-* PostgreSQL
-* Prisma ORM
-* Neon Database
-
-### Deployment
-
-* Vercel (Frontend)
-* Render (Backend)
-* Neon PostgreSQL (Database)
+### Database & Infrastructure
+* **Database Engine:** PostgreSQL (Neon Serverless PostgreSQL Cloud)
+* **Hosting:** Vercel (Frontend SPA) + Render (Node.js REST API)
 
 ---
 
-## Database Schema
+## 🗄️ Database Relational Schema
 
-### User
-
-* Authentication
-* Client Ownership
-* Activity Tracking
-
-### Client
-
-* Name
-* Email
-* Company
-* Associated Projects
-
-### Project
-
-* Title
-* Description
-* Budget
-* Progress
-* Status
-* Deadline
-* Client Association
-
-### Invoice
-
-* Invoice Number
-* Amount
-* Status
-* Due Date
-* Notes
-* Project Association
-
-### Activity Logs
-
-* Action Type
-* Entity Type
-* Entity ID
-* Timestamp
-
----
-
-## Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/HRITIK200/FreelanceFlow-AI.git
-cd freelanceflow-ai
+```
+┌──────────┐ 1        N ┌──────────┐ 1        N ┌───────────┐ 1        N ┌─────────┐
+│   User   ├───────────►│  Client  ├───────────►│  Project  ├───────────►│ Invoice │
+└────┬─────┘            └──────────┘            └───────────┘            └─────────┘
+     │ 1
+     │ N
+┌────▼────────┐
+│ ActivityLog │
+└─────────────┘
 ```
 
-### Backend Setup
+* **User:** Multi-tenant account authentication, profile details (`hourlyRate`, `company`, `title`).
+* **Client:** Name, email, company, budget tracking, user ownership foreign key.
+* **Project:** Title, description, budget, progress (0-100%), deadline, client foreign key (`onDelete: Cascade`).
+* **Invoice:** Invoice number, amount, status (`PAID` / `PENDING`), due date, project foreign key (`onDelete: Cascade`).
+* **ActivityLog:** User action history details, entity type, timestamps.
 
+---
+
+## 🚀 Local Installation & Setup
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/HRITIK200/FreelanceFlow-AI.git
+cd FreelanceFlow-AI
+```
+
+### 2. Backend Setup (`/server`)
 ```bash
 cd server
 npm install
-
 ```
 
-Run migrations:
+Create a `.env` file in `/server`:
+```env
+PORT=5000
+DATABASE_URL="postgresql://user:password@localhost:5432/freelanceflow?schema=public"
+JWT_SECRET="your_super_secret_jwt_key"
+```
 
+Apply database migrations:
 ```bash
 npx prisma migrate dev
 npx prisma generate
 ```
 
-Start backend:
-
+Start backend development server:
 ```bash
 npm run dev
 ```
 
-### Frontend Setup
-
+### 3. Frontend Setup (`/client`)
 ```bash
-cd client
+cd ../client
 npm install
 ```
 
-Create `.env`:
-
+Create a `.env` file in `/client`:
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
-Start frontend:
-
+Start frontend development server:
 ```bash
 npm run dev
 ```
 
 ---
 
-## Project Architecture
+## 💡 Key Technical Accomplishments
 
-Frontend (React + Tailwind)
-↓
-Axios API Layer
-↓
-Express Backend
-↓
-Prisma ORM
-↓
-PostgreSQL Database
-
-Additional Services:
-
-* JWT Authentication
-* PDF Generation
-* Email Service
-* Excel Export
+- **Zero-Disk PDFKit Streaming Engine:** Pipes PDF buffers directly to HTTP response stream (`doc.pipe(res)`), avoiding server disk I/O and cleanup scripts.
+- **Row-Level Data Security:** All Prisma queries filter on `userId` to enforce strict multi-tenant isolation.
+- **Lightweight Event Bus Sync:** Native `window.dispatchEvent` syncs profile avatar and global client filters without Redux boilerplate.
+- **Defensive Error-Proof UI:** Component computations use `useMemo` with safe numeric fallbacks (`Number(val) || 0`) and `Array.isArray()` guards.
 
 ---
 
-## Key Learning Outcomes
+## 👨‍💻 Author
 
-* Full Stack MERN Development
-* REST API Design
-* Authentication & Authorization
-* Database Design with Prisma
-* PostgreSQL Integration
-* SaaS Application Architecture
-* Invoice Management Systems
-* PDF Generation
-* Email Automation
-* Responsive UI Development
-* Deployment & Production Setup
-
----
-
-## Future Improvements
-
-* Role-Based Access Control
-* Payment Gateway Integration
-* Recurring Invoices
-* Team Collaboration
-* Notification System
-* Dark Mode
-* Advanced Analytics
-* AI-Powered Insights
-
----
-
-## Author
-
-### Hritik Pal
-
-MCA Graduate (2025)
-
-Full Stack MERN Developer
-
-GitHub: https://github.com/HRITIK200
-
-LinkedIn: https://www.linkedin.com/in/hritik-pal-616005217/
-
-Email: [palhritik18@gmail.com]
+### **Hritik Pal**
+* Full-Stack MERN / PERN Developer | MCA Graduate
+* **GitHub:** [https://github.com/HRITIK200](https://github.com/HRITIK200)
+* **LinkedIn:** [https://www.linkedin.com/in/hritik-pal-616005217/](https://www.linkedin.com/in/hritik-pal-616005217/)
+* **Email:** [palhritik18@gmail.com](mailto:palhritik18@gmail.com)
