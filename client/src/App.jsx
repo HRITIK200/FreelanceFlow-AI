@@ -28,9 +28,15 @@ from "./pages/clients/ClientDetails";
 import ProjectDetails
 from "./pages/projects/ProjectDetails";
 
+import LandingPage from "./pages/landing/LandingPage";
+
 function App() {
   return (
     <Routes>
+      <Route
+        path="/"
+        element={<LandingPage />}
+      />
 
       <Route
         path="/login"
@@ -41,22 +47,13 @@ function App() {
         path="/register"
         element={<Register />}
       />
-      
+
       <Route
         path="/profile"
         element={
-        <ProtectedRoute>
-        <Profile />
-        </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to="/login"
-            replace
-          />
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
         }
       />
 
