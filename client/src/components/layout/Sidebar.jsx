@@ -84,7 +84,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, collapsed, setCol
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   const displayName = userName || user?.name || "User";
