@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Zap,
   ShieldCheck,
@@ -45,23 +45,30 @@ export default function LandingPage() {
     }
   }, [darkMode]);
 
+  const isSubmitting = useRef(false);
+
   const handleDemoLogin = async () => {
+    if (isSubmitting.current || demoLoading) return;
+    isSubmitting.current = true;
+    setDemoLoading(true);
+    toast.loading("Accessing demo workspace...", { id: "auth-status" });
+
     try {
-      setDemoLoading(true);
       const demoData = {
         email: "demo@freelanceflow.ai",
         password: "demopassword",
       };
       const data = await loginUser(demoData);
       login(data.token, data.user);
-      toast.success("Welcome! Demo account logged in.");
+      toast.success("Welcome! Demo account loaded.", { id: "auth-status" });
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast.error("Demo login failed. Navigating to login page.");
+      toast.error("Demo login failed. Navigating to login page.", { id: "auth-status" });
       navigate("/login");
     } finally {
       setDemoLoading(false);
+      isSubmitting.current = false;
     }
   };
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { getClientDetails, deleteClient } from "../../api/clientApi";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import Skeleton from "../../components/ui/Skeleton";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 import {
   Users, Building2, Mail, Phone, FolderKanban, Receipt,
   IndianRupee, ArrowLeft, Trash2, CheckCircle2, Clock3,
@@ -14,6 +15,8 @@ import {
 export default function ClientDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isDemo = user?.role === "DEMO";
 
   const [data, setData]         = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -35,6 +38,11 @@ export default function ClientDetails() {
   }, [id]);
 
   const handleDelete = async () => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to delete clients!", { id: "demo-restricted" });
+      setIsDeleteOpen(false);
+      return;
+    }
     try {
       await deleteClient(id);
       toast.success("Client deleted successfully");

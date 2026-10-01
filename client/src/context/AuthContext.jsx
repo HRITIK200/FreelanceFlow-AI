@@ -67,11 +67,14 @@ export const AuthProvider =
       setUser(null);
     };
 
+    const isDemo = user?.role === "DEMO";
+
     return (
       <AuthContext.Provider
         value={{
           token,
           user,
+          isDemo,
           login,
           logout,
         }}

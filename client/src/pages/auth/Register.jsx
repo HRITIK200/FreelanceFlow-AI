@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
@@ -29,6 +29,7 @@ export default function Register() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const isSubmitting = useRef(false);
 
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("ff_theme");
@@ -54,27 +55,33 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting.current || loading) return;
+
     if (!formData.name || !formData.email || !formData.password) {
-      toast.error("Please fill in all required fields");
+      toast.error("Please fill in all required fields", { id: "auth-status" });
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters", { id: "auth-status" });
       return;
     }
 
+    isSubmitting.current = true;
+    setLoading(true);
+    toast.loading("Creating your workspace...", { id: "auth-status" });
+
     try {
-      setLoading(true);
       const data = await registerUser(formData);
       login(data.token, data.user);
-      toast.success("Account created successfully!");
+      toast.success("Account created successfully!", { id: "auth-status" });
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+      toast.error(error.response?.data?.message || "Registration failed. Please try again.", { id: "auth-status" });
     } finally {
       setLoading(false);
+      isSubmitting.current = false;
     }
   };
 

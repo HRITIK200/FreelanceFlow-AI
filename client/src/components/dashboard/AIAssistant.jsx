@@ -56,11 +56,13 @@ export default function AIAssistant({ stats = {} }) {
       if (totalProjects === 0) {
         return "You don't have any projects registered yet. Tap 'Add Project' in the Quick Actions card to launch your first workspace.";
       }
-      return `You currently have **${totalProjects} projects** in total. **${completedProjects} are completed**, indicating a **${completionRate}% success rate**. Your active partners include Stark Industries and Wayne Enterprises.`;
+      return `You currently have **${totalProjects} projects** in total. **${completedProjects} are completed**, indicating a **${completionRate}% success rate**. ${totalProjects > 0 ? "Keep up the momentum on your active project deliveries!" : "Create your first project to get started!"}`;
     }
 
     if (q.includes("revenue") || q.includes("stat") || q.includes("money") || q.includes("finance")) {
-      return `Here's a breakdown of your finances:\n- **Collected Revenue**: ₹${paidRevenue.toLocaleString()}\n- **Pending Invoices**: ₹${pendingRevenue.toLocaleString()}\nStark Industries currently represents your largest contract value.`;
+      const topClient = stats?.clientRevenueShares?.[0]?.name;
+      const clientNote = topClient ? `**${topClient}** currently represents your highest revenue contributor.` : "Manage and track client invoices to keep revenue growing.";
+      return `Here's a breakdown of your finances:\n- **Collected Revenue**: ₹${paidRevenue.toLocaleString()}\n- **Pending Invoices**: ₹${pendingRevenue.toLocaleString()}\n${clientNote}`;
     }
 
     if (q.includes("invoice") || q.includes("overdue") || q.includes("unpaid")) {

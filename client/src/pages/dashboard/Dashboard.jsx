@@ -35,6 +35,11 @@ import {
 export default function Dashboard() {
 
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isDemo = user?.role === "DEMO";
+
+  const taskStorageKey = user?.id ? `ff_dashboard_tasks_${user.id}` : "ff_dashboard_tasks";
+  const notesStorageKey = user?.id ? `ff_scratch_notes_${user.id}` : "ff_scratch_notes";
 
   const [rawStats, setStats] = useState({
     totalClients: 0,
@@ -51,12 +56,16 @@ export default function Dashboard() {
   const [targetRevenue, setTargetRevenue] = useState(150000);
   const [tasks, setTasks] = useState(() => {
     try {
-      const saved = localStorage.getItem("ff_dashboard_tasks");
-      return saved ? JSON.parse(saved) : [
-        { id: 1, text: "Send Stark invoice report", completed: false },
-        { id: 2, text: "Review Batcave wireframes with Bruce", completed: true },
-        { id: 3, text: "Update profile hourly rate settings", completed: false },
-      ];
+      const saved = localStorage.getItem(taskStorageKey);
+      if (saved) return JSON.parse(saved);
+      if (isDemo) {
+        return [
+          { id: 1, text: "Send Stark invoice report", completed: false },
+          { id: 2, text: "Review Batcave wireframes with Bruce", completed: true },
+          { id: 3, text: "Update profile hourly rate settings", completed: false },
+        ];
+      }
+      return [];
     } catch (e) {
       return [];
     }
@@ -65,27 +74,37 @@ export default function Dashboard() {
 
   const handleAddTask = (e) => {
     e.preventDefault();
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to manage tasks!", { id: "demo-restricted" });
+      return;
+    }
     if (!taskText.trim()) return;
     const newTask = { id: Date.now(), text: taskText.trim(), completed: false };
     const updated = [...tasks, newTask];
     setTasks(updated);
-    localStorage.setItem("ff_dashboard_tasks", JSON.stringify(updated));
+    localStorage.setItem(taskStorageKey, JSON.stringify(updated));
     setTaskText("");
   };
 
   const handleToggleTask = (id) => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to manage tasks!", { id: "demo-restricted" });
+      return;
+    }
     const updated = tasks.map((t) => t.id === id ? { ...t, completed: !t.completed } : t);
     setTasks(updated);
-    localStorage.setItem("ff_dashboard_tasks", JSON.stringify(updated));
+    localStorage.setItem(taskStorageKey, JSON.stringify(updated));
   };
 
   const handleDeleteTask = (id) => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to manage tasks!", { id: "demo-restricted" });
+      return;
+    }
     const updated = tasks.filter((t) => t.id !== id);
     setTasks(updated);
-    localStorage.setItem("ff_dashboard_tasks", JSON.stringify(updated));
+    localStorage.setItem(taskStorageKey, JSON.stringify(updated));
   };
-
-  const { user } = useAuth();
 
   const [chartTab, setChartTab] = useState("overview");
   const [rawProjects, setProjects] = useState([]);
@@ -93,7 +112,7 @@ export default function Dashboard() {
   const [calcIncome, setCalcIncome] = useState(100000);
   const [calcHours, setCalcHours] = useState(30);
   const [calcExpenses, setCalcExpenses] = useState(15000);
-  const [scratchNotes, setScratchNotes] = useState(() => localStorage.getItem("ff_scratch_notes") || "");
+  const [scratchNotes, setScratchNotes] = useState(() => localStorage.getItem(notesStorageKey) || "");
   const [scratchClient, setScratchClient] = useState("");
 
   const [clientFilter, setClientFilter] = useState(() => localStorage.getItem("ff_active_client_filter") || "all");
@@ -876,8 +895,13 @@ export default function Dashboard() {
             <div className="flex gap-1.5 mt-4">
               <button 
                 onClick={() => {
-                  setScratchNotes("Scope of Work:\n- Objective:\n- Deliverables:\n- Timeline:\n- Fee: ");
-                  localStorage.setItem("ff_scratch_notes", "Scope of Work:\n- Objective:\n- Deliverables:\n- Timeline:\n- Fee: ");
+                  if (isDemo) {
+                    toast.error("Demo account is view-only. Create a free account to edit notes!", { id: "demo-restricted" });
+                    return;
+                  }
+                  const val = "Scope of Work:\n- Objective:\n- Deliverables:\n- Timeline:\n- Fee: ";
+                  setScratchNotes(val);
+                  localStorage.setItem(notesStorageKey, val);
                 }}
                 className="text-[9px] font-extrabold uppercase tracking-wider bg-gray-50 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 rounded-lg px-2 py-1 transition-all"
               >
@@ -885,8 +909,13 @@ export default function Dashboard() {
               </button>
               <button 
                 onClick={() => {
-                  setScratchNotes("Dear [Client],\nThank you for working with me! Please review Invoice details below.\nAmount: \nDue Date: ");
-                  localStorage.setItem("ff_scratch_notes", "Dear [Client],\nThank you for working with me! Please review Invoice details below.\nAmount: \nDue Date: ");
+                  if (isDemo) {
+                    toast.error("Demo account is view-only. Create a free account to edit notes!", { id: "demo-restricted" });
+                    return;
+                  }
+                  const val = "Dear [Client],\nThank you for working with me! Please review Invoice details below.\nAmount: \nDue Date: ";
+                  setScratchNotes(val);
+                  localStorage.setItem(notesStorageKey, val);
                 }}
                 className="text-[9px] font-extrabold uppercase tracking-wider bg-gray-50 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 rounded-lg px-2 py-1 transition-all"
               >
@@ -894,8 +923,13 @@ export default function Dashboard() {
               </button>
               <button 
                 onClick={() => {
-                  setScratchNotes("Hi [Client],\nJust a friendly reminder that Invoice is due on [Date]. Please process at your earliest convenience.");
-                  localStorage.setItem("ff_scratch_notes", "Hi [Client],\nJust a friendly reminder that Invoice is due on [Date]. Please process at your earliest convenience.");
+                  if (isDemo) {
+                    toast.error("Demo account is view-only. Create a free account to edit notes!", { id: "demo-restricted" });
+                    return;
+                  }
+                  const val = "Hi [Client],\nJust a friendly reminder that Invoice is due on [Date]. Please process at your earliest convenience.";
+                  setScratchNotes(val);
+                  localStorage.setItem(notesStorageKey, val);
                 }}
                 className="text-[9px] font-extrabold uppercase tracking-wider bg-gray-50 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 rounded-lg px-2 py-1 transition-all"
               >
@@ -907,8 +941,12 @@ export default function Dashboard() {
               rows={4}
               value={scratchNotes}
               onChange={(e) => {
+                if (isDemo) {
+                  toast.error("Demo account is view-only. Create a free account to edit notes!", { id: "demo-restricted" });
+                  return;
+                }
                 setScratchNotes(e.target.value);
-                localStorage.setItem("ff_scratch_notes", e.target.value);
+                localStorage.setItem(notesStorageKey, e.target.value);
               }}
               placeholder="Start drafting contracts or scope details..."
               className="w-full mt-4 bg-white/50 border border-gray-200 focus:border-blue-500 rounded-2xl p-3 text-xs outline-none resize-none transition-all"

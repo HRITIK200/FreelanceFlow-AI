@@ -31,13 +31,22 @@ import {
 
 export default function Profile() {
   const { user } = useAuth();
+  const isDemo = user?.role === "DEMO";
   const [loading, setLoading] = useState(true);
 
+  const uid = user?.id || "guest";
+  const nameKey = `freelancer_name_${uid}`;
+  const emailKey = `freelancer_email_${uid}`;
+  const titleKey = `freelancer_title_${uid}`;
+  const companyKey = `freelancer_company_${uid}`;
+  const skillsKey = `freelancer_skills_${uid}`;
+  const availKey = `freelancer_availability_${uid}`;
+
   // Dynamic user details
-  const [profileName, setProfileName] = useState(() => localStorage.getItem("freelancer_name") || user?.name || "Freelancer User");
-  const [profileEmail, setProfileEmail] = useState(() => localStorage.getItem("freelancer_email") || user?.email || "freelancer@example.com");
-  const [profileTitle, setProfileTitle] = useState(() => localStorage.getItem("freelancer_title") || "Senior Full-Stack Freelancer");
-  const [profileCompany, setProfileCompany] = useState(() => localStorage.getItem("freelancer_company") || "FlowStudio Agency");
+  const [profileName, setProfileName] = useState(() => localStorage.getItem(nameKey) || user?.name || "Freelancer User");
+  const [profileEmail, setProfileEmail] = useState(() => localStorage.getItem(emailKey) || user?.email || "freelancer@example.com");
+  const [profileTitle, setProfileTitle] = useState(() => localStorage.getItem(titleKey) || "Senior Full-Stack Freelancer");
+  const [profileCompany, setProfileCompany] = useState(() => localStorage.getItem(companyKey) || "FlowStudio Agency");
 
   const [stats, setStats] = useState({
     totalClients: 0,
@@ -48,7 +57,7 @@ export default function Profile() {
 
   // Dynamic skills
   const [skills, setSkills] = useState(() => {
-    const saved = localStorage.getItem("freelancer_skills");
+    const saved = localStorage.getItem(skillsKey);
     return saved ? JSON.parse(saved) : [
       "React.js",
       "Node.js",
@@ -64,13 +73,13 @@ export default function Profile() {
   const [showAddSkill, setShowAddSkill] = useState(false);
 
   // Dynamic availability
-  const [availability, setAvailability] = useState(() => localStorage.getItem("freelancer_availability") || "Available for Work");
+  const [availability, setAvailability] = useState(() => localStorage.getItem(availKey) || "Available for Work");
 
   const syncSettings = () => {
-    setProfileName(localStorage.getItem("freelancer_name") || user?.name || "Freelancer User");
-    setProfileEmail(localStorage.getItem("freelancer_email") || user?.email || "freelancer@example.com");
-    setProfileTitle(localStorage.getItem("freelancer_title") || "Senior Full-Stack Freelancer");
-    setProfileCompany(localStorage.getItem("freelancer_company") || "FlowStudio Agency");
+    setProfileName(localStorage.getItem(nameKey) || user?.name || "Freelancer User");
+    setProfileEmail(localStorage.getItem(emailKey) || user?.email || "freelancer@example.com");
+    setProfileTitle(localStorage.getItem(titleKey) || "Senior Full-Stack Freelancer");
+    setProfileCompany(localStorage.getItem(companyKey) || "FlowStudio Agency");
   };
 
   useEffect(() => {
@@ -97,6 +106,10 @@ export default function Profile() {
 
   const handleAddSkill = (e) => {
     e.preventDefault();
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to customize skills!", { id: "demo-restricted" });
+      return;
+    }
     if (!newSkill.trim()) return;
     if (skills.includes(newSkill.trim())) {
       toast.error("Skill already added");
@@ -104,25 +117,33 @@ export default function Profile() {
     }
     const updated = [...skills, newSkill.trim()];
     setSkills(updated);
-    localStorage.setItem("freelancer_skills", JSON.stringify(updated));
+    localStorage.setItem(skillsKey, JSON.stringify(updated));
     setNewSkill("");
     setShowAddSkill(false);
     toast.success("Skill tag added! ⚡");
   };
 
   const handleRemoveSkill = (skillToRemove) => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to customize skills!", { id: "demo-restricted" });
+      return;
+    }
     const updated = skills.filter((s) => s !== skillToRemove);
     setSkills(updated);
-    localStorage.setItem("freelancer_skills", JSON.stringify(updated));
+    localStorage.setItem(skillsKey, JSON.stringify(updated));
     toast.success("Skill removed");
   };
 
   const handleToggleAvailability = () => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to update availability!", { id: "demo-restricted" });
+      return;
+    }
     const options = ["Available for Work", "In a Sprint", "Busy / Fully Booked"];
     const currentIdx = options.indexOf(availability);
     const nextOption = options[(currentIdx + 1) % options.length];
     setAvailability(nextOption);
-    localStorage.setItem("freelancer_availability", nextOption);
+    localStorage.setItem(availKey, nextOption);
     toast.success(`Status updated: "${nextOption}"`);
   };
 

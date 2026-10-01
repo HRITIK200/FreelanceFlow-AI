@@ -33,18 +33,19 @@ import {
 export default function Settings() {
   const { user } = useAuth();
   const isDemo = user?.role === "DEMO";
+  const uid = user?.id || "guest";
 
   // Tab State
   const [activeTab, setActiveTab] = useState("profile");
 
   // Profile State
-  const [name, setName] = useState(() => localStorage.getItem("freelancer_name") || user?.name || "Freelancer User");
-  const [email, setEmail] = useState(() => localStorage.getItem("freelancer_email") || user?.email || "freelancer@example.com");
-  const [title, setTitle] = useState(() => localStorage.getItem("freelancer_title") || "Senior Full-Stack Freelancer");
-  const [company, setCompany] = useState(() => localStorage.getItem("freelancer_company") || "FlowStudio Agency");
-  const [phone, setPhone] = useState(() => localStorage.getItem("freelancer_phone") || "+91 98765 43210");
+  const [name, setName] = useState(() => localStorage.getItem(`freelancer_name_${uid}`) || user?.name || "Freelancer User");
+  const [email, setEmail] = useState(() => localStorage.getItem(`freelancer_email_${uid}`) || user?.email || "freelancer@example.com");
+  const [title, setTitle] = useState(() => localStorage.getItem(`freelancer_title_${uid}`) || "Senior Full-Stack Freelancer");
+  const [company, setCompany] = useState(() => localStorage.getItem(`freelancer_company_${uid}`) || "FlowStudio Agency");
+  const [phone, setPhone] = useState(() => localStorage.getItem(`freelancer_phone_${uid}`) || "+91 98765 43210");
   const [bio, setBio] = useState(
-    () => localStorage.getItem("freelancer_bio") || "Building high-performance web applications and design systems for global clients."
+    () => localStorage.getItem(`freelancer_bio_${uid}`) || "Building high-performance web applications and design systems for global clients."
   );
 
   // Security State
@@ -52,11 +53,11 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [twoFactor, setTwoFactor] = useState(() => localStorage.getItem("freelancer_2fa") === "true");
+  const [twoFactor, setTwoFactor] = useState(() => localStorage.getItem(`freelancer_2fa_${uid}`) === "true");
 
   // Notifications State
   const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem("freelancer_notifications");
+    const saved = localStorage.getItem(`freelancer_notifications_${uid}`);
     return saved ? JSON.parse(saved) : {
       emailAlerts: true,
       invoiceReminders: true,
@@ -67,14 +68,14 @@ export default function Settings() {
   });
 
   // Preferences State
-  const [currency, setCurrency] = useState(() => localStorage.getItem("freelancer_currency") || "INR (₹)");
-  const [hourlyRate, setHourlyRate] = useState(() => localStorage.getItem("freelancer_hourly_rate") || "2500");
-  const [taxRate, setTaxRate] = useState(() => localStorage.getItem("freelancer_tax_rate") || "18");
-  const [paymentTerms, setPaymentTerms] = useState(() => localStorage.getItem("freelancer_payment_terms") || "14");
+  const [currency, setCurrency] = useState(() => localStorage.getItem(`freelancer_currency_${uid}`) || "INR (₹)");
+  const [hourlyRate, setHourlyRate] = useState(() => localStorage.getItem(`freelancer_hourly_rate_${uid}`) || "2500");
+  const [taxRate, setTaxRate] = useState(() => localStorage.getItem(`freelancer_tax_rate_${uid}`) || "18");
+  const [paymentTerms, setPaymentTerms] = useState(() => localStorage.getItem(`freelancer_payment_terms_${uid}`) || "14");
 
   // App Preferences
-  const [timezone, setTimezone] = useState(() => localStorage.getItem("freelancer_timezone") || "(GMT+05:30) Asia/Kolkata (IST)");
-  const [dateFormat, setDateFormat] = useState(() => localStorage.getItem("freelancer_date_format") || "DD/MM/YYYY (e.g. 03/08/2026)");
+  const [timezone, setTimezone] = useState(() => localStorage.getItem(`freelancer_timezone_${uid}`) || "(GMT+05:30) Asia/Kolkata (IST)");
+  const [dateFormat, setDateFormat] = useState(() => localStorage.getItem(`freelancer_date_format_${uid}`) || "DD/MM/YYYY (e.g. 03/08/2026)");
 
   // Modal State
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -85,17 +86,17 @@ export default function Settings() {
   const handleSaveProfile = (e) => {
     e.preventDefault();
     if (isDemo) {
-      toast.error("Demo user credentials cannot be modified");
+      toast.error("Demo user credentials cannot be modified", { id: "demo-restricted" });
       return;
     }
     setSavingProfile(true);
 
-    localStorage.setItem("freelancer_name", name);
-    localStorage.setItem("freelancer_email", email);
-    localStorage.setItem("freelancer_title", title);
-    localStorage.setItem("freelancer_company", company);
-    localStorage.setItem("freelancer_phone", phone);
-    localStorage.setItem("freelancer_bio", bio);
+    localStorage.setItem(`freelancer_name_${uid}`, name);
+    localStorage.setItem(`freelancer_email_${uid}`, email);
+    localStorage.setItem(`freelancer_title_${uid}`, title);
+    localStorage.setItem(`freelancer_company_${uid}`, company);
+    localStorage.setItem(`freelancer_phone_${uid}`, phone);
+    localStorage.setItem(`freelancer_bio_${uid}`, bio);
 
     window.dispatchEvent(new Event("userSettingsChanged"));
 

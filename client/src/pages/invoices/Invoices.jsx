@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { exportToExcel } from "../../utils/exportToExcel";
 import Skeleton from "../../components/ui/Skeleton";
+import { useAuth } from "../../context/AuthContext";
 
 import {
   CheckCircle2, Download, Mail, Trash2, FileText, Clock3,
@@ -30,6 +31,9 @@ const dueDays = (dueDate) => {
 };
 
 export default function Invoices() {
+  const { user } = useAuth();
+  const isDemo = user?.role === "DEMO";
+
   const [invoices, setInvoices]     = useState([]);
   const [projects, setProjects]     = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -120,6 +124,11 @@ export default function Invoices() {
   /* ── Create invoice ─────────────────────────────────────── */
   const handleCreate = async (e) => {
     e.preventDefault();
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to generate invoices!", { id: "demo-restricted" });
+      setShowModal(false);
+      return;
+    }
     if (!formData.amount || !formData.dueDate) { toast.error("Amount and due date are required"); return; }
     try {
       setSubmitting(true);
@@ -137,6 +146,10 @@ export default function Invoices() {
 
   /* ── Toggle paid/pending ────────────────────────────────── */
   const handleToggleStatus = async (invoice) => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to update invoice statuses!", { id: "demo-restricted" });
+      return;
+    }
     const newStatus = invoice.status === "PAID" ? "PENDING" : "PAID";
     try {
       await updateInvoice(invoice.id, { status: newStatus });
@@ -167,6 +180,10 @@ export default function Invoices() {
 
   /* ── Send email ─────────────────────────────────────────── */
   const handleEmail = async (invoice) => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to dispatch emails!", { id: "demo-restricted" });
+      return;
+    }
     try {
       setSendingId(invoice.id);
       await sendInvoiceEmail(invoice.id);
@@ -650,6 +667,11 @@ export default function Invoices() {
         title="Delete Invoice"
         message="Are you sure you want to delete this invoice? This action cannot be undone."
         onConfirm={async () => {
+          if (isDemo) {
+            toast.error("Demo account is view-only. Create a free account to delete invoices!", { id: "demo-restricted" });
+            setIsDeleteOpen(false);
+            return;
+          }
           try {
             await deleteInvoice(deleteInvoiceId);
             toast.success("Invoice deleted successfully");

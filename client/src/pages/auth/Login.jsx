@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
@@ -51,24 +51,32 @@ export default function Login() {
     });
   };
 
+  const isSubmitting = useRef(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting.current || loading) return;
+
     if (!formData.email || !formData.password) {
-      toast.error("Please enter both email and password");
+      toast.error("Please enter both email and password", { id: "auth-status" });
       return;
     }
 
+    isSubmitting.current = true;
+    setLoading(true);
+    toast.loading("Signing into your workspace...", { id: "auth-status" });
+
     try {
-      setLoading(true);
       const data = await loginUser(formData);
       login(data.token, data.user);
-      toast.success("Login successful!");
+      toast.success("Login successful!", { id: "auth-status" });
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Invalid credentials. Please try again.");
+      toast.error(error.response?.data?.message || "Invalid credentials. Please try again.", { id: "auth-status" });
     } finally {
       setLoading(false);
+      isSubmitting.current = false;
     }
   };
 

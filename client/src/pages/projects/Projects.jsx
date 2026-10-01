@@ -13,6 +13,7 @@ import { toast } from "react-hot-toast";
 import { exportToExcel } from "../../utils/exportToExcel";
 import { Link } from "react-router-dom";
 import Skeleton from "../../components/ui/Skeleton";
+import { useAuth } from "../../context/AuthContext";
 
 import {
   FolderKanban,
@@ -70,6 +71,9 @@ const inputCls = "w-full bg-slate-50 dark:bg-[#1e2433] border border-gray-200 da
 const labelCls = "text-xs font-semibold text-gray-500 uppercase tracking-wider";
 
 export default function Projects() {
+  const { user } = useAuth();
+  const isDemo = user?.role === "DEMO";
+
   const [projects, setProjects]         = useState([]);
   const [clients, setClients]           = useState([]);
   const [loading, setLoading]           = useState(true);
@@ -170,6 +174,11 @@ export default function Projects() {
   /* ── Create project ────────────────────────────────────── */
   const handleCreate = async (e) => {
     e.preventDefault();
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to create projects!", { id: "demo-restricted" });
+      setShowAddModal(false);
+      return;
+    }
     if (!formData.title.trim()) { toast.error("Project title is required"); return; }
     if (!formData.clientId) { toast.error("Please select a client"); return; }
     try {
@@ -206,6 +215,11 @@ export default function Projects() {
   /* ── Update project ────────────────────────────────────── */
   const handleUpdate = async (e) => {
     e.preventDefault();
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to edit projects!", { id: "demo-restricted" });
+      setIsEditOpen(false);
+      return;
+    }
     try {
       const updatedStatus = (selectedProject?.progress || 0) >= 100 ? "COMPLETED" : selectedProject.status;
       await updateProject(selectedProject.id, {
@@ -728,6 +742,11 @@ export default function Projects() {
         title="Delete Project"
         message="Are you sure you want to delete this project? This action cannot be undone."
         onConfirm={async () => {
+          if (isDemo) {
+            toast.error("Demo account is view-only. Create a free account to delete projects!", { id: "demo-restricted" });
+            setIsDeleteOpen(false);
+            return;
+          }
           try {
             await deleteProject(deleteProjectId);
             toast.success("Project deleted successfully");

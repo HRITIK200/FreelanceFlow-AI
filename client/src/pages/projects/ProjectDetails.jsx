@@ -9,6 +9,7 @@ import Modal from "../../components/ui/Modal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import Skeleton from "../../components/ui/Skeleton";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 import {
   FolderKanban, IndianRupee, Clock3, CheckCircle2, Building2,
   Plus, Download, Send, Trash2, ArrowLeft, Receipt, CalendarClock
@@ -17,6 +18,8 @@ import {
 export default function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isDemo = user?.role === "DEMO";
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +54,11 @@ export default function ProjectDetails() {
 
   const handleCreateInvoice = async (e) => {
     e.preventDefault();
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to generate invoices!", { id: "demo-restricted" });
+      setShowInvoiceModal(false);
+      return;
+    }
     if (!invoiceData.amount || !invoiceData.dueDate) {
       toast.error("Amount and Due Date are required");
       return;
@@ -75,6 +83,11 @@ export default function ProjectDetails() {
   };
 
   const handleDeleteProject = async () => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to delete projects!", { id: "demo-restricted" });
+      setIsDeleteOpen(false);
+      return;
+    }
     try {
       await deleteProject(id);
       toast.success("Project deleted successfully");
@@ -99,6 +112,10 @@ export default function ProjectDetails() {
   };
 
   const handleSendEmail = async (inv) => {
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to dispatch emails!", { id: "demo-restricted" });
+      return;
+    }
     try {
       await sendInvoiceEmail(inv.id);
       toast.success("Invoice email sent!");

@@ -13,6 +13,7 @@ import Modal from "../../components/ui/Modal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { exportToExcel } from "../../utils/exportToExcel";
 import Skeleton from "../../components/ui/Skeleton";
+import { useAuth } from "../../context/AuthContext";
 
 import {
   Users,
@@ -57,6 +58,9 @@ const getInitials = (name = "") =>
     .join("");
 
 export default function Clients() {
+  const { user } = useAuth();
+  const isDemo = user?.role === "DEMO";
+
   const [clients, setClients] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -158,6 +162,10 @@ export default function Clients() {
   /* ── Submit new client ──────────────────────────────────── */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isDemo) {
+      toast.error("Demo account is view-only. Create a free account to add clients!", { id: "demo-restricted" });
+      return;
+    }
     if (!form.name.trim() || !form.email.trim()) {
       toast.error("Name and email are required");
       return;
@@ -581,6 +589,11 @@ export default function Clients() {
           <form
             onSubmit={async (e) => {
               e.preventDefault();
+              if (isDemo) {
+                toast.error("Demo account is view-only. Create a free account to edit clients!", { id: "demo-restricted" });
+                setIsEditOpen(false);
+                return;
+              }
               try {
                 await updateClient(selectedClient.id, {
                   name: selectedClient.name,
@@ -652,6 +665,11 @@ export default function Clients() {
         title="Delete Client"
         message="Are you sure you want to delete this client? This action cannot be undone."
         onConfirm={async () => {
+          if (isDemo) {
+            toast.error("Demo account is view-only. Create a free account to delete clients!", { id: "demo-restricted" });
+            setIsDeleteOpen(false);
+            return;
+          }
           try {
             await deleteClient(deleteClientId);
             toast.success("Client deleted successfully");
